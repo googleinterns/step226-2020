@@ -18,10 +18,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Volunteer Home</title>
+    <title>Volunteer Matcher</title>
 </head>
 <body>
-<p><a href="registration.html">Registration</a></p>
-<p><a href="matcher.html">Matcher</a></p>
+<h2>Welcome to volunteer matching!</h2>
+<p>Please specify the time in which you would be available to help:</p>
+<form action="matched.html">
+    <label for="start-time">Start time</label>
+    <input type="time" id="start-time" name="start-time" required>
+    <br>
+    <label for="end-time">End time</label>
+    <input type="time" id="end-time" name="end-time" required>
+    <br>
+    <input type="submit">
+</form>
+
 </body>
 </html>
