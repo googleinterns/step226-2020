@@ -14,14 +14,7 @@
   ~ limitations under the License.
   -->
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Isolate Home</title>
-</head>
-<body>
-  <p><a href="registration.jsp">Registration</a></p>
-  <p><a href="./request/index.jsp">Submit a request</a></p>
-</body>
-</html>
+<button onclick="addTicket()">Create Ticket</button>
+<form id="request-submission-form" method="POST" action="/request">
+  <button type="submit">Submit Request</button>
+</form>

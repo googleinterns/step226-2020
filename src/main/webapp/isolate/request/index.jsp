@@ -17,11 +17,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Isolate Home</title>
+    <meta charset="UTF-8">
+    <title>Request Submission</title>
+    <script src="./scripts/main.js" type="module"></script>
 </head>
 <body>
-  <p><a href="registration.jsp">Registration</a></p>
-  <p><a href="./request/index.jsp">Submit a request</a></p>
+  <%@ include file = "request-form.html" %>
 </body>
 </html>
