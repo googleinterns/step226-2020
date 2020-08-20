@@ -45,6 +45,7 @@ public class RegistrationServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) {
     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    if (request == null) return;
 
     UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
