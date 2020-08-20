@@ -55,6 +55,12 @@ public class RegistrationServlet extends HttpServlet {
 
     try {
       final String userId = userService.getCurrentUser().getUserId();
+      if (userId == null) {
+        System.err.println("User id is null!");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        return;
+      }
+
       UserType userType = null;
       final Set<String> propertyNames =
               Sets.newHashSet("firstname", "lastname", "type", "latitude", "longitude");

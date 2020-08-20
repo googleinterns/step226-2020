@@ -16,6 +16,7 @@
 
 package com.google.sps.servlets;
 
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalUserServiceTestConfig;
 import org.junit.jupiter.api.AfterAll;
@@ -31,17 +32,19 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 
 public class RegistrationServletTest {
-  private static final LocalServiceTestHelper userServiceHelper =
-          new LocalServiceTestHelper(new LocalUserServiceTestConfig());
+  private static final LocalUserServiceTestConfig userServiceConfig = new LocalUserServiceTestConfig();
+  private static final LocalServiceTestHelper helper =
+          new LocalServiceTestHelper(
+                  userServiceConfig, new LocalDatastoreServiceTestConfig());
 
   @BeforeAll
   static void setUp() {
-    userServiceHelper.setUp();
+    helper.setUp();
   }
 
   @AfterAll
   static void tearDown() {
-    userServiceHelper.tearDown();
+    helper.tearDown();
   }
 
   @Test
@@ -53,7 +56,7 @@ public class RegistrationServletTest {
 
   @Test
   public void testPostNotLoggedIn() {
-    userServiceHelper.setEnvIsLoggedIn(false);
+    helper.setEnvIsLoggedIn(false);
 
     RegistrationServlet registrationServlet = new RegistrationServlet();
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -64,5 +67,23 @@ public class RegistrationServletTest {
 
     registrationServlet.doPost(request, response);
     assertEquals(HttpServletResponse.SC_UNAUTHORIZED, valueCapture.getValue());
+  }
+
+  @Test
+  public void testPostEmptyRequest() {
+    helper.setEnvIsLoggedIn(true);
+    helper.setEnvEmail("test@email.com");
+    helper.setEnvAuthDomain("google.com");
+    userServiceConfig.setOAuthUserId("11111111");
+
+    RegistrationServlet registrationServlet = new RegistrationServlet();
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    ArgumentCaptor<Integer> valueCapture = ArgumentCaptor.forClass(Integer.class);
+    doNothing().when(response).setStatus(valueCapture.capture());
+
+    registrationServlet.doPost(request, response);
+    assertEquals(HttpServletResponse.SC_BAD_REQUEST, valueCapture.getValue());
   }
 }
