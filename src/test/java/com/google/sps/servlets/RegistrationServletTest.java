@@ -16,13 +16,18 @@
 
 package com.google.sps.servlets;
 
+import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserService;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.google.appengine.tools.development.testing.LocalUserServiceTestConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,12 +35,22 @@ import javax.servlet.http.HttpServletResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RegistrationServletTest {
-  private static final LocalUserServiceTestConfig userServiceConfig = new LocalUserServiceTestConfig();
+
+  @Mock
+  UserService userService;
+  @InjectMocks
+  RegistrationServlet registrationServlet;
+
   private static final LocalServiceTestHelper helper =
-          new LocalServiceTestHelper(
-                  userServiceConfig, new LocalDatastoreServiceTestConfig());
+          new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+
+  @BeforeEach
+  void injectDependencies() {
+    MockitoAnnotations.openMocks(this);
+  }
 
   @BeforeAll
   static void setUp() {
@@ -49,16 +64,15 @@ public class RegistrationServletTest {
 
   @Test
   public void testPostNullRequest() {
-    RegistrationServlet registrationServlet = new RegistrationServlet();
+    registrationServlet = new RegistrationServlet();
     HttpServletResponse response = mock(HttpServletResponse.class);
     registrationServlet.doPost(null, response);
   }
 
   @Test
   public void testPostNotLoggedIn() {
-    helper.setEnvIsLoggedIn(false);
+    when(userService.isUserLoggedIn()).thenReturn(false);
 
-    RegistrationServlet registrationServlet = new RegistrationServlet();
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
@@ -71,12 +85,11 @@ public class RegistrationServletTest {
 
   @Test
   public void testPostEmptyRequest() {
-    helper.setEnvIsLoggedIn(true);
-    helper.setEnvEmail("test@email.com");
-    helper.setEnvAuthDomain("google.com");
-    userServiceConfig.setOAuthUserId("11111111");
+    User mockedUser = mock(User.class);
+    when(mockedUser.getUserId()).thenReturn("anuserid");
+    when(userService.getCurrentUser()).thenReturn(mockedUser);
+    when(userService.isUserLoggedIn()).thenReturn(true);
 
-    RegistrationServlet registrationServlet = new RegistrationServlet();
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
