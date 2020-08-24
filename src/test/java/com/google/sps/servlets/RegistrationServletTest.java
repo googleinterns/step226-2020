@@ -343,6 +343,32 @@ public class RegistrationServletTest {
     assertEquals("The longitude is not formatted as a double!", getErrors());
   }
 
-  // TODO test length limits for firstname and lastname
-  // TODO test size constraints for latitude & longitude (as doubles)
+  @Test
+  public void testPost1LetterFirstname() {
+    setupUser();
+    setNonNullRequestParameters("a", "alastname", "isolate", "-85.300738", "-85.300738");
+    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    assertEquals("Parameter firstname is not within length bounds!", getErrors());
+  }
+
+  @Test
+  public void testPost2LetterFirstname() {
+    setupUser();
+    setNonNullRequestParameters("ab", "alastname", "isolate", "-85.300738", "-85.300738");
+    assertResponseCode(HttpServletResponse.SC_OK);
+    assertEquals("", getErrors());
+  }
+
+  @Test
+  public void testPostLongLastname() {
+    setupUser();
+    setNonNullRequestParameters(
+            "abenthy",
+            "alas tnamewbfjhukfjg orejg rg e3bfudrebjuhegujyddkuifheruigfh rui54rit y34795ty 87345 t785r4yh t845rht 875ryt 9875ry t5 54 yt54 y54 y654y ygffgh rth trh trh th t th thgrthrthrthrthtrhtrhtrhtrhrthrthtrhtrhthrthtrhtrhtrrrrrrrrrrrrrrrrrrevuyjeduyedgfjuyewgfruyefruyegfruye4g uye4wruywe4g uye4grfuywe4g rfuye4gfruye4w guyrf e4",
+            "isolate",
+            "-85.300738",
+            "-85.300738");
+    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    assertEquals("Parameter lastname is not within length bounds!", getErrors());
+  }
 }
