@@ -20,16 +20,19 @@ import com.google.appengine.api.users.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import java.io.IOException;
+import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +58,6 @@ public class LoginStatusServletTest {
    */
   @Test
   public void testGetNullRequest() throws IOException {
-    System.out.println("===LOGINSTATUS SERVLET=== " + loginStatusServlet);
     Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
       loginStatusServlet.doGet(null, response);
     });
@@ -68,7 +70,6 @@ public class LoginStatusServletTest {
    */
   @Test
   public void testGetNullResponse() throws IOException {
-    System.out.println("===LOGINSTATUS SERVLET=== " + loginStatusServlet);
     Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
       loginStatusServlet.doGet(request, null);
     });
@@ -81,13 +82,15 @@ public class LoginStatusServletTest {
    */
   @Test
   public void testGetUserLoggedOut() throws IOException {
-    System.out.println("88: ===LOGINSTATUS SERVLET=== " + loginStatusServlet);
+    PrintWriter writer = mock(PrintWriter.class);
+
+    when(response.getWriter()).thenReturn(writer);
+
     when(userService.isUserLoggedIn()).thenReturn(false);
 
-    System.out.println("88: ===LOGINSTATUS SERVLET=== " + loginStatusServlet);
     loginStatusServlet.doGet(request, response);
 
-    verify(response).getWriter().println("false");
+    verify(writer).println("false");
   }
 
   /**
@@ -95,12 +98,14 @@ public class LoginStatusServletTest {
    */
   @Test
   public void testGetUserLoggedIn() throws IOException {
-    System.out.println("102: ===LOGINSTATUS SERVLET=== " + loginStatusServlet);
+    PrintWriter writer = mock(PrintWriter.class);
+
+    when(response.getWriter()).thenReturn(writer);
+
     when(userService.isUserLoggedIn()).thenReturn(true);
 
-    System.out.println("102: ===LOGINSTATUS SERVLET=== " + loginStatusServlet);
     loginStatusServlet.doGet(request, response);
 
-    verify(response).getWriter().println("true");
+    verify(writer).println("true");
   }
 }
