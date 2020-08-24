@@ -20,7 +20,6 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.collect.Sets;
 
 import javax.servlet.annotation.WebServlet;
@@ -42,12 +41,17 @@ public class RegistrationServlet extends HttpServlet {
     VOLUNTEER
   }
 
+  private UserService userService;
+
+  public void setUserService(UserService userService) {
+    this.userService = userService;
+  }
+
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) {
     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     if (request == null) return;
 
-    UserService userService = UserServiceFactory.getUserService();
     if (!userService.isUserLoggedIn()) {
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       return;
@@ -55,6 +59,12 @@ public class RegistrationServlet extends HttpServlet {
 
     try {
       final String userId = userService.getCurrentUser().getUserId();
+      if (userId == null) {
+        System.err.println("User id is null!");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        return;
+      }
+
       UserType userType = null;
       final Set<String> propertyNames =
               Sets.newHashSet("firstname", "lastname", "type", "latitude", "longitude");
