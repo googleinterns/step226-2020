@@ -20,6 +20,7 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.collect.Sets;
 
 import javax.servlet.annotation.WebServlet;
@@ -42,6 +43,10 @@ public class RegistrationServlet extends HttpServlet {
   }
 
   private UserService userService;
+
+  public RegistrationServlet() {
+    this.userService = UserServiceFactory.getUserService();
+  }
 
   public void setUserService(UserService userService) {
     this.userService = userService;
