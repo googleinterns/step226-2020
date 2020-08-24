@@ -159,6 +159,20 @@ public class RegistrationServletTest {
     when(request.getParameterMap()).thenReturn(parameterMap);
   }
 
+  /**
+   * Sets HTTP request parameters, but only if each value is not null
+   */
+  private void setNonNullRequestParameters(
+          String firstname, String lastname, String type, String latitude, String longitude) {
+    Map<String, String[]> parameterMap = new HashMap<>();
+    if (firstname != null) parameterMap.put("firstname", new String[]{firstname});
+    if (lastname != null) parameterMap.put("lastname", new String[]{lastname});
+    if (type != null) parameterMap.put("type", new String[]{type});
+    if (latitude != null) parameterMap.put("latitude", new String[]{latitude});
+    if (longitude != null) parameterMap.put("longitude", new String[]{longitude});
+    when(request.getParameterMap()).thenReturn(parameterMap);
+  }
+
   @Test
   public void testPostEmptyRequest() {
     setupUser();
@@ -214,7 +228,47 @@ public class RegistrationServletTest {
     checkNullParameter("longitude");
   }
 
-  // TODO test firstname, lastname, type, latitude, longitude as missing parameters
+  private void checkMissingParameter(String parameterName) {
+    ArgumentCaptor<Integer> valueCapture = captureResponseStatus();
+    registrationServlet.doPost(request, response);
+    assertEquals(HttpServletResponse.SC_BAD_REQUEST, valueCapture.getValue());
+    assertEquals("Missing parameter " + parameterName + " for registration request!", getErrors());
+  }
+
+  @Test
+  public void testPostMissingFirstname() {
+    setupUser();
+    setNonNullRequestParameters(null, "alastname", "volunteer", "-85.300738", "-85.300738");
+    checkMissingParameter("firstname");
+  }
+
+  @Test
+  public void testPostMissingLastname() {
+    setupUser();
+    setNonNullRequestParameters("afirstname", null, "volunteer", "-85.300738", "-85.300738");
+    checkMissingParameter("lastname");
+  }
+
+  @Test
+  public void testPostMissingType() {
+    setupUser();
+    setNonNullRequestParameters("afirstname", "alastname", null, "-85.300738", "-85.300738");
+    checkMissingParameter("type");
+  }
+
+  @Test
+  public void testPostMissingLatitude() {
+    setupUser();
+    setNonNullRequestParameters("afirstname", "alastname", "volunteer", null, "-85.300738");
+    checkMissingParameter("latitude");
+  }
+
+  @Test
+  public void testPostMissingLongitude() {
+    setupUser();
+    setNonNullRequestParameters("afirstname", "alastname", "volunteer", "-85.300738", null);
+    checkMissingParameter("longitude");
+  }
   // TODO test wrong input for type, latitude and longitude
   // TODO test length limits for firstname and lastname
   // TODO test size constraints for latitude & longitude (as doubles)
