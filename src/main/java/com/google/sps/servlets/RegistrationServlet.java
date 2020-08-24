@@ -75,12 +75,19 @@ public class RegistrationServlet extends HttpServlet {
       entity.setProperty("userId", userId);
 
       for (String propertyName : propertyNames) {
-        if (!parameterMap.containsKey(propertyName)) {
+        final String[] parameterArray;
+        if (!parameterMap.containsKey(propertyName) || (parameterArray = parameterMap.get(propertyName)).length < 1) {
           System.err.printf("Missing parameter %s for registration request!\n", propertyName);
           return;
         }
-        // Get first (and only) value of each parameter and make sure it's not blank
-        final String parameter = parameterMap.get(propertyName)[0].trim();
+        // Get first (and only) value of each parameter
+        String parameter = parameterArray[0];
+        if (parameter == null) {
+          System.err.printf("Parameter %s is null!", propertyName);
+          return;
+        }
+        // Make sure parameter value is not blank
+        parameter = parameter.trim();
         if (parameter.isEmpty()) {
           System.err.printf("Parameter %s is blank!", propertyName);
           return;
