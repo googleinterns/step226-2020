@@ -39,7 +39,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class RegistrationServletTest {
@@ -95,36 +94,6 @@ public class RegistrationServletTest {
     return errorStream.toString().trim();
   }
 
-  @Test
-  public void testPostNullRequest() {
-    registrationServlet = new RegistrationServlet();
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    registrationServlet.doPost(null, response);
-  }
-
-  @Test
-  public void testPostNotLoggedIn() {
-    when(userService.isUserLoggedIn()).thenReturn(false);
-
-    ArgumentCaptor<Integer> valueCapture = ArgumentCaptor.forClass(Integer.class);
-    doNothing().when(response).setStatus(valueCapture.capture());
-
-    registrationServlet.doPost(request, response);
-    assertEquals(HttpServletResponse.SC_UNAUTHORIZED, valueCapture.getValue());
-  }
-
-  @Test
-  public void testPostNoUserId() {
-    when(userService.isUserLoggedIn()).thenReturn(true);
-    when(userService.getCurrentUser()).thenReturn(user);
-
-    ArgumentCaptor<Integer> valueCapture = ArgumentCaptor.forClass(Integer.class);
-    doNothing().when(response).setStatus(valueCapture.capture());
-
-    registrationServlet.doPost(request, response);
-    assertEquals(HttpServletResponse.SC_UNAUTHORIZED, valueCapture.getValue());
-  }
-
   /**
    * Sets up the user service mock to have a logged-in and valid user
    */
@@ -173,24 +142,74 @@ public class RegistrationServletTest {
     when(request.getParameterMap()).thenReturn(parameterMap);
   }
 
-  @Test
-  public void testPostEmptyRequest() {
-    setupUser();
+  /**
+   * Asserts that the HTTP response to this request was a certain value
+   *
+   * @param code The HTTP response code that the response contains
+   */
+  private void assertResponseCode(int code) {
     ArgumentCaptor<Integer> valueCapture = captureResponseStatus();
     registrationServlet.doPost(request, response);
-    assertEquals(HttpServletResponse.SC_BAD_REQUEST, valueCapture.getValue());
+    assertEquals(code, valueCapture.getValue());
   }
 
   /**
-   * Asserts whether a certain parameter was detected as null in the request
+   * Asserts whether a certain parameter was null in the HTTP request
    *
    * @param parameterName The name of the parameter, as passed in the HTTP request
    */
   private void checkNullParameter(String parameterName) {
+    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    assertEquals("Parameter " + parameterName + " is null!", getErrors());
+  }
+
+  /**
+   * Asserts whether a certain parameter was null in the HTTP request
+   *
+   * @param parameterName The name of the parameter, as passed in the HTTP request
+   */
+  private void checkMissingParameter(String parameterName) {
     ArgumentCaptor<Integer> valueCapture = captureResponseStatus();
     registrationServlet.doPost(request, response);
     assertEquals(HttpServletResponse.SC_BAD_REQUEST, valueCapture.getValue());
-    assertEquals("Parameter " + parameterName + " is null!", getErrors());
+    assertEquals("Missing parameter " + parameterName + " for registration request!", getErrors());
+  }
+
+  /**
+   * Assert that a parameter is blank in a request
+   *
+   * @param parameterName The name of the parameter that is blank
+   */
+  private void checkBlankParameter(String parameterName) {
+    ArgumentCaptor<Integer> valueCapture = captureResponseStatus();
+    registrationServlet.doPost(request, response);
+    assertEquals(HttpServletResponse.SC_BAD_REQUEST, valueCapture.getValue());
+    assertEquals("Parameter " + parameterName + " is blank!", getErrors());
+  }
+
+  @Test
+  public void testPostNullRequest() {
+    registrationServlet = new RegistrationServlet();
+    registrationServlet.doPost(null, response);
+  }
+
+  @Test
+  public void testPostNotLoggedIn() {
+    when(userService.isUserLoggedIn()).thenReturn(false);
+    assertResponseCode(HttpServletResponse.SC_UNAUTHORIZED);
+  }
+
+  @Test
+  public void testPostNoUserId() {
+    when(userService.isUserLoggedIn()).thenReturn(true);
+    when(userService.getCurrentUser()).thenReturn(user);
+    assertResponseCode(HttpServletResponse.SC_UNAUTHORIZED);
+  }
+
+  @Test
+  public void testPostEmptyRequest() {
+    setupUser();
+    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
   }
 
   @Test
@@ -228,13 +247,6 @@ public class RegistrationServletTest {
     checkNullParameter("longitude");
   }
 
-  private void checkMissingParameter(String parameterName) {
-    ArgumentCaptor<Integer> valueCapture = captureResponseStatus();
-    registrationServlet.doPost(request, response);
-    assertEquals(HttpServletResponse.SC_BAD_REQUEST, valueCapture.getValue());
-    assertEquals("Missing parameter " + parameterName + " for registration request!", getErrors());
-  }
-
   @Test
   public void testPostMissingFirstname() {
     setupUser();
@@ -270,18 +282,6 @@ public class RegistrationServletTest {
     checkMissingParameter("longitude");
   }
 
-  /**
-   * Assert that a parameter is blank in a request
-   *
-   * @param parameterName The name of the parameter that is blank
-   */
-  private void checkBlankParameter(String parameterName) {
-    ArgumentCaptor<Integer> valueCapture = captureResponseStatus();
-    registrationServlet.doPost(request, response);
-    assertEquals(HttpServletResponse.SC_BAD_REQUEST, valueCapture.getValue());
-    assertEquals("Parameter " + parameterName + " is blank!", getErrors());
-  }
-
   @Test
   public void testPostBlankFirstname() {
     setupUser();
@@ -313,9 +313,19 @@ public class RegistrationServletTest {
   @Test
   public void testPostBlankLongitude() {
     setupUser();
-    setNonNullRequestParameters("afirstname", "alastname", "volunteer", "-85.300738", "                                       ");
+    setNonNullRequestParameters(
+            "afirstname", "alastname", "volunteer", "-85.300738", "                    ");
     checkBlankParameter("longitude");
   }
+
+  @Test
+  public void testPostInvalidType() {
+    setupUser();
+    setNonNullRequestParameters(
+            "afirstname", "alastname", "ekugfghweig", "-85.300738", "-85.300738");
+    checkBlankParameter("firstname");
+  }
+
   // TODO test wrong input for type, latitude and longitude
   // TODO test length limits for firstname and lastname
   // TODO test size constraints for latitude & longitude (as doubles)
