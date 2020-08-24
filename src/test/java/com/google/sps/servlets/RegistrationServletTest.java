@@ -92,7 +92,7 @@ public class RegistrationServletTest {
    * @return A string containing all errors
    */
   private String getErrors() {
-    return errorStream.toString();
+    return errorStream.toString().trim();
   }
 
   @Test
