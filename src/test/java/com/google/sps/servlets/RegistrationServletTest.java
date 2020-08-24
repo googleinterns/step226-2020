@@ -269,6 +269,53 @@ public class RegistrationServletTest {
     setNonNullRequestParameters("afirstname", "alastname", "volunteer", "-85.300738", null);
     checkMissingParameter("longitude");
   }
+
+  /**
+   * Assert that a parameter is blank in a request
+   *
+   * @param parameterName The name of the parameter that is blank
+   */
+  private void checkBlankParameter(String parameterName) {
+    ArgumentCaptor<Integer> valueCapture = captureResponseStatus();
+    registrationServlet.doPost(request, response);
+    assertEquals(HttpServletResponse.SC_BAD_REQUEST, valueCapture.getValue());
+    assertEquals("Parameter " + parameterName + " is blank!", getErrors());
+  }
+
+  @Test
+  public void testPostBlankFirstname() {
+    setupUser();
+    setNonNullRequestParameters("", "alastname", "volunteer", "-85.300738", "-85.300738");
+    checkBlankParameter("firstname");
+  }
+
+  @Test
+  public void testPostBlankLastname() {
+    setupUser();
+    setNonNullRequestParameters("afirstname", "       ", "volunteer", "-85.300738", "-85.300738");
+    checkBlankParameter("lastname");
+  }
+
+  @Test
+  public void testPostBlankType() {
+    setupUser();
+    setNonNullRequestParameters("afirstname", "alastname", "        ", "-85.300738", "-85.300738");
+    checkBlankParameter("type");
+  }
+
+  @Test
+  public void testPostBlankLatitude() {
+    setupUser();
+    setNonNullRequestParameters("afirstname", "alastname", "volunteer", "          ", "-85.300738");
+    checkBlankParameter("latitude");
+  }
+
+  @Test
+  public void testPostBlankLongitude() {
+    setupUser();
+    setNonNullRequestParameters("afirstname", "alastname", "volunteer", "-85.300738", "                                       ");
+    checkBlankParameter("longitude");
+  }
   // TODO test wrong input for type, latitude and longitude
   // TODO test length limits for firstname and lastname
   // TODO test size constraints for latitude & longitude (as doubles)
