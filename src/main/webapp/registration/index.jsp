@@ -18,19 +18,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Registration</title>
-  <script src="main.js"></script>
+  <%@ include file="/bootstrap-css.html" %>
+  <script src="maps.js"></script>
   <script defer
-        src="https://maps.googleapis.com/maps/api/js?key=<API_KEY_HERE>&callback=loadMap&libraries=places">
+      src="https://maps.googleapis.com/maps/api/js?key=<API_KEY_HERE>&callback=loadMap&libraries=places">
   </script>
 </head>
 <body>
   <div class="container" id="container">
-    <h1>
-      Please fill out the form below to register with VINet.
-    </h1>
+    <div class="row">
+      <h2>
+        Please fill out the form below to register with VINet.
+      </h2>
+    </div>
     <!-- Include the registration form on the server side using JSP -->
     <%@ include file = "registration-form.html" %>
   </div>
 </body>
+<!-- Include necessary js libraries for bootstrap functionality. -->
+<%@ include file="/bootstrap-js.html" %>
 </html>

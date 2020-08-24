@@ -17,7 +17,7 @@
 /**
  * Create a map using the Maps API, and insert it into the page.
  */
-window.loadMap =
+const loadMap =
     () => {
       const onSuccess = (location) => {
         const lat = location.coords.latitude;
@@ -56,7 +56,12 @@ const loadMapOnCoords = (center) => {
 
   const mapContainer = document.getElementById('map');
 
-  const options = {center: center, zoom: zoom};
+  const options = {
+    center: center,
+    zoom: zoom,
+    streetViewControl: false,
+    mapTypeControl: false
+  };
 
   /* Create a map, and insert it into the map container. */
   const map = new google.maps.Map(mapContainer, options);
@@ -80,72 +85,73 @@ const loadMapMarker = (map, position) => {
   /* Set the marker to be draggable to allow user interaction. */
   marker.setDraggable(true);
 
-  /* If the map is clicked, move the marker to the location of the click. */
+  /**
+   * Geocode a location, and insert its human-readable address into the map's
+   * search box.
+   *
+   * @param {google.maps.LatLng} latLng The location to geocode.
+   */
+  const geocode = (latLng) => {
+    const textinput = document.getElementById('address-textinput');
+    const geocoder = new google.maps.Geocoder();
+
+    /* Attempt to geocode the current location, to obtain a human-readable
+     * address. */
+    geocoder.geocode({location: latLng}, (results, status) => {
+      if (status === 'OK') {
+        /* If an address is found, insert it into the search box. */
+        textinput.value = results[0].formatted_address;
+      } else {
+        alert('Sorry, that location was not understood :( Please try again.');
+      }
+    });
+  };
+
+  /* If the map is clicked, move the marker to the location of the click, and
+   * geocode the location. */
   const clickHandler = (event) => {
     marker.setPosition(event.latLng);
+    geocode(event.latLng);
   };
 
   google.maps.event.addListener(map, 'click', clickHandler);
 
-  google.maps.event.addListener(
-      marker, 'position_changed', () => positionChangeHandler(true, marker));
+  /**
+   * Event handler for the position_change event on the Marker.
+   *
+   * This will update the values of the hidden form elements for
+   * latitude/longitude with the current location of the Marker.
+   *
+   * @param {google.maps.Marker} marker The marker whose position_change event
+   *     should trigger the handler.
+   */
+  const positionChangeHandler = (marker) => {
+    const latitudeFormInput = document.getElementById('latitude');
+    const longitudeFormInput = document.getElementById('longitude');
+    latitudeFormInput.value = marker.getPosition().lat();
+    longitudeFormInput.value = marker.getPosition().lng();
+    map.panTo(marker.getPosition());
+  };
 
-  /* When the map first loads, the position_changed trigger must be fired to
-   * obtain the current location's human-readable address. */
+  google.maps.event.addListener(
+      marker, 'position_changed', () => positionChangeHandler(marker));
+
+  /* When the map first loads, the click trigger must be fired to
+   * populate the hidden latitude and longitude input elements. */
   google.maps.event.trigger(marker, 'position_changed');
+
+  /* Geocode the current marker position, and populate the search box with the
+   * human-readable address of the current location. */
+  geocode(marker.getPosition());
 
   loadSearchBox(map, marker);
 };
 
 /**
- * Event handler for the position_change event on the Marker.
- *
- * The handler can perform the following functions:
- *
- * (a) Geocode the current location of the marker, to obtain a human-readable
- * address, and insert this address into the search bar.
- *
- * (b) Update the values of the hidden form elements for latitude/longitude with
- * the current location of the marker.
- *
- * If shouldGeocode is true, **BOTH** (a) and (b) will be performed.
- * If shouldGeocode is false, **ONLY** (b) will be performed.
- *
- * @param {boolean} shouldGeocode Whether the handler should attempt to geocode
- *     the current location of the marker.
- * @param {google.maps.Marker} marker The marker whose position_change event
- *     should trigger the handler.
+ * Load a search box onto the provided Map.
+ * @param {google.maps.Map} map
+ * @param {google.maps.Marker} marker
  */
-const positionChangeHandler = (shouldGeocode, marker) => {
-  const latitudeFormInput = document.getElementById('latitude');
-  const longitudeFormInput = document.getElementById('longitude');
-  const textinput = document.getElementById('address-textinput');
-  const geocoder = new google.maps.Geocoder();
-
-  if (shouldGeocode) {
-    /* Attempt to geocode the current location, to obtain a human-readable
-     * address. */
-    geocoder.geocode({location: marker.getPosition()}, (results, status) => {
-      if (status === 'OK') {
-        /* If an address is found, insert it into the search box. */
-        textinput.value = results[0].formatted_address;
-
-        /* Update the input elements for longitude and latitude. These input
-         *elements are used to track the Marker's position. */
-        latitudeFormInput.value = results[0].geometry.location.lat();
-        longitudeFormInput.value = results[0].geometry.location.lat();
-      } else {
-        alert('Sorry, that location was not understood :( Please try again.');
-      }
-    });
-  }
-  /* If geocoding is not requested, update the hidden form input elements only. */
-  else {
-    latitudeFormInput.value = marker.getPosition().lat();
-    longitudeFormInput.value = marker.getPosition().lng();
-  }
-};
-
 const loadSearchBox = (map, marker) => {
   const textinput = document.getElementById('address-textinput');
   const searchBox = new google.maps.places.SearchBox(textinput);
@@ -154,13 +160,6 @@ const loadSearchBox = (map, marker) => {
   // Listen for the event fired when the user selects a prediction and retrieve
   // more details for that place.
   searchBox.addListener('places_changed', () => {
-    /* Clear the event listener for changing the marker position to prevent a
-     * feedback loop from being created. Triggering the 'position_changed' event
-     * can result in triggering the
-     * 'places_changed' event, due of the geocoding performed in the
-     * 'position_changed' handler. */
-    google.maps.event.clearListeners(marker, 'position_changed');
-
     /* Get the results of the user's location search query. */
     const places = searchBox.getPlaces();
 
@@ -179,27 +178,25 @@ const loadSearchBox = (map, marker) => {
       alert('Sorry, that address cannot be located :( Please try again.')
     }
 
-    /* Move the marker to the selected location. */
     marker.setPosition(place.geometry.location);
 
-    /* Handle the change of the marker position, but do NOT attempt to geocode
-     * the current marker position. */
-    positionChangeHandler(/*shouldGeocode: */ false);
-
-    /* Create a set of bounds, based on the new location. */
     const bounds = new google.maps.LatLngBounds();
+
+    /* If there is a recommended viewport for this result, use that viewport. */
     if (place.geometry.viewport) {
-      // Only geocodes have viewport.
       bounds.union(place.geometry.viewport);
-    } else {
+    }
+    /* If there is no recommended viewport for this result, simply center on the
+       location of the result. */
+    else {
       bounds.extend(place.geometry.location);
     }
 
-    /* Recenter the map so that it is centered on the new location. */
+    /* Recenter the map on the new location. */
     map.fitBounds(bounds);
-
-    /* Reset the position_changed event listener. */
-    google.maps.event.addListener(
-        marker, 'position_changed', () => positionChangeHandler(true, marker));
   });
 };
+
+/* Export loadMap as a global variable on the browser's window object. No other
+ * functions are exported. */
+window.loadMap = loadMap;

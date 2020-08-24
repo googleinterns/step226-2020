@@ -1,0 +1,57 @@
+<form id="isolate-registration-form" method="POST" action="/registration">
+  <div class="form-group">
+    <input
+        type="text"
+        name="firstname"
+        placeholder="First Name"
+        required
+        minlength="2"
+        maxlength="300"
+        class="form-control col">
+  </div>
+  <div class="form-group">
+    <input
+        type="text"
+        name="lastname"
+        placeholder="Last Name"
+        required
+        minlength="2"
+        maxlength="300"
+        class="form-control col">
+  </div>
+  <div class="form-group row">
+    <label for="type" class="col-form-label"><h6>I am a:&nbsp;</h6></label>
+    <div class="col">
+      <select name="type" id="type" class="form-control">
+        <option value="volunteer">Volunteer, available to give help.</option>
+        <option value="isolate">Isolate, looking to get help.</option>
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <h4>
+      Please select your isolation address on the below map.
+    </h4>
+  </div>
+  <div class="row">
+    <input
+      type="text"
+      id="address-textinput"
+      placeholder="Address"
+      class="form-control w-75">
+    <div id="map" class="w-100" style="height: 400px"></div>
+  </div>
+  <input
+      type="hidden"
+      name="longitude"
+      id="longitude"
+      required>
+  <input
+      type="hidden"
+      name="latitude"
+      id="latitude"
+      required>
+  <div class="form-group">
+    <button type="submit" class="btn btn-primary col">Register</button>
+  </div>
+</form>
