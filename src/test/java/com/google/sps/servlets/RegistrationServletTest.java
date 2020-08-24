@@ -167,54 +167,51 @@ public class RegistrationServletTest {
     assertEquals(HttpServletResponse.SC_BAD_REQUEST, valueCapture.getValue());
   }
 
+  /**
+   * Asserts whether a certain parameter was detected as null in the request
+   *
+   * @param parameterName The name of the parameter, as passed in the HTTP request
+   */
+  private void checkNullParameter(String parameterName) {
+    ArgumentCaptor<Integer> valueCapture = captureResponseStatus();
+    registrationServlet.doPost(request, response);
+    assertEquals(HttpServletResponse.SC_BAD_REQUEST, valueCapture.getValue());
+    assertEquals("Parameter " + parameterName + " is null!", getErrors());
+  }
+
   @Test
   public void testPostNullFirstname() {
     setupUser();
     setRequestParameters(null, "alastname", "volunteer", "-85.300738", "-85.300738");
-    ArgumentCaptor<Integer> valueCapture = captureResponseStatus();
-    registrationServlet.doPost(request, response);
-    assertEquals(HttpServletResponse.SC_BAD_REQUEST, valueCapture.getValue());
-    assertEquals("Parameter firstname is null!", getErrors());
+    checkNullParameter("firstname");
   }
 
   @Test
   public void testPostNullLastname() {
     setupUser();
     setRequestParameters("afirstname", null, "volunteer", "-79.013542", "-85.300738");
-    ArgumentCaptor<Integer> valueCapture = captureResponseStatus();
-    registrationServlet.doPost(request, response);
-    assertEquals(HttpServletResponse.SC_BAD_REQUEST, valueCapture.getValue());
-    assertEquals("Parameter lastname is null!", getErrors());
+    checkNullParameter("lastname");
   }
 
   @Test
   public void testPostNullType() {
     setupUser();
     setRequestParameters("afirstname", "alastname", null, "-85.300738", "-85.300738");
-    ArgumentCaptor<Integer> valueCapture = captureResponseStatus();
-    registrationServlet.doPost(request, response);
-    assertEquals(HttpServletResponse.SC_BAD_REQUEST, valueCapture.getValue());
-    assertEquals("Parameter type is null!", getErrors());
+    checkNullParameter("type");
   }
 
   @Test
   public void testPostNullLatitude() {
     setupUser();
     setRequestParameters("afirstname", "alastname", "volunteer", null, "-85.300738");
-    ArgumentCaptor<Integer> valueCapture = captureResponseStatus();
-    registrationServlet.doPost(request, response);
-    assertEquals(HttpServletResponse.SC_BAD_REQUEST, valueCapture.getValue());
-    assertEquals("Parameter latitude is null!", getErrors());
+    checkNullParameter("latitude");
   }
 
   @Test
   public void testPostNullLongitude() {
     setupUser();
     setRequestParameters("afirstname", "alastname", "volunteer", "-85.300738", null);
-    ArgumentCaptor<Integer> valueCapture = captureResponseStatus();
-    registrationServlet.doPost(request, response);
-    assertEquals(HttpServletResponse.SC_BAD_REQUEST, valueCapture.getValue());
-    assertEquals("Parameter longitude is null!", getErrors());
+    checkNullParameter("longitude");
   }
 
   // TODO test firstname, lastname, type, latitude, longitude as missing parameters
