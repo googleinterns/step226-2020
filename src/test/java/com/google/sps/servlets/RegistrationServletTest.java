@@ -323,10 +323,26 @@ public class RegistrationServletTest {
     setupUser();
     setNonNullRequestParameters(
             "afirstname", "alastname", "ekugfghweig", "-85.300738", "-85.300738");
-    checkBlankParameter("firstname");
+    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    assertEquals("Wrong type parameter!", getErrors());
   }
 
-  // TODO test wrong input for type, latitude and longitude
+  @Test
+  public void testPostInvalidLatitude() {
+    setupUser();
+    setNonNullRequestParameters("afirstname", "alastname", "isolate", "weifeuf", "-85.300738");
+    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    assertEquals("The latitude is not formatted as a double!", getErrors());
+  }
+
+  @Test
+  public void testPostInvalidLongitude() {
+    setupUser();
+    setNonNullRequestParameters("afirstname", "alastname", "isolate", "-85.300738", "newf873nf");
+    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    assertEquals("The longitude is not formatted as a double!", getErrors());
+  }
+
   // TODO test length limits for firstname and lastname
   // TODO test size constraints for latitude & longitude (as doubles)
 }
