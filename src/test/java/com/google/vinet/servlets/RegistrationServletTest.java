@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.sps.servlets;
+package com.google.vinet.servlets;
 
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
