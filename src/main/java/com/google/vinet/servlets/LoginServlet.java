@@ -16,7 +16,6 @@ package com.google.vinet.servlets;
 
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.users.UserService;
-import com.google.gson.Gson;
 import java.io.IOException;
 import javax.inject.Inject;
 import javax.servlet.annotation.WebServlet;
@@ -50,7 +49,6 @@ public class LoginServlet extends HttpServlet {
     }
 
     final String redirectURL = request.getParameter("redirectURL");
-    Gson gson = new Gson();
 
     if(redirectURL == null) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, "redirectURL parameter missing");
@@ -60,7 +58,7 @@ public class LoginServlet extends HttpServlet {
 
     try {
       final String login = this.userService.createLoginURL(redirectURL);
-      response.getWriter().print(gson.toJson(login));
+      response.sendRedirect(login);
     }
     /* UserService will throw an IllegalArgumentException if redirectURL is
        invalid. */
