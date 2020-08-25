@@ -34,7 +34,7 @@ export const deleteTicket =
         throw (TypeError(`${TYPE_MISMATCH_PREFIX} null.`));
       }
 
-      else if (typeof ticket === 'undefined') {
+      if (typeof ticket === 'undefined') {
         throw (TypeError(`${TYPE_MISMATCH_PREFIX} undefined.`));
       }
 
