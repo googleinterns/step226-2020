@@ -163,6 +163,14 @@ public class RegistrationServlet extends HttpServlet {
    */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException{
+    if (response == null) {
+      throw new IllegalArgumentException("response cannot be null");
+    }
+
+    if (request == null) {
+      throw new IllegalArgumentException("request cannot be null");
+    }
+
     if ( !this.userService.isUserLoggedIn() ) {
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return;
@@ -176,6 +184,8 @@ public class RegistrationServlet extends HttpServlet {
       return;
     }
 
+    /* Create a query which will return all entries in the DataStore with a userId matching that of
+     *the current user. */
     final Filter userIdFilter = new FilterPredicate("userId", FilterOperator.EQUAL, userId);
     final Query query = new Query(USER_TABLE_NAME).setFilter(userIdFilter);
 
@@ -184,14 +194,22 @@ public class RegistrationServlet extends HttpServlet {
 
     final Entity entity;
 
+    /* Try to retrieve the results of the query as a single Entity.
+     * If there is more than a single result, then the registration service has incorrectly
+     * registered a user twice. This error will be passed up to the caller.
+     *
+     * In a production environment, this would have to be reported to the sysadmin/project owner,
+     * as duplicate registration should never be allowed.
+     */
     try{
       entity = preparedQuery.asSingleEntity();
-    } catch(TooManyResultsException ex) {
+    }
+    catch(TooManyResultsException exception) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      return;
-    } catch (IllegalStateException ex) {
+      throw exception;
+    } catch (IllegalStateException exception) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      return;
+      throw exception;
     }
 
     final boolean registered;
