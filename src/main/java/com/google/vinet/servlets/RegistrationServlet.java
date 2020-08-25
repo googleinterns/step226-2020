@@ -19,14 +19,23 @@ package com.google.vinet.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
@@ -146,6 +155,59 @@ public class RegistrationServlet extends HttpServlet {
     } catch (Exception e) {
       System.err.println("There was an error registering!");
       response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+    }
+  }
+
+  /**
+   * Returns whether the logged-in User has registered with the service.
+   */
+  @Override
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException{
+    if ( !this.userService.isUserLoggedIn() ) {
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      return;
+    }
+
+    final User user = userService.getCurrentUser();
+    final String userId = user.getUserId();
+
+    if (userId == null) {
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      return;
+    }
+
+    final Filter userIdFilter = new FilterPredicate("userId", FilterOperator.EQUAL, userId);
+    final Query query = new Query(USER_TABLE_NAME).setFilter(userIdFilter);
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    final PreparedQuery preparedQuery = datastore.prepare(query);
+
+    final Entity entity;
+
+    try{
+      entity = preparedQuery.asSingleEntity();
+    } catch(TooManyResultsException ex) {
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      return;
+    } catch (IllegalStateException ex) {
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      return;
+    }
+
+    final boolean registered;
+
+    if (entity == null) {
+      registered = false;
+    } else {
+      registered = true;
+    }
+
+    final Gson gson = new Gson();
+    
+    try{
+      response.getWriter().println(gson.toJson(registered));
+    } catch (Exception ex) {
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 }
