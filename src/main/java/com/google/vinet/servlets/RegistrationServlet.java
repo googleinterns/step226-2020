@@ -211,13 +211,10 @@ public class RegistrationServlet extends HttpServlet {
       throw exception;
     }
 
-    final boolean registered;
-
-    if (entity == null) {
-      registered = false;
-    } else {
-      registered = true;
-    }
+    /* If the query returns a non-null value, then the User is registered.
+     * If the query returns a null value, then the user is not registered.
+     */
+    final boolean registered = (entity != null);
 
     final Gson gson = new Gson();
     
