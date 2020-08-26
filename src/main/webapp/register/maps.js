@@ -72,8 +72,8 @@ const loadMapOnCoords = (center) => {
 
 /**
  * Create a Marker, and attach it to the provided Map at the provided position.
- * @param {google.maps.Map} map
- * @param {google.maps.LatLng} position
+ * @param {google.maps.Map} map The map to attach the marker onto.
+ * @param {google.maps.LatLng} position The position on the map to attach the Marker onto.
  */
 const loadMapMarker = (map, position) => {
   const marker = new google.maps.Marker({
