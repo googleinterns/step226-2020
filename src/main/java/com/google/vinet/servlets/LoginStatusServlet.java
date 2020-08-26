@@ -18,7 +18,6 @@ import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.users.UserService;
 import com.google.gson.Gson;
 import java.io.IOException;
-import javax.inject.Inject;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -27,13 +26,20 @@ import javax.servlet.http.HttpServletResponse;
 /** Servlet that returns the login status of the user. */
 @WebServlet("/login-status")
 public class LoginStatusServlet extends HttpServlet {
-  @Inject private UserService userService;
+  private UserService userService;
 
   /**
    * Construct a LoginStatusServlet that depends on the default implementaion of UserService.
    */
   public LoginStatusServlet() {
     this.userService = UserServiceFactory.getUserService();
+  }
+
+  /**
+   * Construct a LoginStatusServlet that depends on the provided implementaion of UserService.
+   */
+  public LoginStatusServlet(UserService userService) {
+    this.userService = userService;
   }
 
   @Override

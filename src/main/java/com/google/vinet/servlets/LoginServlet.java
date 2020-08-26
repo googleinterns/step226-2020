@@ -17,7 +17,6 @@ package com.google.vinet.servlets;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.users.UserService;
 import java.io.IOException;
-import javax.inject.Inject;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -29,13 +28,20 @@ import javax.servlet.http.HttpServletResponse;
  */
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
-  @Inject private UserService userService;
+  private UserService userService;
 
   /**
-   * Construct a LoginStatusServlet that depends on the default implementaion of UserService.
+   * Construct a LoginServlet that depends on the default implementaion of UserService.
    */
   public LoginServlet() {
     this.userService = UserServiceFactory.getUserService();
+  }
+
+  /**
+   * Construct a LoginServlet that depends on the provided implementation of UserService..
+   */
+  public LoginServlet(UserService userService) {
+    this.userService = userService;
   }
 
   @Override

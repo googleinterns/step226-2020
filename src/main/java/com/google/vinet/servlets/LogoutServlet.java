@@ -18,7 +18,6 @@ import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.users.UserService;
 import java.io.IOException;
 import java.net.URL;
-import javax.inject.Inject;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -30,13 +29,20 @@ import javax.servlet.http.HttpServletResponse;
  */
 @WebServlet("/logout")
 public class LogoutServlet extends HttpServlet {
-  @Inject private UserService userService;
+  private UserService userService;
 
   /**
    * Construct a LogoutServlet that depends on the default implementaion of UserService.
    */
   public LogoutServlet() {
     this.userService = UserServiceFactory.getUserService();
+  }
+
+  /**
+   * Construct a LogoutServlet that depends on the provided implementaion of UserService.
+   */
+  public LogoutServlet(UserService userService) {
+    this.userService = userService;
   }
 
   @Override
