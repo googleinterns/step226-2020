@@ -40,6 +40,7 @@ public class LogoutServlet extends HttpServlet {
 
   /**
    * Construct a LogoutServlet that depends on the provided implementaion of UserService.
+   * @param userService The implementation of UserService the LogoutServlet will depend on.
    */
   public LogoutServlet(UserService userService) {
     this.userService = userService;

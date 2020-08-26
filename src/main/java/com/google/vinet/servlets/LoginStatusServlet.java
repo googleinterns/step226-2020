@@ -37,6 +37,7 @@ public class LoginStatusServlet extends HttpServlet {
 
   /**
    * Construct a LoginStatusServlet that depends on the provided implementaion of UserService.
+   * @param userService The implementation of UserService the LoginStatusServlet will depend on.
    */
   public LoginStatusServlet(UserService userService) {
     this.userService = userService;
