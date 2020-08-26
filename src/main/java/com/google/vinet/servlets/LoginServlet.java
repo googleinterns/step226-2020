@@ -38,7 +38,7 @@ public class LoginServlet extends HttpServlet {
   }
 
   /**
-   * Construct a LoginServlet that depends on the provided implementation of UserService..
+   * Construct a LoginServlet that depends on the provided implementation of UserService.
    * @param userService The implementation of UserService the LoginServlet will depend on.
    */
   public LoginServlet(UserService userService) {
