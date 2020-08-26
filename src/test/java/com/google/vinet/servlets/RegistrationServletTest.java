@@ -39,6 +39,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class RegistrationServletTest {
@@ -106,7 +107,7 @@ public class RegistrationServletTest {
   /**
    * Sets up an argument captor to get the HTTP status code from the response
    *
-   * @return The argument captor that will contain the HTTp status code, as an Integer
+   * @return The argument captor that will contain the HTTP status code, as an Integer
    */
   private ArgumentCaptor<Integer> captureResponseStatus() {
     ArgumentCaptor<Integer> valueCapture = ArgumentCaptor.forClass(Integer.class);
@@ -143,14 +144,13 @@ public class RegistrationServletTest {
   }
 
   /**
-   * Asserts that the HTTP response to this request was a certain value
+   * Calls the POST request, and asserts that the HTTP response to this request was a certain value
    *
    * @param code The HTTP response code that the response contains
    */
   private void assertResponseCode(int code) {
-    ArgumentCaptor<Integer> valueCapture = captureResponseStatus();
     registrationServlet.doPost(request, response);
-    assertEquals(code, valueCapture.getValue());
+    verify(response).setStatus(code);
   }
 
   /**
@@ -169,9 +169,7 @@ public class RegistrationServletTest {
    * @param parameterName The name of the parameter, as passed in the HTTP request
    */
   private void checkMissingParameter(String parameterName) {
-    ArgumentCaptor<Integer> valueCapture = captureResponseStatus();
-    registrationServlet.doPost(request, response);
-    assertEquals(HttpServletResponse.SC_BAD_REQUEST, valueCapture.getValue());
+    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("Missing parameter " + parameterName + " for registration request!", getErrors());
   }
 
@@ -181,9 +179,7 @@ public class RegistrationServletTest {
    * @param parameterName The name of the parameter that is blank
    */
   private void checkBlankParameter(String parameterName) {
-    ArgumentCaptor<Integer> valueCapture = captureResponseStatus();
-    registrationServlet.doPost(request, response);
-    assertEquals(HttpServletResponse.SC_BAD_REQUEST, valueCapture.getValue());
+    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("Parameter " + parameterName + " is blank!", getErrors());
   }
 
