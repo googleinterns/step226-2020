@@ -123,7 +123,7 @@ const loadMapMarker = (map, position) => {
    * latitude/longitude with the current location of the Marker.
    *
    * @param {google.maps.Marker} marker The marker whose position_change event
-   *     should trigger the handler.
+   *     will trigger the handler.
    */
   const positionChangeHandler = (marker) => {
     const latitudeFormInput = document.getElementById('latitude');
