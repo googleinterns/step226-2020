@@ -203,8 +203,7 @@ public class RegistrationServlet extends HttpServlet {
      */
     try{
       entity = preparedQuery.asSingleEntity();
-    }
-    catch(TooManyResultsException exception) {
+    } catch(TooManyResultsException exception) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       throw exception;
     } catch (IllegalStateException exception) {
