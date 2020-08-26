@@ -14,7 +14,11 @@
   ~ limitations under the License.
   -->
 
-<button onclick="addTicket()">Create Ticket</button>
+<div class="form-group">
+  <button onclick="addTicket()">Add Request Item</button>
+</div>
 <form id="request-submission-form" method="POST" action="/request">
-  <button type="submit">Submit Request</button>
+  <div class="form-group">
+    <button type="submit" class="btn btn-primary">Submit Request</button>
+  </div>
 </form>

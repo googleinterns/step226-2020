@@ -15,7 +15,7 @@
  */
 
 import {TicketFactory} from './TicketFactory.js';
-import {removeFromDOM} from './DOMUtils.js';
+import {removeFromDOM} from '/scripts/DOMUtils.js';
 
 /* Create a TicketFactory to create tickets during the session */
 const ticketFactory = new TicketFactory();

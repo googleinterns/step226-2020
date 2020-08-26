@@ -19,9 +19,19 @@
 <head>
     <meta charset="UTF-8">
     <title>Request Submission</title>
+    <%@ include file="/bootstrap-css.html" %>
     <script src="./scripts/main.js" type="module"></script>
 </head>
 <body>
-  <%@ include file = "request-form.html" %>
+  <div class="container">
+    <div class="row">
+      <div class="column">
+        <h1>Please submit your request below.</h1>
+      </div>
+    </div>
+    <%@ include file = "request-form.html" %>
+  </div>
 </body>
+<!-- Include necessary js libraries for bootstrap functionality. -->
+<%@ include file="/bootstrap-js.html" %>
 </html>
