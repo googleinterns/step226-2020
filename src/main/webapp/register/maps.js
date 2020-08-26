@@ -95,11 +95,9 @@ const loadMapMarker = (map, position) => {
     const textinput = document.getElementById('address-textinput');
     const geocoder = new google.maps.Geocoder();
 
-    /* Attempt to geocode the current location, to obtain a human-readable
-     * address. */
     geocoder.geocode({location: latLng}, (results, status) => {
+      /* If an address is found, insert it into the search box. */
       if (status === 'OK') {
-        /* If an address is found, insert it into the search box. */
         textinput.value = results[0].formatted_address;
       } else {
         alert('Sorry, that location was not understood :( Please try again.');
