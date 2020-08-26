@@ -174,7 +174,7 @@ public class RegistrationServletTest {
   }
 
   /**
-   * Assert that a parameter is blank in a request
+   * Asserts that a parameter is blank in a request
    *
    * @param parameterName The name of the parameter that is blank
    */
