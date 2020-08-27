@@ -91,7 +91,7 @@ public abstract class TimeSlot implements Comparable<TimeSlot> {
    * @return Whether this slot contains the specified slot
    */
   public boolean contains(TimeSlot timeSlot) {
-    return compareTo(timeSlot) >= 0 && TimeSlotEndComparator.compare(this, timeSlot) <= 0;
+    return compareTo(timeSlot) <= 0 && TimeSlotEndComparator.compare(this, timeSlot) >= 0;
   }
 
   @Override
