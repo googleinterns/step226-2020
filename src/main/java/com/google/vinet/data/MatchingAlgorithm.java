@@ -34,9 +34,6 @@ public class MatchingAlgorithm {
    * An implementation of the Hopcroft-Karp algorithm to match requested help times with volunteer
    * availability times.
    *
-   * <p>The time slots must all belong to the same day. The algorithm also ensures a maximum
-   * distance for volunteer action.
-   *
    * @param isolateTimeSlots   The set of all requested time slots for help
    * @param volunteerTimeSlots The set of all time slots in which volunteers are available to help
    * @return A set of matched time slots, where a volunteer was matched to a requested time slot
