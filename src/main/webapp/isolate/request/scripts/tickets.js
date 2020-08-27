@@ -73,7 +73,6 @@ const createRequestTicket = async () => {
     const ticket = await ticketFactory.createTicket();
     return ticket;
   } catch (error) {
-    /* Pass the error up to the caller. */
     throw(error);
   }
 }
