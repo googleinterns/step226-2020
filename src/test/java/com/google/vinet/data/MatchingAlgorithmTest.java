@@ -29,16 +29,17 @@ public class MatchingAlgorithmTest {
 
   private Set<IsolateTimeSlot> isolateTimeSlots;
   private Set<VolunteerTimeSlot> volunteerTimeSlots;
+  private Instant now;
 
   @BeforeEach
   public void initialiseSets() {
     isolateTimeSlots = new HashSet<>();
     volunteerTimeSlots = new HashSet<>();
+    now = Instant.now();
   }
 
   @Test
   public void testOneRequestOneVolunteerMatch() {
-    Instant now = Instant.now();
     IsolateTimeSlot isolateSlot = new IsolateTimeSlot(now, now.plus(1, HOURS), null);
     VolunteerTimeSlot volunteerSlot = new VolunteerTimeSlot(now, now.plus(1, HOURS), null);
     isolateTimeSlots.add(isolateSlot);
@@ -47,5 +48,62 @@ public class MatchingAlgorithmTest {
     assert (matched.contains(isolateSlot));
     assert (isolateSlot.isPaired());
     assert (isolateSlot.getPairedSlot().equals(volunteerSlot));
+  }
+
+
+  @Test
+  public void testOneRequestOneVolunteerNoMatch() {
+    IsolateTimeSlot isolateSlot = new IsolateTimeSlot(now.plus(1, HOURS), now.plus(2, HOURS), null);
+    VolunteerTimeSlot volunteerSlot = new VolunteerTimeSlot(now, now.plus(1, HOURS), null);
+    isolateTimeSlots.add(isolateSlot);
+    volunteerTimeSlots.add(volunteerSlot);
+    Set<IsolateTimeSlot> matched = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    assert (!matched.contains(isolateSlot));
+    assert (!isolateSlot.isPaired());
+    assert (!isolateSlot.getPairedSlot().equals(volunteerSlot));
+  }
+
+  @Test
+  public void testOneRequestOneVolunteerVolunteerTooLongMatch() {
+    IsolateTimeSlot isolateSlot = new IsolateTimeSlot(now, now.plus(1, HOURS), null);
+    VolunteerTimeSlot volunteerSlot = new VolunteerTimeSlot(now, now.plus(2, HOURS), null);
+    isolateTimeSlots.add(isolateSlot);
+    volunteerTimeSlots.add(volunteerSlot);
+    Set<IsolateTimeSlot> matched = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    assert (matched.contains(isolateSlot));
+    assert (isolateSlot.isPaired());
+    assert (isolateSlot.getPairedSlot().equals(volunteerSlot));
+  }
+
+  /**
+   * This tests having two requested hours that both fit within the volunteer's available time slot.
+   * Because we are doing bipartite matching, this means only one of the requests will be matched.
+   * Either of the isolate timeslots could be assigned.
+   */
+  @Test
+  public void testTwoRequestsOneVolunteerVolunteerTooLongMatch() {
+    IsolateTimeSlot isolateSlot1 = new IsolateTimeSlot(now, now.plus(1, HOURS), null);
+    IsolateTimeSlot isolateSlot2 = new IsolateTimeSlot(now.plus(1, HOURS), now.plus(2, HOURS), null);
+    VolunteerTimeSlot volunteerSlot = new VolunteerTimeSlot(now, now.plus(2, HOURS), null);
+    isolateTimeSlots.add(isolateSlot1);
+    isolateTimeSlots.add(isolateSlot2);
+    volunteerTimeSlots.add(volunteerSlot);
+    Set<IsolateTimeSlot> matched = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    assert (matched.size() == 1);
+  }
+
+  @Test
+  public void testTwoRequestsTwoVolunteersVolunteerTooLongMatch() {
+    IsolateTimeSlot isolateSlot1 = new IsolateTimeSlot(now, now.plus(1, HOURS), null);
+    IsolateTimeSlot isolateSlot2 = new IsolateTimeSlot(now.plus(1, HOURS), now.plus(2, HOURS), null);
+    VolunteerTimeSlot volunteerSlot1 = new VolunteerTimeSlot(now, now.plus(2, HOURS), null);
+    VolunteerTimeSlot volunteerSlot2 = new VolunteerTimeSlot(now, now.plus(1, HOURS), null);
+    isolateTimeSlots.add(isolateSlot1);
+    isolateTimeSlots.add(isolateSlot2);
+    volunteerTimeSlots.add(volunteerSlot1);
+    volunteerTimeSlots.add(volunteerSlot2);
+    Set<IsolateTimeSlot> matched = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    assert (matched.size() == 2);
+    assert (!isolateSlot1.getPairedSlot().equals(isolateSlot2.getPairedSlot()));
   }
 }
