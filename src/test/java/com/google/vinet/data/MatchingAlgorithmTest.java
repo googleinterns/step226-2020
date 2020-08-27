@@ -47,7 +47,7 @@ public class MatchingAlgorithmTest {
     Set<IsolateTimeSlot> matched = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
     assert (matched.contains(isolateSlot));
     assert (isolateSlot.isPaired());
-    assert (isolateSlot.getPairedSlot().equals(volunteerSlot));
+    assert (isolateSlot.getPairedSlot() == volunteerSlot);
   }
 
 
@@ -60,7 +60,7 @@ public class MatchingAlgorithmTest {
     Set<IsolateTimeSlot> matched = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
     assert (!matched.contains(isolateSlot));
     assert (!isolateSlot.isPaired());
-    assert (!isolateSlot.getPairedSlot().equals(volunteerSlot));
+    assert (isolateSlot.getPairedSlot() != volunteerSlot);
   }
 
   @Test
@@ -72,7 +72,7 @@ public class MatchingAlgorithmTest {
     Set<IsolateTimeSlot> matched = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
     assert (matched.contains(isolateSlot));
     assert (isolateSlot.isPaired());
-    assert (isolateSlot.getPairedSlot().equals(volunteerSlot));
+    assert (isolateSlot.getPairedSlot() == volunteerSlot);
   }
 
   /**
@@ -104,6 +104,12 @@ public class MatchingAlgorithmTest {
     volunteerTimeSlots.add(volunteerSlot2);
     Set<IsolateTimeSlot> matched = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
     assert (matched.size() == 2);
-    assert (!isolateSlot1.getPairedSlot().equals(isolateSlot2.getPairedSlot()));
+    assert (isolateSlot1.getPairedSlot() != (isolateSlot2.getPairedSlot()));
   }
+
+
+  //TODO test with no volunteers
+  //TODO test with no isolates
+  //TODO test with neither
+  //TODO test with null sets
 }
