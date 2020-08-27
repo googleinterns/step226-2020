@@ -78,8 +78,9 @@ export class TicketFactory {
   async createTicket() {
     /* Attempt to cache the ticket template a maximum of 10 times. */ 
     const FETCH_LIMIT = 10;
+    let cached = false;
     for (let i = 0; i < FETCH_LIMIT; i++) {
-      const cached = await this.cacheTicketTemplate();
+      cached = await this.cacheTicketTemplate();
       
       if (cached) {
         break;
