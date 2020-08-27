@@ -60,22 +60,23 @@ export class TicketFactory {
        */
       this.ticketTemplateFetchAttempts++;
 
-      /* If the request fails, try again. */
-      if (!response.ok) {
-        this.cacheTicketTemplate();
-      }
       /* If the request succeeds, attempt to parse the body of the response */
-      else {
+      /* If the request fails, try again. */
+      if (response.ok) {
         const text = await response.text();
 
         /* If parsing the response body fails, try again. */
         if (text === null || typeof text === 'undefined') {
           this.cacheTicketTemplate();
         }
-        /* If parsing the response body succeeds, cache the response body. */
+        /* If parsing the response body succeeds, cache the response body and return. */
         else {
           this.ticketTemplate = text;
+          return;
         }
+      } else {
+        /* If the request has failed, try again. */
+        this.cacheTicketTemplate();  
       }
     }
   }
