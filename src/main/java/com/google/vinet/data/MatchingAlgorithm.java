@@ -16,9 +16,19 @@
 
 package com.google.vinet.data;
 
+import java.time.Instant;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class MatchingAlgorithm {
+
+  /**
+   * Represents a node connected to all isolate time slot nodes
+   */
+  public static final IsolateTimeSlot NIL_NODE =
+          new IsolateTimeSlot(Instant.MIN, Instant.MIN, null);
 
   /**
    * An implementation of the Hopcroft-Karp algorithm to match requested help times with volunteer
@@ -31,21 +41,92 @@ public class MatchingAlgorithm {
    * @param volunteerTimeSlots The set of all time slots in which volunteers are available to help
    * @return A set of matched time slots, where a volunteer was matched to a requested time slot
    */
-  public static Set<MatchedTimeSlot> matchTimeSlots(
+  public static Set<IsolateTimeSlot> matchTimeSlots(
           Set<IsolateTimeSlot> isolateTimeSlots, Set<VolunteerTimeSlot> volunteerTimeSlots) {
-    // First step: add edges
+
+    addEdges(isolateTimeSlots, volunteerTimeSlots);
+    isolateTimeSlots.add(NIL_NODE);
+
+    while (breadthFirstSearch(isolateTimeSlots)) {
+      for (IsolateTimeSlot isolateTimeSlot : isolateTimeSlots) {
+        if (!isolateTimeSlot.isPaired()) {
+          depthFirstSearch(isolateTimeSlot);
+        }
+      }
+    }
+
+    return isolateTimeSlots.stream().filter(TimeSlot::isPaired).collect(Collectors.toSet());
+  }
+
+  /**
+   * Adds edges between the two sets of time slots, based on availability constraints.
+   *
+   * <p>Adds an edge if a volunteer time slot is contained by any isolate time slot.
+   */
+  private static void addEdges(
+          Set<IsolateTimeSlot> isolateTimeSlots, Set<VolunteerTimeSlot> volunteerTimeSlots) {
     // For each volunteer time slot, check if it is contained by each isolate time slot.
-    // if yes, add as a neighbour to both. This is an N^2 operation.
+    // if yes, add as a neighbour to both. This is an N*M operation.
     for (VolunteerTimeSlot volunteerTimeSlot : volunteerTimeSlots) {
       for (IsolateTimeSlot isolateTimeSlot : isolateTimeSlots) {
-        //TODO check if within geographic range
+        // TODO check if within geographic range
         if (isolateTimeSlot.contains(volunteerTimeSlot)) {
           isolateTimeSlot.addNeighbour(volunteerTimeSlot);
           volunteerTimeSlot.addNeighbour(isolateTimeSlot);
         }
       }
     }
+  }
 
-    throw new UnsupportedOperationException();
+  /**
+   * Performs breadth-first search (BFS) from one set of time slots to the other.
+   *
+   * @param isolateTimeSlots The set of isolate-requested time slots.
+   * @return True if a path was found between two unmatched time slots.
+   */
+  private static boolean breadthFirstSearch(Set<IsolateTimeSlot> isolateTimeSlots) {
+    Queue<TimeSlot> queue = new LinkedList<>();
+    for (IsolateTimeSlot isolateTimeSlot : isolateTimeSlots) {
+      if (!isolateTimeSlot.isPaired()) {
+        isolateTimeSlot.setDistance(0);
+        queue.add(isolateTimeSlot);
+      } else {
+        isolateTimeSlot.setDistance(Double.POSITIVE_INFINITY);
+      }
+    }
+
+    NIL_NODE.setDistance(Double.POSITIVE_INFINITY);
+
+    while (!queue.isEmpty()) {
+      TimeSlot slot = queue.remove();
+      final double slotDistance = slot.getDistance();
+      if (slotDistance < NIL_NODE.getDistance()) {
+        for (TimeSlot neighbour : slot.getNeighbours()) {
+          TimeSlot neighbourPair = neighbour.getPairedSlot();
+          if (neighbourPair.getDistance() == Double.POSITIVE_INFINITY) {
+            neighbourPair.setDistance(slotDistance + 1);
+            queue.add(neighbourPair);
+          }
+        }
+      }
+    }
+
+    return NIL_NODE.getDistance() != Double.POSITIVE_INFINITY;
+  }
+
+  private static boolean depthFirstSearch(TimeSlot slot) {
+    if (slot.equals(NIL_NODE)) return true;
+    for (TimeSlot neighbour : slot.getNeighbours()) {
+      TimeSlot neighbourPair = neighbour.getPairedSlot();
+      if (neighbourPair.getDistance() == slot.getDistance() + 1) {
+        if (depthFirstSearch(neighbourPair)) {
+          neighbour.setPairedSlot(slot);
+          slot.setPairedSlot(neighbour);
+          return true;
+        }
+      }
+    }
+    slot.setDistance(Double.POSITIVE_INFINITY);
+    return false;
   }
 }

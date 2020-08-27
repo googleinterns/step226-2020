@@ -29,6 +29,8 @@ public abstract class TimeSlot implements Comparable<TimeSlot> {
   private final Instant end;
   protected final RegisteredUser registeredUser;
   private final Set<TimeSlot> neighbours = new HashSet<>();
+  private TimeSlot pairedSlot = null;
+  private double distance = 0;
 
   protected TimeSlot(Instant start, Instant end, RegisteredUser registeredUser) {
     this.start = start;
@@ -44,16 +46,32 @@ public abstract class TimeSlot implements Comparable<TimeSlot> {
     return end;
   }
 
+  public double getDistance() {
+    return distance;
+  }
+
+  public void setDistance(double distance) {
+    this.distance = distance;
+  }
+
+  public boolean isPaired() {
+    return pairedSlot != null;
+  }
+
+  public TimeSlot getPairedSlot() {
+    return pairedSlot == null ? MatchingAlgorithm.NIL_NODE : pairedSlot;
+  }
+
+  public void setPairedSlot(TimeSlot pairedSlot) {
+    this.pairedSlot = pairedSlot;
+  }
+
   public Set<TimeSlot> getNeighbours() {
     return Collections.unmodifiableSet(neighbours);
   }
 
   public void addNeighbour(TimeSlot timeSlot) {
     neighbours.add(timeSlot);
-  }
-
-  public void removeNeighbour(TimeSlot timeSlot) {
-    neighbours.remove(timeSlot);
   }
 
   /**
@@ -76,15 +94,14 @@ public abstract class TimeSlot implements Comparable<TimeSlot> {
     return compareTo(timeSlot) >= 0 && TimeSlotEndComparator.compare(this, timeSlot) <= 0;
   }
 
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     TimeSlot timeSlot = (TimeSlot) o;
-    return Objects.equals(start, timeSlot.start) &&
-            Objects.equals(end, timeSlot.end) &&
-            Objects.equals(registeredUser, timeSlot.registeredUser);
+    return Objects.equals(start, timeSlot.start)
+            && Objects.equals(end, timeSlot.end)
+            && Objects.equals(registeredUser, timeSlot.registeredUser);
   }
 
   @Override
