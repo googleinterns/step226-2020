@@ -20,17 +20,20 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public abstract class TimeSlot implements Comparable<TimeSlot> {
 
   private final Instant start;
   private final Instant end;
+  protected final RegisteredUser registeredUser;
   private final Set<TimeSlot> neighbours = new HashSet<>();
 
-  protected TimeSlot(Instant start, Instant end) {
+  protected TimeSlot(Instant start, Instant end, RegisteredUser registeredUser) {
     this.start = start;
     this.end = end;
+    this.registeredUser = registeredUser;
   }
 
   public Instant getStart() {
@@ -71,5 +74,21 @@ public abstract class TimeSlot implements Comparable<TimeSlot> {
    */
   public boolean contains(TimeSlot timeSlot) {
     return compareTo(timeSlot) >= 0 && TimeSlotEndComparator.compare(this, timeSlot) <= 0;
+  }
+
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    TimeSlot timeSlot = (TimeSlot) o;
+    return Objects.equals(start, timeSlot.start) &&
+            Objects.equals(end, timeSlot.end) &&
+            Objects.equals(registeredUser, timeSlot.registeredUser);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(start, end, registeredUser);
   }
 }
