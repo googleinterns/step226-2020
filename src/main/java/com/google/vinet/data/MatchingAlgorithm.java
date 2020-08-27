@@ -58,16 +58,18 @@ public class MatchingAlgorithm {
   /**
    * Adds edges between the two sets of time slots, based on availability constraints.
    *
-   * <p>Adds an edge if a volunteer time slot is contained by any isolate time slot.
+   * <p>Adds an edge if a volunteer time slot contains an isolate time slot.
+   *
+   * <p>This is an N*M operation, where N is the number of isolate time slots and M the number of
+   * volunteer time slots.
    */
   private static void addEdges(
           Set<IsolateTimeSlot> isolateTimeSlots, Set<VolunteerTimeSlot> volunteerTimeSlots) {
-    // For each volunteer time slot, check if it is contained by each isolate time slot.
-    // if yes, add as a neighbour to both. This is an N*M operation.
     for (VolunteerTimeSlot volunteerTimeSlot : volunteerTimeSlots) {
       for (IsolateTimeSlot isolateTimeSlot : isolateTimeSlots) {
         // TODO check if within geographic range
-        if (isolateTimeSlot.contains(volunteerTimeSlot)) {
+        // TODO consider the case where volunteer time slot is longer than isolate's
+        if (volunteerTimeSlot.contains(isolateTimeSlot)) {
           isolateTimeSlot.addNeighbour(volunteerTimeSlot);
           volunteerTimeSlot.addNeighbour(isolateTimeSlot);
         }
