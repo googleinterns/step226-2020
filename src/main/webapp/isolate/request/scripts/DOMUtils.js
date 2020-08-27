@@ -26,12 +26,10 @@ export const removeFromDOM = (element) => {
   const INVALID_PARENT_ELEMENT_MESSAGE =
       `${ERROR_PREFIX} has an invalid 'parentElement' attribute`;
 
-  // Ensure that the element is not null.
   if (element === null) {
     throw (TypeError(`${TYPE_MISMATCH_PREFIX} null.`));
   }
 
-  // Ensure that the element is not undefined.
   if (typeof element === 'undefined') {
     throw (TypeError(`${TYPE_MISMATCH_PREFIX} undefined.`));
   }
@@ -45,15 +43,10 @@ export const removeFromDOM = (element) => {
     throw (TypeError(`${ERROR_PREFIX} must have a 'parentElement' attribute`));
   }
 
-  // Extract the parentElement attribute, only after ensuring it exists.
-  parent = element.parentElement;
-
-  // Ensure that the parent element is not null.
   if (parent === null) {
     throw (TypeError(INVALID_PARENT_ELEMENT_MESSAGE));
   }
 
-  // Ensure that the parent element is not undefined.
   if (typeof parent === 'undefined') {
     throw (TypeError(INVALID_PARENT_ELEMENT_MESSAGE));
   }
