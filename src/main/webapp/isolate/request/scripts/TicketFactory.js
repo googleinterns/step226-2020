@@ -29,56 +29,44 @@ export class TicketFactory {
   constructor() {
     /* The number of tickets created. */
     this.ticketCount = 0;
-    /* The number of times the page has attempted to fetch the ticket template
-     * from the server. */
-    this.ticketTemplateFetchAttempts = 0;
     /* The template for request tickets. */
     this.ticketTemplate = null;
   }
 
   /**
-   * Cache the Ticket Template, if necessary. If the Ticket Template already
+   * Attempt to cache the Ticket Template, if necessary. If the Ticket Template already
    * exists, calling this function is a no-op.
    * 
+   * @return Whether the template has been cached.
    * @throws Will throw an Error if the server cannot retrieve the
    *     Ticket Template.
    */
   async cacheTicketTemplate() {
-    /* cacheTicketTemplate is recursive. If ten or more failed attempts are made
-     * to fetch the template, the process is aborted. */
-    if (this.ticketTemplateFetchAttempts >= 10) {
-      throw (Error('Ticket template cannot be fetched from the server.'));
-    }
-
     /* If the ticketTemplate is null or undefined, attempt to fetch it from the
      * server. */
     if (this.ticketTemplate === null ||
         typeof this.ticketTemplate === 'undefined') {
       const response = await fetch('request-ticket.html');
 
-      /* Each time the server is queried, increment the number of fetch attempts
-       */
-      this.ticketTemplateFetchAttempts++;
-
       /* If the request succeeds, attempt to parse the body of the response */
-      /* If the request fails, try again. */
       if (response.ok) {
         const text = await response.text();
 
-        /* If parsing the response body fails, try again. */
+        /* If parsing the response body fails, report failure. */
         if (text === null || typeof text === 'undefined') {
-          this.cacheTicketTemplate();
+          return false;
         }
-        /* If parsing the response body succeeds, cache the response body and return. */
+        /* If parsing the response body succeeds, cache the ticket template and report success. */
         else {
           this.ticketTemplate = text;
-          return;
+          return true;
         }
-      } else {
-        /* If the request has failed, try again. */
-        this.cacheTicketTemplate();  
       }
+      /* The response was not ok. Report failure. */
+      return false;
     }
+    /* The ticketTemplate has already been cached. Report success. */
+    return true;
   }
 
   /**
@@ -88,10 +76,18 @@ export class TicketFactory {
    *     Ticket Template.
    */
   async createTicket() {
-    try {
-      await this.cacheTicketTemplate();
-    } catch (error) {
-      throw (Error(`Ticket creation failed with error\n:${error}`));
+    /* Attempt to cache the ticket template a maximum of 10 times. */ 
+    const FETCH_LIMIT = 10;
+    for (let i = 0; i < FETCH_LIMIT; i++) {
+      const cached = await this.cacheTicketTemplate();
+      
+      if (cached) {
+        break;
+      }
+    }
+    
+    if (!cached) {
+      throw (Error(`Ticket creation failed.`));
     }
 
     const ticket = document.createElement('fieldset');
