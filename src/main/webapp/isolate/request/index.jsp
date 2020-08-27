@@ -19,7 +19,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Request Submission</title>
-    <script src="./scripts/main.js" type="module"></script>
+    <script src="scripts/main.js" type="module"></script>
 </head>
 <body>
   <%@ include file = "request-form.html" %>
