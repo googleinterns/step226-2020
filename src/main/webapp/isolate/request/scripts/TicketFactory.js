@@ -93,20 +93,17 @@ export class TicketFactory {
       throw (Error(`Ticket creation failed with error\n:${error}`));
     }
 
-    const ticket = document.createElement('fieldset');
+    const ticketContainer = document.createElement('fieldset');
+    const ticket = document.createElement('div');
+    ticketContainer.classList.add('card');
+    ticketContainer.classList.add('form-group');
+    ticket.classList.add('card-body');
+
+    ticketContainer.appendChild(ticket);
+
     ticket.innerHTML = this.ticketTemplate;
 
-    /* Rename each ticket's input element */
-    for (let child of ticket.children) {
-      /*
-       * The name of the tickets always resembles a 2D array. This ensures that
-       * the browser can format the request properly, such that all of the
-       * tickets are recieved on the backend within a single POST request.
-       */
-      child.name = `tickets[${this.ticketCount}][${child.name}]`;
-    }
-
     this.ticketCount++;
-    return ticket;
+    return ticketContainer;
   }
 }
