@@ -13,11 +13,56 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<div class="form-group">
-  <button onclick="addTicket()">Add Request Item</button>
-</div>
 <form id="request-submission-form" method="POST" action="/request">
+  <div class="form-group">
+    <label for="date">Date of Fulfillment</label>
+    <input type="date" name="date" id="date" class="form-control w-auto" required>
+  </div>
+  <div class="form-group alert alert-info">
+    <p>
+      The 'fulfillment window' below is used to ensure that you are assigned a volunteer
+      who is available to fulfill your request at a time when you are available to accept it.
+      If you are available all-day, please indicate this by clicking 'I am available all-day' below.
+    </p>
+  </div>
+  <div class="form-check">
+    <input type="checkbox" id="all-day-checkbox" class="form-check-input" onchange="invertTimeInputVisibility();">
+    <label for="all-day-checkbox">I am available all-day.</label>
+  </div>
+  <div class="form-group" id="startTimeContainer">
+    <label for="startTime">
+      Start of fulfillment window:
+    </label>
+    <input type="time" name="startTime" id="startTime" class="form-control w-auto">
+  </div>
+  <div class="form-group" id="endTimeContainer">
+    <label for="endTime">
+      End of fulfillment window:
+    </label>
+    <input type="time" name="endTime" id="endTime" class="form-control w-auto">
+  </div>
+  <div class="form-group">
+    <label for="duration">Estimated Fulfillment Duration</label>
+    <select name="duration" id="duration" class="form-control w-auto">
+      <option value="15">15 Minutes</option>
+      <option value="30">30 Minutes</option>
+      <option value="45">45 Minutes</option>
+      <option value="60">1 hour</option>
+      <option value="75">1 hour 15 minutes</option>
+      <option value="90">1 hour 30 minutes</option>
+      <option value="105">1 hour 45 minutes</option>
+      <option value="120">2 hours</option>
+      <option value="135">2 hours 15 minutes</option>
+      <option value="150">2 hours 30 minutes</option>
+      <option value="165">2 hours 45 minutes</option>
+      <option value="180">3 hours</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <button type="button" onclick="addTicket()">Add Item to Request</button>
+  </div>
+  <div class="form-group" id="tickets">
+  </div>
   <div class="form-group">
     <button type="submit" class="btn btn-primary">Submit Request</button>
   </div>
