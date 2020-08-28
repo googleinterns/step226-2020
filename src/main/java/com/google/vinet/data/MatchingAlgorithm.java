@@ -34,6 +34,10 @@ public class MatchingAlgorithm {
    * An implementation of the Hopcroft-Karp algorithm to match requested help times with volunteer
    * availability times.
    *
+   * <p>This method has a worst-case run time of O(N*M + E*sqrt(N+M)), where N is the number of
+   * volunteer time slots, M the number of isolate time slots, and E the number of edges between the
+   * two sets. The O(N*M) is due to the edge creation before running the algorithm.
+   *
    * @param isolateTimeSlots   The set of all requested time slots for help
    * @param volunteerTimeSlots The set of all time slots in which volunteers are available to help
    * @return A set of matched time slots, where a volunteer was matched to a requested time slot
