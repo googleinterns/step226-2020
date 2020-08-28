@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static java.time.temporal.ChronoUnit.HOURS;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class MatchingAlgorithmTest {
 
@@ -44,12 +45,12 @@ public class MatchingAlgorithmTest {
     VolunteerTimeSlot volunteerSlot = new VolunteerTimeSlot(now, now.plus(1, HOURS), null);
     isolateTimeSlots.add(isolateSlot);
     volunteerTimeSlots.add(volunteerSlot);
-    Set<IsolateTimeSlot> matched = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
     assert (matched.contains(isolateSlot));
     assert (isolateSlot.isPaired());
     assert (isolateSlot.getPairedSlot() == volunteerSlot);
   }
-
 
   @Test
   public void testOneRequestOneVolunteerNoMatch() {
@@ -57,7 +58,8 @@ public class MatchingAlgorithmTest {
     VolunteerTimeSlot volunteerSlot = new VolunteerTimeSlot(now, now.plus(1, HOURS), null);
     isolateTimeSlots.add(isolateSlot);
     volunteerTimeSlots.add(volunteerSlot);
-    Set<IsolateTimeSlot> matched = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
     assert (!matched.contains(isolateSlot));
     assert (!isolateSlot.isPaired());
     assert (isolateSlot.getPairedSlot() != volunteerSlot);
@@ -69,7 +71,8 @@ public class MatchingAlgorithmTest {
     VolunteerTimeSlot volunteerSlot = new VolunteerTimeSlot(now, now.plus(2, HOURS), null);
     isolateTimeSlots.add(isolateSlot);
     volunteerTimeSlots.add(volunteerSlot);
-    Set<IsolateTimeSlot> matched = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
     assert (matched.contains(isolateSlot));
     assert (isolateSlot.isPaired());
     assert (isolateSlot.getPairedSlot() == volunteerSlot);
@@ -83,33 +86,138 @@ public class MatchingAlgorithmTest {
   @Test
   public void testTwoRequestsOneVolunteerVolunteerTooLongMatch() {
     IsolateTimeSlot isolateSlot1 = new IsolateTimeSlot(now, now.plus(1, HOURS), null);
-    IsolateTimeSlot isolateSlot2 = new IsolateTimeSlot(now.plus(1, HOURS), now.plus(2, HOURS), null);
+    IsolateTimeSlot isolateSlot2 =
+            new IsolateTimeSlot(now.plus(1, HOURS), now.plus(2, HOURS), null);
     VolunteerTimeSlot volunteerSlot = new VolunteerTimeSlot(now, now.plus(2, HOURS), null);
     isolateTimeSlots.add(isolateSlot1);
     isolateTimeSlots.add(isolateSlot2);
     volunteerTimeSlots.add(volunteerSlot);
-    Set<IsolateTimeSlot> matched = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
     assert (matched.size() == 1);
   }
 
   @Test
   public void testTwoRequestsTwoVolunteersVolunteerTooLongMatch() {
     IsolateTimeSlot isolateSlot1 = new IsolateTimeSlot(now, now.plus(1, HOURS), null);
-    IsolateTimeSlot isolateSlot2 = new IsolateTimeSlot(now.plus(1, HOURS), now.plus(2, HOURS), null);
+    IsolateTimeSlot isolateSlot2 =
+            new IsolateTimeSlot(now.plus(1, HOURS), now.plus(2, HOURS), null);
     VolunteerTimeSlot volunteerSlot1 = new VolunteerTimeSlot(now, now.plus(2, HOURS), null);
     VolunteerTimeSlot volunteerSlot2 = new VolunteerTimeSlot(now, now.plus(1, HOURS), null);
     isolateTimeSlots.add(isolateSlot1);
     isolateTimeSlots.add(isolateSlot2);
     volunteerTimeSlots.add(volunteerSlot1);
     volunteerTimeSlots.add(volunteerSlot2);
-    Set<IsolateTimeSlot> matched = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
     assert (matched.size() == 2);
     assert (isolateSlot1.getPairedSlot() != (isolateSlot2.getPairedSlot()));
   }
 
+  @Test
+  public void testNullIsolates() {
+    VolunteerTimeSlot volunteerSlot1 = new VolunteerTimeSlot(now, now.plus(2, HOURS), null);
+    volunteerTimeSlots.add(volunteerSlot1);
+    assertThrows(
+            IllegalArgumentException.class,
+            () -> MatchingAlgorithm.matchTimeSlots(null, volunteerTimeSlots));
+  }
 
-  //TODO test with no volunteers
-  //TODO test with no isolates
-  //TODO test with neither
-  //TODO test with null sets
+  @Test
+  public void testNullVolunteers() {
+    IsolateTimeSlot isolateSlot1 = new IsolateTimeSlot(now, now.plus(1, HOURS), null);
+    isolateTimeSlots.add(isolateSlot1);
+    assertThrows(
+            IllegalArgumentException.class,
+            () -> MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, null));
+  }
+
+  @Test
+  public void testNullSets() {
+    assertThrows(
+            IllegalArgumentException.class, () -> MatchingAlgorithm.matchTimeSlots(null, null));
+  }
+
+  @Test
+  public void testNoVolunteers() {
+    isolateTimeSlots.add(new IsolateTimeSlot(now, now.plus(1, HOURS), null));
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    assert (matched.size() == 0);
+  }
+
+  @Test
+  public void testNoIsolates() {
+    volunteerTimeSlots.add(new VolunteerTimeSlot(now, now.plus(2, HOURS), null));
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    assert (matched.size() == 0);
+  }
+
+  @Test
+  public void testEmptySets() {
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    assert (matched.size() == 0);
+  }
+
+  @Test
+  public void testNullIsolateSlot() {
+    isolateTimeSlots.add(null);
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    assert (matched.size() == 0);
+  }
+
+  @Test
+  public void testNullVolunteerSlot() {
+    volunteerTimeSlots.add(null);
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    assert (matched.size() == 0);
+  }
+
+  @Test
+  public void testNullSlots() {
+    volunteerTimeSlots.add(null);
+    isolateTimeSlots.add(null);
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    assert (matched.size() == 0);
+  }
+
+  @Test
+  public void testNullStartTime() {
+    assertThrows(
+            NullPointerException.class,
+            () -> isolateTimeSlots.add(new IsolateTimeSlot(null, now.plus(1, HOURS), null)));
+    volunteerTimeSlots.add(new VolunteerTimeSlot(now, now.plus(2, HOURS), null));
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    assert (matched.size() == 0);
+  }
+
+  @Test
+  public void testNullEndTime() {
+    assertThrows(
+            NullPointerException.class,
+            () -> isolateTimeSlots.add(new IsolateTimeSlot(now, null, null)));
+    volunteerTimeSlots.add(new VolunteerTimeSlot(now, now.plus(2, HOURS), null));
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    assert (matched.size() == 0);
+  }
+
+  @Test
+  public void testStartAfterEnd() {
+    assertThrows(
+            IllegalArgumentException.class,
+            () -> isolateTimeSlots.add(new IsolateTimeSlot(now.plus(1, HOURS), now, null)));
+    assertThrows(
+            IllegalArgumentException.class,
+            () -> volunteerTimeSlots.add(new VolunteerTimeSlot(now.plus(1, HOURS), now, null)));
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    assert (matched.size() == 0);
+  }
 }

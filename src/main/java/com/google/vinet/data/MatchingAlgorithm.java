@@ -41,6 +41,13 @@ public class MatchingAlgorithm {
   public static Set<IsolateTimeSlot> matchTimeSlots(
           Set<IsolateTimeSlot> isolateTimeSlots, Set<VolunteerTimeSlot> volunteerTimeSlots) {
 
+    if (isolateTimeSlots == null || volunteerTimeSlots == null)
+      throw new IllegalArgumentException("Null argument!");
+
+    // Remove null nodes, if present
+    isolateTimeSlots.remove(null);
+    volunteerTimeSlots.remove(null);
+
     addEdges(isolateTimeSlots, volunteerTimeSlots);
     isolateTimeSlots.add(NIL_NODE);
 
@@ -69,6 +76,18 @@ public class MatchingAlgorithm {
       for (IsolateTimeSlot isolateTimeSlot : isolateTimeSlots) {
         // TODO check if within geographic range
         // TODO consider the case where volunteer time slot is longer than isolate's
+        // we could run the algorithm again with the remaining isolate slots and the chunks of
+        // volunteer time slots that were not assigned
+
+        // Remove time slot if any of its instants are null
+        if (volunteerTimeSlot.getStart() == null || volunteerTimeSlot.getEnd() == null) {
+          volunteerTimeSlots.remove(volunteerTimeSlot);
+          continue;
+        } else if (isolateTimeSlot.getStart() == null || isolateTimeSlot.getEnd() == null) {
+          isolateTimeSlots.remove(isolateTimeSlot);
+          continue;
+        }
+
         if (volunteerTimeSlot.contains(isolateTimeSlot)) {
           isolateTimeSlot.addNeighbour(volunteerTimeSlot);
           volunteerTimeSlot.addNeighbour(isolateTimeSlot);
@@ -113,6 +132,12 @@ public class MatchingAlgorithm {
     return NIL_NODE.getDistance() != Double.POSITIVE_INFINITY;
   }
 
+  /**
+   * Performs depth-first search from the given time slot to the first unmatched time slot it finds
+   *
+   * @param slot The slot to use as a starting point for the search
+   * @return Whether the search found an unmatched slot
+   */
   private static boolean depthFirstSearch(TimeSlot slot) {
     if (slot.equals(NIL_NODE)) return true;
     for (TimeSlot neighbour : slot.getNeighbours()) {
