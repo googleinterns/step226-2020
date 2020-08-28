@@ -52,10 +52,10 @@ export const deleteTicket =
  */
 export const addTicket =
     async () => {
-  const form = document.getElementById('request-submission-form');
+  const ticketsContainer = document.getElementById('tickets');
 
   try{
-    form.appendChild(await createRequestTicket());
+    ticketsContainer.appendChild(await createRequestTicket());
   } catch(error) {
     throw(`Could not add ticket to the request form, failed with error: ${error}`);
   }
