@@ -21,7 +21,7 @@
  * necessary members.
  */
 
-import {addTicket, deleteTicket} from 'tickets.js';
+import {addTicket, deleteTicket} from './tickets.js';
 
 /* Add necessary functions to the global namespace. */
 
