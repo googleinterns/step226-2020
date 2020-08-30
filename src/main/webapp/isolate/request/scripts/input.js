@@ -19,7 +19,7 @@ export const invertVisibility = (element) => {
   try{
     element.hidden;
   } catch {
-    throw (TypeError(`${ERROR_PREFIX} must have a 'style' attribute.`));
+    throw (TypeError(`${ERROR_PREFIX} must have a 'hidden' attribute.`));
   }
 
   element.hidden = !element.hidden;
