@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {TicketFactory} from 'TicketFactory.js';
-import {removeFromDOM} from 'DOMUtils.js';
+import {TicketFactory} from './TicketFactory.js';
+import {removeFromDOM} from './DOMUtils.js';
 
 /* Create a TicketFactory to create tickets during the session */
 const ticketFactory = new TicketFactory();
