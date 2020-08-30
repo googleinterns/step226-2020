@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {TicketFactory} from './TicketFactory.js';
-import {removeFromDOM} from './DOMUtils.js';
+import {TicketFactory} from 'TicketFactory.js';
+import {removeFromDOM} from 'DOMUtils.js';
 
 /* Create a TicketFactory to create tickets during the session */
 const ticketFactory = new TicketFactory();
@@ -34,7 +34,7 @@ export const deleteTicket =
         throw (TypeError(`${TYPE_MISMATCH_PREFIX} null.`));
       }
 
-      else if (typeof ticket === 'undefined') {
+      if (typeof ticket === 'undefined') {
         throw (TypeError(`${TYPE_MISMATCH_PREFIX} undefined.`));
       }
 
@@ -73,7 +73,6 @@ const createRequestTicket = async () => {
     const ticket = await ticketFactory.createTicket();
     return ticket;
   } catch (error) {
-    /* Pass the error up to the caller. */
     throw(error);
   }
 }
