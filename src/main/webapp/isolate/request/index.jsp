@@ -20,7 +20,7 @@
     <meta charset="UTF-8">
     <title>Request Submission</title>
     <%@ include file="/bootstrap-css.html" %>
-    <script src="./scripts/main.js" type="module"></script>
+    <script src="scripts/main.js" type="module"></script>
 </head>
 <body>
   <div class="container">
