@@ -19,6 +19,8 @@ package com.google.vinet.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
 import com.google.appengine.api.datastore.Query;
@@ -196,7 +198,9 @@ public class RegistrationServlet extends HttpServlet {
     }
   }
 
-  public static boolean isUserRegistered(UserService userService) throws RuntimeException{
+
+
+  public boolean isUserRegistered(UserService userService) throws RuntimeException{
     final PreparedQuery preparedQuery = getUserQuery(userService);
 
     final Entity userEntity = getSingleEntity(preparedQuery);
@@ -209,19 +213,19 @@ public class RegistrationServlet extends HttpServlet {
     return registered;
   }
 
-  public static boolean isUserIsolate(UserService userService) throws RuntimeException{
+  public boolean isUserIsolate(UserService userService) throws RuntimeException{
     final UserType type = getUserType(userService);
 
     return type == UserType.ISOLATE;
   }
 
-  public static boolean isUserVolunteer(UserService userService) throws RuntimeException{
+  public boolean isUserVolunteer(UserService userService) throws RuntimeException{
     final UserType type = getUserType(userService);
 
     return type == UserType.VOLUNTEER;
   }
 
-  public static UserType getUserType(UserService userService) throws RuntimeException{
+  public UserType getUserType(UserService userService) throws RuntimeException{
     final PreparedQuery preparedQuery = getUserQuery(userService);
 
     final Entity userEntity = getSingleEntity(preparedQuery);
@@ -241,7 +245,7 @@ public class RegistrationServlet extends HttpServlet {
     return type;
   }
 
-  public static Entity getSingleEntity(PreparedQuery preparedQuery) throws RuntimeException{
+  public Entity getSingleEntity(PreparedQuery preparedQuery) throws RuntimeException{
     final Entity entity;
 
     /* Try to retrieve the results of the query as a single Entity.
@@ -262,7 +266,7 @@ public class RegistrationServlet extends HttpServlet {
     return entity;
   }
 
-  public static PreparedQuery getUserQuery(UserService userService) throws RuntimeException{
+  public PreparedQuery getUserQuery(UserService userService) throws RuntimeException{
     final User user = userService.getCurrentUser();
     final String userId = user.getUserId();
 
@@ -279,5 +283,13 @@ public class RegistrationServlet extends HttpServlet {
     final PreparedQuery preparedQuery = datastore.prepare(query);
 
     return preparedQuery;
+  }
+
+  /**
+   * Wrapper around {@code KeyFactory.keyToString(String s)}, used to allow stubbing during tests.
+   * @param s The String to pass to {@code KeyFactory.keyToString(String s)}.
+   */
+  public Key stringToKey(String s){
+    return KeyFactory.stringToKey(s);
   }
 }
