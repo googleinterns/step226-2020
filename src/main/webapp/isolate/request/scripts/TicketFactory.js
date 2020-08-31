@@ -57,7 +57,7 @@ export class TicketFactory {
     
     const text = await response.text();
     
-    if (text === null && typeof text === 'undefined') {
+    if (text === null || typeof text === 'undefined') {
       return false;
     }
     
