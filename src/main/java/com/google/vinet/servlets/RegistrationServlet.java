@@ -176,22 +176,69 @@ public class RegistrationServlet extends HttpServlet {
       return;
     }
 
-    final User user = userService.getCurrentUser();
-    final String userId = user.getUserId();
-
-    if (userId == null) {
-      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    final boolean registered;
+    try{
+      registered = isUserRegistered(this.userService);
+    } catch(RuntimeException ex){
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       return;
     }
 
-    /* Create a query which will return all entries in the DataStore with a userId matching that of
-     *the current user. */
-    final Filter userIdFilter = new FilterPredicate("userId", FilterOperator.EQUAL, userId);
-    final Query query = new Query(USER_TABLE_NAME).setFilter(userIdFilter);
+    final Gson gson = new Gson();
+    
+    try{
+      response.getWriter().println(gson.toJson(registered));
+    } catch (Exception ex) {
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+  }
 
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    final PreparedQuery preparedQuery = datastore.prepare(query);
+  public static boolean isUserRegistered(UserService userService) throws RuntimeException{
+    final PreparedQuery preparedQuery = getUserQuery(userService);
 
+    final Entity userEntity = getSingleEntity(preparedQuery);
+
+    /* If the query returns a non-null value, then the User is registered.
+     * If the query returns a null value, then the user is not registered.
+     */
+    final boolean registered = (userEntity != null);
+
+    return registered;
+  }
+
+  public static boolean isUserIsolate(UserService userService) throws RuntimeException{
+    final UserType type = getUserType(userService);
+
+    return type == UserType.ISOLATE;
+  }
+
+  public static boolean isUserVolunteer(UserService userService) throws RuntimeException{
+    final UserType type = getUserType(userService);
+
+    return type == UserType.VOLUNTEER;
+  }
+
+  public static UserType getUserType(UserService userService) throws RuntimeException{
+    final PreparedQuery preparedQuery = getUserQuery(userService);
+
+    final Entity userEntity = getSingleEntity(preparedQuery);
+
+    if (userEntity == null) {
+      throw new IllegalStateException("cannot check type of unregistered user");
+    }
+
+    final String typeString = (String) userEntity.getProperty("type");
+
+    if (typeString == null) {
+      throw new IllegalStateException("query did not return a valid user");
+    }
+
+    final UserType type = UserType.valueOf(typeString.toUpperCase());
+
+    return type;
+  }
+
+  public static Entity getSingleEntity(PreparedQuery preparedQuery) throws RuntimeException{
     final Entity entity;
 
     /* Try to retrieve the results of the query as a single Entity.
@@ -204,24 +251,30 @@ public class RegistrationServlet extends HttpServlet {
     try{
       entity = preparedQuery.asSingleEntity();
     } catch(TooManyResultsException exception) {
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       throw exception;
     } catch (IllegalStateException exception) {
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       throw exception;
     }
 
-    /* If the query returns a non-null value, then the User is registered.
-     * If the query returns a null value, then the user is not registered.
-     */
-    final boolean registered = (entity != null);
+    return entity;
+  }
 
-    final Gson gson = new Gson();
-    
-    try{
-      response.getWriter().println(gson.toJson(registered));
-    } catch (Exception ex) {
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+  public static PreparedQuery getUserQuery(UserService userService) throws RuntimeException{
+    final User user = userService.getCurrentUser();
+    final String userId = user.getUserId();
+
+    if (userId == null) {
+      throw new IllegalStateException("current user does not have an id");
     }
+
+    /* Create a query which will return all entries in the DataStore with a userId matching that of
+     *the current user. */
+    final Filter userIdFilter = new FilterPredicate("userId", FilterOperator.EQUAL, userId);
+    final Query query = new Query(USER_TABLE_NAME).setFilter(userIdFilter);
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    final PreparedQuery preparedQuery = datastore.prepare(query);
+
+    return preparedQuery;
   }
 }
