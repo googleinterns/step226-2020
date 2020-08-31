@@ -67,9 +67,10 @@
     <button type="submit" class="btn btn-primary">Submit Request</button>
   </div>
   <!-- Hidden input element for capturing and posting the user's local timezone. -->
+  <!-- TODO: Clean up and document how timezone capturing works. -->
   <input
       type="text"
       name="timezoneOffset"
-      value="new window.Intl.DateTimeFormat().resolvedOptions().timeZone"
+      value="(() => {const iso = new Date().toISOString(); return iso.substr(iso.indexOf('Z'));})()"
       hidden>
 </form>
