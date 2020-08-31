@@ -238,22 +238,24 @@ public class RequestServlet extends HttpServlet {
       userId = userService.getCurrentUser().getUserId();
     } catch (Exception ex) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      return;
     }
 
     startTime = String.format("%sT%s:00%s", date, startTime, timezoneOffset);
     endTime = String.format("%sT%s:00%s", date, endTime, timezoneOffset);
 
-    final Instant start;
-    final Instant end;
-    final Isolate isolate;
-    final IsolateTimeSlot isolateTimeSlot;
-
+    /*
+     * The following is an assurance that the provided startTime and endTime are valid.
+     * The computed Instant's and IsolateTimeSlot will not be stored in Datastore, as
+     * this is not supported.
+     * Instead, the startTime and endTime are stored.
+     */
     try{
-      DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME();
-      start = Instant.from(formatter.parse(startTime));
-      end = Instant.from(formatter.parse(endTime));
-      isolate = new Isolate(userId);
-      isolateTimeSlot = new IsolateTimeSlot(start, end , isolate);
+      DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+      final Isolate isolate = new Isolate(userId);
+      final Instant start = Instant.from(formatter.parse(startTime));
+      final Instant end = Instant.from(formatter.parse(endTime));
+      final IsolateTimeSlot isolateTimeSlot = new IsolateTimeSlot(start, end , isolate);
     } catch (DateTimeParseException exception) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, "error parsing timeslot");
       return;
@@ -264,7 +266,8 @@ public class RequestServlet extends HttpServlet {
     final Entity ticketEntity = new Entity("Ticket");
     ticketEntity.setProperty("isolateId", userId);
     ticketEntity.setProperty("volunteerId", null);
-    ticketEntity.setProperty("timeslot", isolateTimeSlot);
+    ticketEntity.setProperty("startTime", startTime);
+    ticketEntity.setProperty("endTime", endTime);
     ticketEntity.setProperty("subjects", gson.toJson(subjects));
     ticketEntity.setProperty("details", gson.toJson(details));
 
@@ -303,12 +306,14 @@ public class RequestServlet extends HttpServlet {
 
     if (keyString == null) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      return;
     }
 
     keyString = keyString.trim();
 
     if (keyString.equals("")) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      return;
     }
 
 
