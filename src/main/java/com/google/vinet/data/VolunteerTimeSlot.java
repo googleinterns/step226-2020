@@ -20,7 +20,7 @@ import java.time.Instant;
 
 public class VolunteerTimeSlot extends TimeSlot {
 
-  protected VolunteerTimeSlot(Instant start, Instant end, Volunteer volunteer) {
+  public VolunteerTimeSlot(Instant start, Instant end, Volunteer volunteer) {
     super(start, end, volunteer);
   }
 

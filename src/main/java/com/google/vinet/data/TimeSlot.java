@@ -32,11 +32,18 @@ public abstract class TimeSlot implements Comparable<TimeSlot> {
   private TimeSlot pairedSlot = null;
   private double distance = 0;
 
-  protected TimeSlot(Instant start, Instant end, RegisteredUser registeredUser) {
-    if (start == null || end == null) throw new NullPointerException();
+  /**
+   * Create a new time slot. Start and end times must not be null, and start time must come before
+   * end time.
+   *
+   * @param start          The starting instant for the slot.
+   * @param end            The ending instant for the slot.
+   * @param registeredUser The user for which this slot applies.
+   */
+  public TimeSlot(Instant start, Instant end, RegisteredUser registeredUser) {
+    this.start = Objects.requireNonNull(start, "Start time must not be null!");
+    this.end = Objects.requireNonNull(end, "End time must not be null!");
     if (start.isAfter(end)) throw new IllegalArgumentException();
-    this.start = start;
-    this.end = end;
     this.registeredUser = registeredUser;
   }
 
@@ -76,9 +83,7 @@ public abstract class TimeSlot implements Comparable<TimeSlot> {
     neighbours.add(timeSlot);
   }
 
-  /**
-   * Compares two time slots based on their start time
-   */
+  /** Compares two time slots based on their start time */
   @Override
   public int compareTo(TimeSlot timeSlot) {
     return start.compareTo(timeSlot.getStart());
