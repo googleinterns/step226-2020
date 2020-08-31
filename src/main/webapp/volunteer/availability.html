@@ -18,11 +18,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Volunteer Home</title>
+    <title>Volunteer Matcher</title>
+    <script src="availability.js"></script>
 </head>
-<body>
-<p><a href="/login?redirectURL=/register/">Registration</a></p>
-<p><a href="availability.html">Specify Availability</a></p>
-<p><a href="matches.html">View Matches</a></p>
+<body onload="populateRows();">
+<script src="availability.js"></script>
+<h2>Welcome to volunteer matching!</h2>
+<p>Please specify the time(s) in which you would be available to help:</p>
+<button onclick="addEmptyRow()">Add Row</button>
+<form id="availability-form" method="POST" action="/volunteer-availability">
+    <input type="submit">
+</form>
+
 </body>
 </html>
+
