@@ -45,6 +45,8 @@ public class RegistrationServlet extends HttpServlet {
   private static final int MIN_NAME_LENGTH = 2;
   private static final int MAX_NAME_LENGTH = 300;
   private static final String USER_TABLE_NAME = "UserInfo";
+  public static final String ISOLATE_HOME_PAGE = "/isolate/home.html";
+  public static final String VOLUNTEER_HOME_PAGE = "/volunteer/home.html";
 
   private enum UserType {
     ISOLATE,
@@ -90,7 +92,8 @@ public class RegistrationServlet extends HttpServlet {
 
       for (String propertyName : propertyNames) {
         final String[] parameterArray;
-        if (!parameterMap.containsKey(propertyName) || (parameterArray = parameterMap.get(propertyName)).length < 1) {
+        if (!parameterMap.containsKey(propertyName)
+                || (parameterArray = parameterMap.get(propertyName)).length < 1) {
           System.err.printf("Missing parameter %s for registration request!\n", propertyName);
           return;
         }
@@ -146,9 +149,9 @@ public class RegistrationServlet extends HttpServlet {
       response.setStatus(HttpServletResponse.SC_OK);
 
       if (userType == UserType.ISOLATE) {
-        response.sendRedirect("/isolate/home.html");
+        response.sendRedirect(ISOLATE_HOME_PAGE);
       } else if (userType == UserType.VOLUNTEER) {
-        response.sendRedirect("/volunteer/home.html");
+        response.sendRedirect(VOLUNTEER_HOME_PAGE);
       } else {
         response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
       }
@@ -162,7 +165,7 @@ public class RegistrationServlet extends HttpServlet {
    * Returns whether the logged-in User has registered with the service.
    */
   @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException{
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     if (response == null) {
       throw new IllegalArgumentException("response cannot be null");
     }
@@ -171,7 +174,7 @@ public class RegistrationServlet extends HttpServlet {
       throw new IllegalArgumentException("request cannot be null");
     }
 
-    if ( !this.userService.isUserLoggedIn() ) {
+    if (!this.userService.isUserLoggedIn()) {
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return;
     }
@@ -201,27 +204,21 @@ public class RegistrationServlet extends HttpServlet {
      * In a production environment, this would have to be reported to the sysadmin/project owner,
      * as duplicate registration should never be allowed.
      */
-    try{
+    try {
       entity = preparedQuery.asSingleEntity();
-    } catch(TooManyResultsException exception) {
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      throw exception;
-    } catch (IllegalStateException exception) {
+    } catch (TooManyResultsException | IllegalStateException exception) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       throw exception;
     }
 
-    final boolean registered;
-
-    if (entity == null) {
-      registered = false;
-    } else {
-      registered = true;
-    }
+    /* If the query returns a non-null value, then the User is registered.
+     * If the query returns a null value, then the user is not registered.
+     */
+    final boolean registered = (entity != null);
 
     final Gson gson = new Gson();
-    
-    try{
+
+    try {
       response.getWriter().println(gson.toJson(registered));
     } catch (Exception ex) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

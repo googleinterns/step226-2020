@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class LoginServlet extends HttpServlet {
   }
 
   /**
-   * Construct a LoginServlet that depends on the provided implementation of UserService..
+   * Construct a LoginServlet that depends on the provided implementation of UserService.
    * @param userService The implementation of UserService the LoginServlet will depend on.
    */
   public LoginServlet(UserService userService) {

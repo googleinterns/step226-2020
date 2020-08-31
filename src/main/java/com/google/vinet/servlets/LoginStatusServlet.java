@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,14 +29,14 @@ public class LoginStatusServlet extends HttpServlet {
   private UserService userService;
 
   /**
-   * Construct a LoginStatusServlet that depends on the default implementaion of UserService.
+   * Construct a LoginStatusServlet that depends on the default implementation of UserService.
    */
   public LoginStatusServlet() {
     this.userService = UserServiceFactory.getUserService();
   }
 
   /**
-   * Construct a LoginStatusServlet that depends on the provided implementaion of UserService.
+   * Construct a LoginStatusServlet that depends on the provided implementation of UserService.
    * @param userService The implementation of UserService the LoginStatusServlet will depend on.
    */
   public LoginStatusServlet(UserService userService) {
