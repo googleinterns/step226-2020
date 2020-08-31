@@ -71,3 +71,9 @@ window.invertTimeInputVisibility = () => {
   startTime.value = START_OF_DAY;
   endTime.value = END_OF_DAY;
 };
+
+window.onload = () => {
+  const timezone = new Date().toTimeString().split(' ')[1].replace('GMT', ''); 
+  const timezoneOffsetElement = document.getElementById('timezoneOffset');
+  timezoneOffsetElement.value = timezone;
+};
