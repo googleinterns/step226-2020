@@ -264,7 +264,7 @@ public class RequestServlet extends HttpServlet {
     final Entity ticketEntity = new Entity("Ticket");
     ticketEntity.setProperty("isolateId", userId);
     ticketEntity.setProperty("volunteerId", null);
-    ticketEntity.setProperty("timeslot", isolateTimeslot);
+    ticketEntity.setProperty("timeslot", isolateTimeSlot);
     ticketEntity.setProperty("subjects", gson.toJson(subjects));
     ticketEntity.setProperty("details", gson.toJson(details));
 
