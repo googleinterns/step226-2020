@@ -27,6 +27,8 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
+import com.google.vinet.data.Isolate;
+import com.google.vinet.data.IsolateTimeSlot;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
