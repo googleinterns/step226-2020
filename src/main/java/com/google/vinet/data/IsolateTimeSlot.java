@@ -20,7 +20,7 @@ import java.time.Instant;
 
 public class IsolateTimeSlot extends TimeSlot {
 
-  protected IsolateTimeSlot(Instant start, Instant end, Isolate isolate) {
+  public IsolateTimeSlot(Instant start, Instant end, Isolate isolate) {
     super(start, end, isolate);
   }
 
