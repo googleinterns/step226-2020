@@ -22,8 +22,18 @@
   <title>Registration</title>
   <%@ include file="/bootstrap-css.html" %>
   <script src="maps.js"></script>
+  <!-- 
+      TODO: REMOVE DEVELOPMENT KEY FETCHING
+      This app cannot be deployed without inserting your production API key into the below script element.
+      This key must be authorised to access the following Google Cloud API's:
+          - Maps JavaScript API
+          - Geocoding API
+          - Places API
+      For development purposes, the app assumes that the key is stored as an environment variable of the OS.
+  -->
+  <% /* TODO: REMOVE */ final String API_KEY = System.getenv().get("MAPS_DEV_KEY"); %>
   <script defer
-      src="https://maps.googleapis.com/maps/api/js?key=<API_KEY_HERE>&callback=loadMap&libraries=places">
+      src="https://maps.googleapis.com/maps/api/js?key=<%= API_KEY %>&callback=loadMap&libraries=places">
   </script>
 </head>
 <body>
