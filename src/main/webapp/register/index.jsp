@@ -22,8 +22,20 @@
   <title>Registration</title>
   <%@ include file="/bootstrap-css.html" %>
   <script src="maps.js"></script>
+  <!-- 
+      TODO: ADD PRODUCTION KEY TO appengine-web.xml BEFORE DEPLOYMENT
+      This app cannot be deployed without inserting your production API key into the MAPS_KEY
+      environment variable defined in appengine-web.xml
+      This key must be authorised to access the following Google Cloud API's:
+          - Maps JavaScript API
+          - Geocoding API
+          - Places API
+      For development purposes, the app assumes that the key is stored as an environment variable
+      of the development machine's OS.
+  -->
+  <% /* TODO: REMOVE */ final String API_KEY = System.getenv().get("MAPS_KEY"); %>
   <script defer
-      src="https://maps.googleapis.com/maps/api/js?key=<API_KEY_HERE>&callback=loadMap&libraries=places">
+      src="https://maps.googleapis.com/maps/api/js?key=<%= API_KEY %>&callback=loadMap&libraries=places">
   </script>
 </head>
 <body>
