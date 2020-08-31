@@ -30,6 +30,7 @@ import com.google.gson.Gson;
 import com.google.vinet.data.Isolate;
 import com.google.vinet.data.IsolateTimeSlot;
 
+import javax.print.attribute.standard.MediaSize.ISO;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -45,15 +46,18 @@ public class RequestServlet extends HttpServlet {
   public static final String TICKET_TABLE_NAME = "Ticket";
   private final DatastoreService datastore;
   private final UserService userService;
+  private final RegistrationServlet registrationServlet;
 
   public RequestServlet() {
     this.datastore = DatastoreServiceFactory.getDatastoreService();
     this.userService = UserServiceFactory.getUserService();
+    this.registrationServlet = new RegistrationServlet();
   }
 
-  public RequestServlet(DatastoreService datastore, UserService userService) {
+  public RequestServlet(DatastoreService datastore, UserService userService, RegistrationServlet registrationServlet) {
     this.datastore = datastore;
     this.userService = userService;
+    this.registrationServlet = registrationServlet;
   }
 
   @Override
@@ -75,7 +79,7 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    final boolean registered = RegistrationServlet.isUserRegistered(this.userService);
+    final boolean registered = registrationServlet.isUserRegistered(this.userService);
 
     if (!registered) {
       response.sendError(
@@ -85,7 +89,7 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    final boolean isIsolate = RegistrationServlet.isUserIsolate(this.userService);
+    final boolean isIsolate = registrationServlet.isUserIsolate(this.userService);
 
     if (!isIsolate) {
       response.sendError(
@@ -241,15 +245,17 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    startTime = String.format("%sT%s:00%s", date, startTime, timezoneOffset);
-    endTime = String.format("%sT%s:00%s", date, endTime, timezoneOffset);
-
     /*
      * The following is an assurance that the provided startTime and endTime are valid.
      * The computed Instant's and IsolateTimeSlot will not be stored in Datastore, as
      * this is not supported.
      * Instead, the startTime and endTime are stored.
      */
+    final String ISO_FORMAT = "%sT%s:00%s";
+
+    startTime = String.format(ISO_FORMAT, date, startTime, timezoneOffset);
+    endTime = String.format(ISO_FORMAT, date, endTime, timezoneOffset);
+
     try{
       DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
       final Isolate isolate = new Isolate(userId);
@@ -263,7 +269,7 @@ public class RequestServlet extends HttpServlet {
 
     final Gson gson = new Gson();
 
-    final Entity ticketEntity = new Entity("Ticket");
+    final Entity ticketEntity = new Entity(TICKET_TABLE_NAME);
     ticketEntity.setProperty("isolateId", userId);
     ticketEntity.setProperty("volunteerId", null);
     ticketEntity.setProperty("startTime", startTime);
@@ -292,7 +298,7 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    final boolean registered = RegistrationServlet.isUserRegistered(this.userService);
+    final boolean registered = registrationServlet.isUserRegistered(this.userService);
 
     if (!registered) {
       response.sendError(
@@ -321,7 +327,7 @@ public class RequestServlet extends HttpServlet {
      */
     final Key key;
     try {
-      key = KeyFactory.stringToKey(keyString);
+      key = registrationServlet.stringToKey(keyString);
     } catch (IllegalArgumentException exception) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
       return;
@@ -335,17 +341,25 @@ public class RequestServlet extends HttpServlet {
      */
     final Entity requestEntity;
     try{
-      requestEntity = datastore.get(key);
-    } catch (EntityNotFoundException | IllegalArgumentException exception) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-      return;
+      requestEntity = this.datastore.get(key);
     } catch (DatastoreFailureException exception) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       throw exception;
+    } catch (EntityNotFoundException | IllegalArgumentException exception) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      return;
     }
 
     if (requestEntity == null) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      return;
+    }
+
+    try{
+      response.getWriter().println(requestEntity.getProperties());
+    } catch (Exception exception) {
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      throw exception;
     }
   }
 
