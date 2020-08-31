@@ -42,30 +42,26 @@ export class TicketFactory {
    *     Ticket Template.
    */
   async cacheTicketTemplate() {
-    /* If the ticketTemplate is null or undefined, attempt to fetch it from the
-     * server. */
-    if (this.ticketTemplate === null ||
-        typeof this.ticketTemplate === 'undefined') {
-      const response = await fetch('request-ticket.html');
+    /* If the ticketTemplate has been cached previously, return immediately. */
+    if (this.ticketTemplate !== null &&
+        typeof this.ticketTemplate !== 'undefined') {
+      return true;
+    }
+    
+    const response = await fetch('request-ticket.html');
 
-      /* If the request succeeds, attempt to parse the body of the response */
-      if (response.ok) {
-        const text = await response.text();
-
-        /* If parsing the response body fails, report failure. */
-        if (text === null || typeof text === 'undefined') {
-          return false;
-        }
-        /* If parsing the response body succeeds, cache the ticket template and report success. */
-        else {
-          this.ticketTemplate = text;
-          return true;
-        }
-      }
-      /* The response was not ok. Report failure. */
+    /* If the request fails, immediately report failure. */
+    if (!response.ok) {
       return false;
     }
-    /* The ticketTemplate has already been cached. Report success. */
+    
+    const text = await response.text();
+    
+    if (text === null && typeof text === 'undefined') {
+      return false;
+    }
+    
+    this.ticketTemplate = text;
     return true;
   }
 
