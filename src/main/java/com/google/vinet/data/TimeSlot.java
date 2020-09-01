@@ -18,31 +18,25 @@ package com.google.vinet.data;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public abstract class TimeSlot {
+public abstract class TimeSlot implements Comparable<TimeSlot> {
 
-  private final Instant start;
-  private final Instant end;
+  protected final Instant start;
+  protected final Instant end;
   protected final RegisteredUser registeredUser;
   private final Set<TimeSlot> neighbours = new HashSet<>();
   private TimeSlot pairedSlot = null;
   private double distance = 0;
 
-  /**
-   * Create a new time slot. Start and end times must not be null, and start time must come before
-   * end time.
-   *
-   * @param start          The starting instant for the slot.
-   * @param end            The ending instant for the slot.
-   * @param registeredUser The user for which this slot applies.
-   */
   public TimeSlot(Instant start, Instant end, RegisteredUser registeredUser) {
-    this.start = Objects.requireNonNull(start, "Start time must not be null!");
-    this.end = Objects.requireNonNull(end, "End time must not be null!");
-    if (!start.isBefore(end)) throw new IllegalArgumentException();
+    if (start == null || end == null) throw new NullPointerException();
+    if (start.isAfter(end)) throw new IllegalArgumentException();
+    this.start = start;
+    this.end = end;
     this.registeredUser = registeredUser;
   }
 
@@ -83,14 +77,23 @@ public abstract class TimeSlot {
   }
 
   /**
+   * Compares two time slots based on their start time
+   */
+  @Override
+  public int compareTo(TimeSlot timeSlot) {
+    return start.compareTo(timeSlot.getStart());
+  }
+
+  public static Comparator<TimeSlot> TimeSlotEndComparator = Comparator.comparing(TimeSlot::getEnd);
+
+  /**
    * Checks whether this timeslot contains another
    *
    * @param timeSlot The slot that is to be contained
    * @return Whether this slot contains the specified slot
    */
   public boolean contains(TimeSlot timeSlot) {
-    return (start.equals(timeSlot.start) || start.isBefore(timeSlot.start))
-            && (end.equals(timeSlot.end) || end.isAfter(timeSlot.end));
+    return compareTo(timeSlot) <= 0 && TimeSlotEndComparator.compare(this, timeSlot) >= 0;
   }
 
   @Override
