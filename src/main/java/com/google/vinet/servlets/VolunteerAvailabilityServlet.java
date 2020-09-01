@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @WebServlet("/volunteer-availability")
@@ -65,25 +65,32 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
       return;
     }
 
-    //TODO check if it's a valid userId
+    // TODO check if it's a valid userId
     Volunteer volunteer = new Volunteer(userService.getCurrentUser().getUserId());
 
     // TODO check if any of the parameters are null / not present
     Map<String, String[]> parameterMap = request.getParameterMap();
+    String timezoneOffset = parameterMap.get("timezoneOffset")[0];
+    timezoneOffset = timezoneOffset.replaceFirst("(.{3})", "$1:"); // insert a colon to get ISO time
     final String[] dates = parameterMap.get("date");
     final String[] startTimes = parameterMap.get("start-time");
     final String[] endTimes = parameterMap.get("end-time");
+
+    final String ISO_FORMAT = "%sT%s:00%s";
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     for (int i = 0; i < dates.length; i++) {
       String date = dates[i];
       String startTime = startTimes[i];
       String endTime = endTimes[i];
 
-      // TODO account for timezone
-      Instant startInstant = Instant.from(LocalDateTime.parse(date + "T" + startTime));
-      Instant endInstant = Instant.from(LocalDateTime.parse(date + "T" + endTime));
+      Instant startInstant =
+              Instant.from(
+                      dateTimeFormatter.parse(String.format(ISO_FORMAT, date, startTime, timezoneOffset)));
+      Instant endInstant =
+              Instant.from(
+                      dateTimeFormatter.parse(String.format(ISO_FORMAT, date, endTime, timezoneOffset)));
 
-      // store this volunteer time slot in datastore
       VolunteerTimeSlot volunteerTimeSlot =
               new VolunteerTimeSlot(startInstant, endInstant, volunteer);
       volunteerTimeSlot.toDatastore();
