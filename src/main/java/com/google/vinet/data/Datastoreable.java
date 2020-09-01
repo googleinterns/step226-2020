@@ -24,10 +24,13 @@ public interface Datastoreable {
 
   /**
    * Store this class instance to Datastore.
+<<<<<<< HEAD
    *
    * @throws IllegalArgumentException                                     If the entity was incomplete.
    * @throws java.util.ConcurrentModificationException                    If the entity group to which the entity belongs was modified concurrently.
    * @throws com.google.appengine.api.datastore.DatastoreFailureException If any other datastore error occurs.
+=======
+>>>>>>> Add interface for Datastore items
    */
   void toDatastore();
 }
