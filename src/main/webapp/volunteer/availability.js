@@ -24,6 +24,10 @@ function populateRows() {
 
     // add an empty row at bottom of form
     addEmptyRow();
+
+    //TODO add delete button to each row
+
+    //TODO validate fields so they're not empty, and start time is before end time
 }
 
 function updateTimezoneOffset() {
