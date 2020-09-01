@@ -47,8 +47,8 @@ public class VolunteerTimeSlot extends TimeSlot implements Datastoreable {
 
     final Entity entity = new Entity(VOLUNTEER_TIMESLOT_TABLE_NAME);
     entity.setProperty("userId", registeredUser.getUserId());
-    entity.setProperty("start", getStart());
-    entity.setProperty("end", getEnd());
+    entity.setProperty("start", getStart().toString());
+    entity.setProperty("end", getEnd().toString());
 
     datastoreService.put(entity);
   }
