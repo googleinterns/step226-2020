@@ -356,7 +356,8 @@ public class RequestServlet extends HttpServlet {
     }
 
     try{
-      response.getWriter().println(requestEntity.getProperties());
+      Gson gson = new Gson();
+      response.getWriter().println(json.toJson(requestEntity.getProperties()));
     } catch (Exception exception) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       throw exception;
