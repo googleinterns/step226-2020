@@ -14,11 +14,21 @@
  *  limitations under the License.
  */
 
+function initialise() {
+    updateTimezoneOffset();
+    populateRows();
+}
+
 function populateRows() {
     //TODO fetch existing timeslots for this volunteer from backend
 
     // add an empty row at bottom of form
     addEmptyRow();
+}
+
+function updateTimezoneOffset() {
+    document.getElementById('timezoneOffset').value =
+        new Date().toTimeString().split(' ')[1].replace('GMT', '');
 }
 
 function addEmptyRow() {
