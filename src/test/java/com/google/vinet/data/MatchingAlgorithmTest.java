@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static java.time.temporal.ChronoUnit.HOURS;
+import static java.time.temporal.ChronoUnit.MINUTES;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class MatchingAlgorithmTest {
@@ -260,5 +261,24 @@ public class MatchingAlgorithmTest {
     Set<IsolateTimeSlot> matched =
             MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
     assert (matched.size() == 5);
+  }
+
+  @Test
+  public void testTwentyVolunteersTenIsolatesOverlappingAllMatch() {
+    for (int i = 0; i < 10; i++) {
+      isolateTimeSlots.add(new IsolateTimeSlot(now.plus(i, HOURS), now.plus(i + 1, HOURS), null));
+      isolateTimeSlots.add(
+              new IsolateTimeSlot(now.plus(i, HOURS).plus(30, MINUTES), now.plus(i + 1, HOURS), null));
+    }
+    for (int i = 0; i < 10; i++) {
+      volunteerTimeSlots.add(
+              new VolunteerTimeSlot(now.plus(i, HOURS), now.plus(i + 1, HOURS), null));
+      volunteerTimeSlots.add(
+              new VolunteerTimeSlot(now.plus(i, HOURS), now.plus(i + 2, HOURS), null));
+    }
+
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    assert (matched.size() == 20);
   }
 }
