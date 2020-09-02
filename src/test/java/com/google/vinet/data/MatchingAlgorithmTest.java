@@ -1,17 +1,17 @@
 /*
- * Copyright 2020 Google LLC
+ *  Copyright 2020 Google LLC
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     https://www.apache.org/licenses/LICENSE-2.0
+ *      https:www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package com.google.vinet.data;
@@ -219,5 +219,46 @@ public class MatchingAlgorithmTest {
     Set<IsolateTimeSlot> matched =
             MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
     assert (matched.size() == 0);
+  }
+
+  @Test
+  public void testTenVolunteersTenIsolatesMatchAll() {
+    for (int i = 0; i < 10; i++) {
+      isolateTimeSlots.add(new IsolateTimeSlot(now.plus(i, HOURS), now.plus(i + 1, HOURS), null));
+      volunteerTimeSlots.add(
+              new VolunteerTimeSlot(now.plus(i, HOURS), now.plus(i + 1, HOURS), null));
+    }
+
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    assert (matched.size() == 10);
+  }
+
+  @Test
+  public void test100VolunteersTenIsolatesMatchAll() {
+    for (int i = 0; i < 100; i++) {
+      isolateTimeSlots.add(new IsolateTimeSlot(now.plus(i, HOURS), now.plus(i + 1, HOURS), null));
+      volunteerTimeSlots.add(
+              new VolunteerTimeSlot(now.plus(i, HOURS), now.plus(i + 1, HOURS), null));
+    }
+
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    assert (matched.size() == 100);
+  }
+
+  @Test
+  public void testTenVolunteersTenIsolatesHalfMatch() {
+    for (int i = 0; i < 10; i++) {
+      isolateTimeSlots.add(new IsolateTimeSlot(now.plus(i, HOURS), now.plus(i + 1, HOURS), null));
+    }
+    for (int i = 5; i < 15; i++) {
+      volunteerTimeSlots.add(
+              new VolunteerTimeSlot(now.plus(i, HOURS), now.plus(i + 1, HOURS), null));
+    }
+
+    Set<IsolateTimeSlot> matched =
+            MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    assert (matched.size() == 5);
   }
 }
