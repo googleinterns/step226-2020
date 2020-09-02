@@ -1,17 +1,17 @@
 /*
- * Copyright 2020 Google LLC
+ *  Copyright 2020 Google LLC
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     https://www.apache.org/licenses/LICENSE-2.0
+ *      https:www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package com.google.vinet.data;
@@ -82,15 +82,6 @@ public class MatchingAlgorithm {
         // TODO consider the case where volunteer time slot is longer than isolate's
         // we could run the algorithm again with the remaining isolate slots and the chunks of
         // volunteer time slots that were not assigned
-
-        // Remove time slot if any of its instants are null
-        if (volunteerTimeSlot.getStart() == null || volunteerTimeSlot.getEnd() == null) {
-          volunteerTimeSlots.remove(volunteerTimeSlot);
-          continue;
-        } else if (isolateTimeSlot.getStart() == null || isolateTimeSlot.getEnd() == null) {
-          isolateTimeSlots.remove(isolateTimeSlot);
-          continue;
-        }
 
         if (volunteerTimeSlot.contains(isolateTimeSlot)) {
           isolateTimeSlot.addNeighbour(volunteerTimeSlot);
