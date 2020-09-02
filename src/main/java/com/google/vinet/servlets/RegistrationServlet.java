@@ -98,7 +98,7 @@ public class RegistrationServlet extends HttpServlet {
           System.err.printf("Missing parameter %s for registration request!\n", propertyName);
           return;
         }
-        // Get first (and only) value of each parameter
+        // We only need the first value for this parameter. There shouldn't be any more.
         String parameter = parameterArray[0];
         if (parameter == null) {
           System.err.printf("Parameter %s is null!", propertyName);
