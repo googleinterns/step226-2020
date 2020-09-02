@@ -19,11 +19,16 @@ package com.google.vinet.data;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class VolunteerTimeSlot extends TimeSlot implements Datastoreable {
-  private DatastoreService datastoreService;
+  private static DatastoreService datastoreService;
   public static final String VOLUNTEER_TIMESLOT_TABLE_NAME = "volunteer_timeslots";
 
   public VolunteerTimeSlot(Instant start, Instant end, Volunteer volunteer) {
@@ -51,5 +56,19 @@ public class VolunteerTimeSlot extends TimeSlot implements Datastoreable {
     entity.setProperty("end", getEnd().toString());
 
     datastoreService.put(entity);
+  }
+
+  public static List<VolunteerTimeSlot> getTimeslotsByUserId(String userId) {
+    Query query =
+            new Query(VOLUNTEER_TIMESLOT_TABLE_NAME)
+                    .setFilter(new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId));
+
+    if (datastoreService == null) datastoreService = DatastoreServiceFactory.getDatastoreService();
+
+    PreparedQuery results = datastoreService.prepare(query);
+
+    return StreamSupport.stream(results.asIterable().spliterator(), true)
+            .map(VolunteerTimeSlot::new)
+            .collect(Collectors.toList());
   }
 }

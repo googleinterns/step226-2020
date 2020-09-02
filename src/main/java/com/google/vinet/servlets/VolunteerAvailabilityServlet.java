@@ -18,6 +18,7 @@ package com.google.vinet.servlets;
 
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.gson.Gson;
 import com.google.vinet.data.Volunteer;
 import com.google.vinet.data.VolunteerTimeSlot;
 
@@ -79,6 +80,8 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
     final String ISO_FORMAT = "%sT%s:00%s";
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
+    //TODO don't store duplicated, but update them
+
     for (int i = 0; i < dates.length; i++) {
       String date = dates[i];
       String startTime = startTimes[i];
@@ -95,5 +98,46 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
               new VolunteerTimeSlot(startInstant, endInstant, volunteer);
       volunteerTimeSlot.toDatastore();
     }
+  }
+
+  /**
+   * Get all available time slots for logged-in volunteer.
+   */
+  @Override
+  protected void doGet(HttpServletRequest request, HttpServletResponse response)
+          throws IOException {
+    if (response == null) throw new IllegalArgumentException("response must not be null");
+
+    if (request == null) throw new IllegalArgumentException("request must not be null");
+
+    if (!userService.isUserLoggedIn()) {
+      response.sendError(
+              HttpServletResponse.SC_UNAUTHORIZED, "user must be logged in to get availability");
+      return;
+    }
+
+    final boolean registered = RegistrationServlet.isUserRegistered(userService);
+
+    if (!registered) {
+      response.sendError(
+              HttpServletResponse.SC_UNAUTHORIZED, "user must be registered to get availability");
+      return;
+    }
+
+    final boolean isVolunteer = RegistrationServlet.isUserVolunteer(userService);
+
+    if (!isVolunteer) {
+      response.sendError(
+              HttpServletResponse.SC_UNAUTHORIZED,
+              "user must be registered as a volunteer to get availability");
+      return;
+    }
+
+    // Run a query to get all slot stored for logged-in volunteer
+    response.setContentType("application/json;");
+    new Gson()
+            .toJson(
+                    VolunteerTimeSlot.getTimeslotsByUserId(userService.getCurrentUser().getUserId()),
+                    response.getWriter());
   }
 }
