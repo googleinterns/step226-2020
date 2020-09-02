@@ -24,19 +24,33 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 public class IsolateTimeSlot extends TimeSlot implements Datastoreable{
-  protected static String ISOLATE_TIME_SLOT_TABLE_NAME = "IsolateTimeSlot";
+  protected final static String ISOLATE_TIME_SLOT_TABLE_NAME = "IsolateTimeSlot";
 
   protected final Key ticket;
   protected final LocalDate date;
   protected final DatastoreService datastore;
 
+  /**
+   * Construct an IsolateTimeSlot with a dependency on the default implementation of Datastore.
+   * @param start The start of the TimeSlot.
+   * @param end The end of the TimeSlot.
+   * @param isolate The isolate associated with the TimeSlot.
+   * @param date The date on which the TimeSlot is scheduled.
+   * @param ticket The Datastore key of the request ticket for this TimeSlot.
+   */
   public IsolateTimeSlot(Instant start, Instant end, Isolate isolate, LocalDate date, Key ticket) {
-    super(start, end, isolate);
-    this.date = date;
-    this.ticket = ticket;
-    this.datastore = DatastoreServiceFactory.getDatastoreService();
+    this(start, end, isolate, date, ticket, DatastoreServiceFactory.getDatastoreService());
   }
 
+  /**
+   Construct an IsolateTimeSlot with a dependency on the provided implementation of Datastore.
+   * @param start The start of the TimeSlot.
+   * @param end The end of the TimeSlot.
+   * @param isolate The isolate associated with the TimeSlot.
+   * @param date The date on which the TimeSlot is scheduled.
+   * @param ticket The Datastore key of the request ticket for this TimeSlot.
+   * @param datastore The implementation of Datastore to depend on.
+   */
   public IsolateTimeSlot(Instant start, Instant end, Isolate isolate, LocalDate date, Key ticket, DatastoreService datastore) {
     super(start, end, isolate);
     this.date = date;
