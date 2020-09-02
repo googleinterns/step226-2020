@@ -19,10 +19,9 @@ package com.google.vinet.data;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
 import java.time.Instant;
 
-public class IsolateTimeSlot extends TimeSlot implements Datastoreable<IsolateTimeSlot>{
+public class IsolateTimeSlot extends TimeSlot implements Datastoreable{
   protected static String ISOLATE_TIME_SLOT_TABLE_NAME = "IsolateTimeSlot";
 
   protected final String ticketKey;
