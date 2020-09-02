@@ -19,27 +19,29 @@ package com.google.vinet.data;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 import java.time.Instant;
+import java.time.LocalDate;
 
 public class IsolateTimeSlot extends TimeSlot implements Datastoreable{
   protected static String ISOLATE_TIME_SLOT_TABLE_NAME = "IsolateTimeSlot";
 
-  protected final String ticketKey;
+  protected final Key ticket;
+  protected final LocalDate date;
   protected final DatastoreService datastore;
-  protected final String date;
 
-  public IsolateTimeSlot(Instant start, Instant end, Isolate isolate) {
+  public IsolateTimeSlot(Instant start, Instant end, Isolate isolate, LocalDate date, Key ticket) {
     super(start, end, isolate);
-    this.date = "";
-    this.ticketKey = "";
+    this.date = date;
+    this.ticket = ticket;
     this.datastore = DatastoreServiceFactory.getDatastoreService();
   }
 
-  public IsolateTimeSlot(Instant start, Instant end, Isolate isolate, String date, String ticketKey) {
+  public IsolateTimeSlot(Instant start, Instant end, Isolate isolate, LocalDate date, Key ticket, DatastoreService datastore) {
     super(start, end, isolate);
     this.date = date;
-    this.ticketKey = ticketKey;
-    this.datastore = DatastoreServiceFactory.getDatastoreService();
+    this.ticket = ticket;
+    this.datastore = datastore;
   }
 
   public Isolate getIsolate() {
@@ -53,11 +55,12 @@ public class IsolateTimeSlot extends TimeSlot implements Datastoreable{
   public void toDatastore() {
     /* TODO: Check that all instance variables are non-null before posting to Datastore. */
    final  Entity entity = new Entity(ISOLATE_TIME_SLOT_TABLE_NAME);
-    entity.setProperty("ticketKey", ticketKey);
+    entity.setProperty("ticketKey", ticket);
     entity.setProperty("isolateId", this.getIsolate().userId);
-    entity.setProperty("date", date);
+    entity.setProperty("date", date.toString());
     entity.setProperty("startTime", start.toString());
     entity.setProperty("endTime", end.toString());
+
     this.datastore.put(entity);
   }
 }
