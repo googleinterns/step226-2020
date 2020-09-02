@@ -16,15 +16,49 @@
 
 package com.google.vinet.data;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 import java.time.Instant;
 
-public class IsolateTimeSlot extends TimeSlot {
+public class IsolateTimeSlot extends TimeSlot implements Datastoreable<IsolateTimeSlot>{
+  protected static String ISOLATE_TIME_SLOT_TABLE_NAME = "IsolateTimeSlot";
+
+  protected final String ticketKey;
+  protected final DatastoreService datastore;
+  protected final String date;
 
   public IsolateTimeSlot(Instant start, Instant end, Isolate isolate) {
     super(start, end, isolate);
+    this.date = "";
+    this.ticketKey = "";
+    this.datastore = DatastoreServiceFactory.getDatastoreService();
+  }
+
+  public IsolateTimeSlot(Instant start, Instant end, Isolate isolate, String date, String ticketKey) {
+    super(start, end, isolate);
+    this.date = date;
+    this.ticketKey = ticketKey;
+    this.datastore = DatastoreServiceFactory.getDatastoreService();
   }
 
   public Isolate getIsolate() {
     return (Isolate) registeredUser;
+  }
+
+  /**
+   * Put this IsolateTimeSlot into Datstore.
+   */
+  @Override
+  public void toDatastore() {
+    /* TODO: Check that all instance variables are non-null before posting to Datastore. */
+   final  Entity entity = new Entity(ISOLATE_TIME_SLOT_TABLE_NAME);
+    entity.setProperty("ticketKey", ticketKey);
+    entity.setProperty("isolateId", this.getIsolate().userId);
+    entity.setProperty("date", date);
+    entity.setProperty("startTime", start.toString());
+    entity.setProperty("endTime", end.toString());
+    this.datastore.put(entity);
   }
 }
