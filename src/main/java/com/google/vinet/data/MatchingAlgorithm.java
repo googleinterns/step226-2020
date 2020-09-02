@@ -17,6 +17,7 @@
 package com.google.vinet.data;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
@@ -24,11 +25,9 @@ import java.util.stream.Collectors;
 
 public class MatchingAlgorithm {
 
-  /**
-   * Represents a node connected to all isolate time slot nodes
-   */
+  /** Represents a node connected to all isolate time slot nodes */
   public static final IsolateTimeSlot NIL_NODE =
-          new IsolateTimeSlot(Instant.MIN, Instant.MIN, null);
+      new IsolateTimeSlot(Instant.MIN, Instant.MIN, null, LocalDate.MIN, null);
 
   /**
    * An implementation of the Hopcroft-Karp algorithm to match requested help times with volunteer
