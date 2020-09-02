@@ -93,9 +93,8 @@ public class RegistrationServlet extends HttpServlet {
       entity.setProperty("userId", userId);
 
       for (String propertyName : propertyNames) {
-        final String[] parameterArray;
-        if (!parameterMap.containsKey(propertyName)
-                || (parameterArray = parameterMap.get(propertyName)).length < 1) {
+        final String[] parameterArray = parameterMap.get(propertyName);
+        if (parameterArray == null || parameterArray.length < 1) {
           System.err.printf("Missing parameter %s for registration request!\n", propertyName);
           return;
         }
