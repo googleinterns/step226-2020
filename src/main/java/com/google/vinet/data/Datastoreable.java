@@ -22,7 +22,7 @@ import com.google.appengine.api.datastore.Key;
  * Any class that can be stored and loaded from Datastore. The implementing class must also provide
  * a constructor for loading an object from a Datastore entity.
  */
-public interface Datastoreable<E> {
+public interface Datastoreable {
 
   /**
    * Store this class instance to Datastore.
