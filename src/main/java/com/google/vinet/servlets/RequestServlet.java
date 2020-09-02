@@ -165,8 +165,8 @@ public class RequestServlet extends HttpServlet {
     startTime = startTime.trim();
     endTime = endTime.trim();
     timezoneOffset = timezoneOffset.trim();
-    subjects = trimMembers(subjects);
-    details = trimMembers(details);
+    trimMembers(subjects);
+    trimMembers(details);
 
     if (date.equals("")) {
       response.sendError(
@@ -365,6 +365,7 @@ public class RequestServlet extends HttpServlet {
    * Apply the trim() method to all non-null members of a String array,
    * in-place.
    * @param array The array to process.
+   * @return A reference to {@code array}, for chaining.
    */
   private static String[] trimMembers(String[] array) {
     for (int i = 0; i < array.length; i++) {
