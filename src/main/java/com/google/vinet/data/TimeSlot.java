@@ -25,8 +25,8 @@ import java.util.Set;
 
 public abstract class TimeSlot implements Comparable<TimeSlot> {
 
-  private final Instant start;
-  private final Instant end;
+  protected final Instant start;
+  protected final Instant end;
   protected final RegisteredUser registeredUser;
   private final Set<TimeSlot> neighbours = new HashSet<>();
   private TimeSlot pairedSlot = null;
