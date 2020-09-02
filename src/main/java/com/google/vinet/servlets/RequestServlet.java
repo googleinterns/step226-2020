@@ -25,16 +25,17 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
-import com.google.vinet.data.Isolate;
-import com.google.vinet.data.IsolateTimeSlot;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.time.Duration;
+import java.time.DateTimeException;
 import java.time.format.DateTimeParseException;
 import java.util.stream.Stream;
 
@@ -100,7 +101,7 @@ public class RequestServlet extends HttpServlet {
     String duration = request.getParameter("duration");
     String startTime = request.getParameter("startTime");
     String endTime = request.getParameter("endTime");
-    String timezoneOffset = request.getParameter("timezoneOffset");
+    String timezone = request.getParameter("timezone");
     String[] subjects = request.getParameterValues("subject");
     String[] details = request.getParameterValues("details");
 
@@ -136,7 +137,7 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    if (timezoneOffset == null) {
+    if (timezone == null) {
       response.sendError(
           HttpServletResponse.SC_BAD_REQUEST,
           "timezoneOffset must not be null"
@@ -164,7 +165,7 @@ public class RequestServlet extends HttpServlet {
     duration = duration.trim();
     startTime = startTime.trim();
     endTime = endTime.trim();
-    timezoneOffset = timezoneOffset.trim();
+    timezone = timezone.trim();
     trimMembers(subjects);
     trimMembers(details);
 
@@ -200,7 +201,7 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    if (timezoneOffset.equals("")) {
+    if (timezone.equals("")) {
       response.sendError(
           HttpServletResponse.SC_BAD_REQUEST,
           "timezoneOffset must not be empty"
@@ -248,19 +249,44 @@ public class RequestServlet extends HttpServlet {
      * this is not supported.
      * Instead, the startTime and endTime are stored.
      */
-    final String ISO_FORMAT = "%sT%s:00%s";
 
-    startTime = String.format(ISO_FORMAT, date, startTime, timezoneOffset);
-    endTime = String.format(ISO_FORMAT, date, endTime, timezoneOffset);
-
+    final LocalDate day;
     try{
-      DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-      final Isolate isolate = new Isolate(userId);
-      final Instant start = Instant.from(formatter.parse(startTime));
-      final Instant end = Instant.from(formatter.parse(endTime));
-      final IsolateTimeSlot isolateTimeSlot = new IsolateTimeSlot(start, end , isolate);
+      day = LocalDate.parse(date);
     } catch (DateTimeParseException exception) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "error parsing timeslot");
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "error parsing date");
+      return;
+    }
+
+    final ZoneOffset timezoneOffset;
+    try {
+      timezoneOffset = ZoneOffset.of(timezone);
+    } catch (DateTimeException exception) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "error parsing timezone");
+      return;
+    }
+
+    final LocalTime start;
+    try{
+      start = LocalTime.parse(startTime);
+    } catch (DateTimeParseException exception) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "error parsing startTime");
+      return;
+    }
+
+    final LocalTime end;
+    try{
+      end = LocalTime.parse(endTime);
+    } catch (DateTimeParseException exception) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "error parsing endTime");
+      return;
+    }
+
+    final Duration requestDuration;
+    try{
+      requestDuration = Duration.ofMinutes(Long.parseLong(duration));
+    } catch (ArithmeticException | NumberFormatException exception) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "error parsing duration");
       return;
     }
 
@@ -269,8 +295,10 @@ public class RequestServlet extends HttpServlet {
     final Entity ticketEntity = new Entity(TICKET_TABLE_NAME);
     ticketEntity.setProperty("isolateId", userId);
     ticketEntity.setProperty("volunteerId", null);
-    ticketEntity.setProperty("startTime", startTime);
-    ticketEntity.setProperty("endTime", endTime);
+    ticketEntity.setProperty("date", day.toString());
+    ticketEntity.setProperty("duration", requestDuration.toString());
+    ticketEntity.setProperty("startTime", start.toString());
+    ticketEntity.setProperty("endTime", end.toString());
     ticketEntity.setProperty("subjects", gson.toJson(subjects));
     ticketEntity.setProperty("details", gson.toJson(details));
 
