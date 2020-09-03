@@ -65,10 +65,11 @@ function constructNewRow(startTimeValue, endTimeValue) {
     startTime.type = "datetime-local";
     startTime.name = "start-time";
     startTime.valueAsNumber = startTimeValue;
+    startTime.required = true;
 
     const ISOStartTime = document.createElement("input");
     ISOStartTime.name = "ISO-start-time";
-    //ISOStartTime.hidden = true;
+    ISOStartTime.hidden = true;
 
     startTime.addEventListener("change", (e) => fillISOStartTime(e.target));
 
@@ -76,10 +77,11 @@ function constructNewRow(startTimeValue, endTimeValue) {
     endTime.type = "time";
     endTime.name = "end-time";
     endTime.value = endTimeValue;
+    endTime.required = true;
 
     const ISOEndTime = document.createElement("input");
     ISOEndTime.name = "ISO-end-time";
-    //ISOEndTime.hidden = true;
+    ISOEndTime.hidden = true;
 
     endTime.addEventListener("change", (e) => fillISOEndTime(e.target));
 

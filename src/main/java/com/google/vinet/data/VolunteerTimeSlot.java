@@ -59,16 +59,25 @@ public class VolunteerTimeSlot extends TimeSlot implements Datastoreable {
   }
 
   public static List<VolunteerTimeSlot> getTimeslotsByUserId(String userId) {
+    return StreamSupport.stream(queryTimeSlots(userId).asIterable().spliterator(), true)
+            .map(VolunteerTimeSlot::new)
+            .collect(Collectors.toList());
+  }
+
+  private static PreparedQuery queryTimeSlots(String userId) {
     Query query =
             new Query(VOLUNTEER_TIMESLOT_TABLE_NAME)
                     .setFilter(new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId));
 
     if (datastoreService == null) datastoreService = DatastoreServiceFactory.getDatastoreService();
 
-    PreparedQuery results = datastoreService.prepare(query);
+    return datastoreService.prepare(query);
+  }
 
-    return StreamSupport.stream(results.asIterable().spliterator(), true)
-            .map(VolunteerTimeSlot::new)
-            .collect(Collectors.toList());
+  public static void deleteAllTimeSlotsByUserId(String userId) {
+    datastoreService.delete(
+            StreamSupport.stream(queryTimeSlots(userId).asIterable().spliterator(), true)
+                    .map(Entity::getKey)
+                    .collect(Collectors.toList()));
   }
 }
