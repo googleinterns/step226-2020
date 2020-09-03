@@ -26,6 +26,7 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
 
+import com.google.vinet.data.*;
 import java.time.*;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -101,58 +102,22 @@ public class RequestServlet extends HttpServlet {
     String[] subjects = request.getParameterValues("subject");
     String[] details = request.getParameterValues("details");
 
-    if (date == null) {
+    if (date == null
+        || duration == null
+        || startTime == null
+        || endTime == null
+        || timezone == null) {
       response.sendError(
           HttpServletResponse.SC_BAD_REQUEST,
-          "date must not be null"
+          "one or more of the parameters were null"
       );
       return;
     }
 
-    if (duration == null) {
+    if (subjects == null || details == null|| subjects.length == 0 || details.length == 0) {
       response.sendError(
           HttpServletResponse.SC_BAD_REQUEST,
-          "duration must not be null"
-      );
-      return;
-    }
-
-    if (startTime == null) {
-      response.sendError(
-          HttpServletResponse.SC_BAD_REQUEST,
-          "startTime must not be null"
-      );
-      return;
-    }
-
-    if (endTime == null) {
-      response.sendError(
-          HttpServletResponse.SC_BAD_REQUEST,
-          "endTime must not be null"
-      );
-      return;
-    }
-
-    if (timezone == null) {
-      response.sendError(
-          HttpServletResponse.SC_BAD_REQUEST,
-          "timezoneOffset must not be null"
-      );
-      return;
-    }
-
-    if (subjects == null || subjects.length < 1) {
-      response.sendError(
-          HttpServletResponse.SC_BAD_REQUEST,
-          "subjects array must not be null or empty"
-      );
-      return;
-    }
-
-    if (details == null || details.length < 1) {
-      response.sendError(
-          HttpServletResponse.SC_BAD_REQUEST,
-          "details array must not be null or empty"
+          "subjects and details arrays must not be null or empty"
       );
       return;
     }
@@ -165,42 +130,14 @@ public class RequestServlet extends HttpServlet {
     trimMembers(subjects);
     trimMembers(details);
 
-    if (date.equals("")) {
+    if (date.isEmpty()
+        || duration.isEmpty()
+        || startTime.isEmpty()
+        || endTime.isEmpty()
+        || timezone.isEmpty()) {
       response.sendError(
           HttpServletResponse.SC_BAD_REQUEST,
-          "date must not be empty"
-      );
-      return;
-    }
-
-    if (duration.equals("")) {
-      response.sendError(
-          HttpServletResponse.SC_BAD_REQUEST,
-          "duration must not be empty"
-      );
-      return;
-    }
-
-    if (startTime.equals("")) {
-      response.sendError(
-          HttpServletResponse.SC_BAD_REQUEST,
-          "startTime must not be empty"
-      );
-      return;
-    }
-
-    if (endTime.equals("")) {
-      response.sendError(
-          HttpServletResponse.SC_BAD_REQUEST,
-          "endTime must not be empty"
-      );
-      return;
-    }
-
-    if (timezone.equals("")) {
-      response.sendError(
-          HttpServletResponse.SC_BAD_REQUEST,
-          "timezoneOffset must not be empty"
+          "one or more of the parameters were empty"
       );
       return;
     }
@@ -240,72 +177,58 @@ public class RequestServlet extends HttpServlet {
     }
 
     /*
-     * The following is an assurance that the provided startTime and endTime are valid.
-     * The computed Instant's and IsolateTimeSlot will not be stored in Datastore, as
-     * this is not supported.
-     * Instead, the startTime and endTime are stored.
+     * All of the below are java.time representations of the associated parameters.
      */
-
     final ZoneOffset timezoneOffset;
+    final LocalDate localDate;
+    final LocalTime localStartTime;
+    final LocalTime localEndTime;
+    final Duration requestDuration;
+
+    /* If any of the below fail, then the request cannot be accepted, as we cannot determine
+    * when the request is due to take place. */
     try {
       timezoneOffset = ZoneOffset.of(timezone);
-    } catch (DateTimeException exception) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "error parsing timezone");
-      return;
-    }
-
-
-    final LocalDate day;
-    try{
-      day = LocalDate.parse(date);
-    } catch (DateTimeParseException exception) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "error parsing date");
-      return;
-    }
-
-    final LocalTime start;
-    try{
-      start = LocalTime.parse(startTime);
-    } catch (DateTimeParseException exception) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "error parsing startTime");
-      return;
-    }
-
-    final LocalTime end;
-    try{
-      end = LocalTime.parse(endTime);
-    } catch (DateTimeParseException exception) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "error parsing endTime");
-      return;
-    }
-
-    final Duration requestDuration;
-    try{
+      localDate = LocalDate.parse(date);
+      localStartTime = LocalTime.parse(startTime);
+      localEndTime = LocalTime.parse(endTime);
       requestDuration = Duration.ofMinutes(Long.parseLong(duration));
-    } catch (ArithmeticException | NumberFormatException exception) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "error parsing duration");
+    } catch (DateTimeException | ArithmeticException | NumberFormatException exception) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "error parsing date/time");
       return;
     }
 
-    final OffsetDateTime startDateTime = OffsetDateTime.of(day, start, timezoneOffset);
-    final OffsetDateTime endDateTime = OffsetDateTime.of(day, end, timezoneOffset);
+    /* Combine the date, time, and timezones. */
+    final OffsetDateTime startDateTime = OffsetDateTime.of(localDate, localStartTime, timezoneOffset);
+    final OffsetDateTime endDateTime = OffsetDateTime.of(localDate, localEndTime, timezoneOffset);
 
-    final Instant startInstant = startDateTime.toInstant();
-    final Instant endInstant = endDateTime.toInstant();
+    /* Convert the start/end date-times to an Instant to be compatible with the TimeSlot interface. */
+    final Instant start = startDateTime.toInstant();
+    final Instant end = endDateTime.toInstant();
 
     final Gson gson = new Gson();
 
     final Entity ticketEntity = new Entity(TICKET_TABLE_NAME);
     ticketEntity.setProperty("isolateId", userId);
-    ticketEntity.setProperty("volunteerId", null);
-    ticketEntity.setProperty("date", day.toString());
     ticketEntity.setProperty("duration", requestDuration.toString());
-    ticketEntity.setProperty("startTime", startInstant.toString());
-    ticketEntity.setProperty("endTime", endInstant.toString());
     ticketEntity.setProperty("subjects", gson.toJson(subjects));
     ticketEntity.setProperty("details", gson.toJson(details));
 
-    this.datastore.put(ticketEntity);
+    /* Put the ticket into the datastore, then create an IsolateTimeSlot which points to this ticket,
+    * and put that IsolateTimeSlot into the datastore. */
+    try{
+      Key ticketKey = this.datastore.put(ticketEntity);
+
+      final Isolate isolate = new Isolate(userId);
+
+      /* Create an IsolateTimeSlot to represent this request, post it to DataStore. */
+      final IsolateTimeSlot timeSlot = new IsolateTimeSlot(start, end, isolate, localDate, ticketKey);
+      timeSlot.toDatastore();
+    } catch (DatastoreFailureException exception) {
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+
+
   }
 
   @Override
