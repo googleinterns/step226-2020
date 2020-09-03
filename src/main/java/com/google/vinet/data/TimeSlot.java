@@ -33,6 +33,7 @@ public abstract class TimeSlot implements Comparable<TimeSlot> {
 
   protected TimeSlot(Instant start, Instant end, RegisteredUser registeredUser) {
     if (start == null || end == null) throw new NullPointerException();
+    System.out.println("Start: " + start.toString() + " end: " + end.toString());
     if (start.isAfter(end)) throw new IllegalArgumentException();
     this.start = start;
     this.end = end;
