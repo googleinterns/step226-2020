@@ -20,9 +20,6 @@ function initialise() {
 
 function populateRows() {
     getExistingTimeSlots().then(rows => {
-        const sorted = [...rows].sort((a, b) => (new Date(a.children["ISO-start-time"].value)).getTime() >
-        (new Date(b.children["ISO-start-time"].value)).getTime() ? 1 : -1);
-        console.log("ROWS", rows, sorted);
         rows.forEach(row => addRow(row))
     });
 
@@ -30,14 +27,13 @@ function populateRows() {
 
     //TODO validate fields so they're not empty, and start time is before end time
 }
-
+//TODO to fix: weird bug where re-fetching slots, the start loses 1 hour???
 async function getExistingTimeSlots() {
     const slots = await (await fetch('/volunteer-availability')).json();
     const rows = slots.map(slot => slotToRow(slot));
-    return rows;
     // Sort timeslots by start time
-    //return [...rows].sort((a, b) => (new Date(a.children["ISO-start-time"].value)).getTime() >
-    //(new Date(b.children["ISO-start-time"].value)).getTime() ? 1 : -1);
+    return [...rows].sort((a, b) => (new Date(a.children["ISO-start-time"].value)).getTime() >
+    (new Date(b.children["ISO-start-time"].value)).getTime() ? 1 : -1);
 }
 
 function slotToRow(slot) {
@@ -57,6 +53,7 @@ function fillISOStartTime(inputElement) {
     if (inputElement.value == null || inputElement.value === "") return;
     inputElement.parentNode.children["ISO-start-time"].value = new Date(inputElement.value).toISOString();
     //TODO also update end time accordingly to date change
+    //TODO resort this slot in list after changing?
 }
 
 function fillISOEndTime(inputElement) {
