@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @WebServlet("/volunteer-availability")
@@ -67,37 +66,31 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
     }
 
     // TODO check if it's a valid userId
-    Volunteer volunteer = new Volunteer(userService.getCurrentUser().getUserId());
+    final String userId = userService.getCurrentUser().getUserId();
+    final Volunteer volunteer = new Volunteer(userId);
 
     // TODO check if any of the parameters are null / not present
-    Map<String, String[]> parameterMap = request.getParameterMap();
-    String timezoneOffset = parameterMap.get("timezoneOffset")[0];
-    timezoneOffset = timezoneOffset.replaceFirst("(.{3})", "$1:"); // insert a colon to get ISO time
-    final String[] dates = parameterMap.get("date");
-    final String[] startTimes = parameterMap.get("start-time");
-    final String[] endTimes = parameterMap.get("end-time");
+    final Map<String, String[]> parameterMap = request.getParameterMap();
+    final String[] startTimes = parameterMap.get("ISO-start-time");
+    final String[] endTimes = parameterMap.get("ISO-end-time");
 
-    final String ISO_FORMAT = "%sT%s:00%s";
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+    // Delete existing timeslots before storing new list of them.
+    VolunteerTimeSlot.deleteAllTimeSlotsByUserId(userId);
 
-    //TODO don't store duplicated, but update them
-
-    for (int i = 0; i < dates.length; i++) {
-      String date = dates[i];
+    for (int i = 0; i < startTimes.length; i++) {
       String startTime = startTimes[i];
       String endTime = endTimes[i];
 
-      Instant startInstant =
-              Instant.from(
-                      dateTimeFormatter.parse(String.format(ISO_FORMAT, date, startTime, timezoneOffset)));
-      Instant endInstant =
-              Instant.from(
-                      dateTimeFormatter.parse(String.format(ISO_FORMAT, date, endTime, timezoneOffset)));
+      Instant startInstant = Instant.parse(startTime);
+      Instant endInstant = Instant.parse(endTime);
 
-      VolunteerTimeSlot volunteerTimeSlot =
-              new VolunteerTimeSlot(startInstant, endInstant, volunteer);
-      volunteerTimeSlot.toDatastore();
+      try {
+        new VolunteerTimeSlot(startInstant, endInstant, volunteer).toDatastore();
+      } catch (IllegalArgumentException | NullPointerException e) {
+        System.err.println("Error saving volunteer timeslot!");
+      }
     }
+    response.sendRedirect("volunteer/availability.html");
   }
 
   /**
