@@ -15,33 +15,15 @@
  */
 
 function initialise() {
-    updateTimezoneOffset();
     populateRows();
 }
 
 function populateRows() {
-    //TODO fetch existing timeslots for this volunteer from backend
     getExistingTimeSlots().then(rows => rows.forEach(row => addRow(row)));
-
-    // add an empty row at bottom of form
-    addEmptyRow();
 
     //TODO add delete button to each row
 
     //TODO validate fields so they're not empty, and start time is before end time
-}
-
-function parseForm() {
-    const form = document.getElementById("availability-form");
-    const divs = form.getElementsByTagName("div");
-    for (let div of divs) {
-        const children = div.children;
-        children["start-time"].value = children["start-time"].valueAsDate.toISOString();
-        children["end-time"].value = children["end-time"].valueAsDate.toISOString();
-    }
-    console.log("Form contents", divs);
-    // divs[1].children["date"].value
-    return false; // prevent form submission
 }
 
 async function getExistingTimeSlots() {
@@ -53,34 +35,42 @@ function slotToRow(slot) {
     //parse start.seconds and end.seconds, getting the date and the day in the local timezone
     const startTime = new Date(slot.start.seconds * 1000);
     const endTime = new Date(slot.end.seconds * 1000);
-    //const date = startTime.getFullYear() + "-" + startTime.getMonth() + "-" + startTime.getDate();
-    const date = startTime.toISOString().replace(/[A-Za-z]+.*/, "");
-    const start = startTime.getHours() + ":" + startTime.getMinutes();
+
     const end = endTime.getHours() + ":" + endTime.getMinutes();
-    return constructNewRow(date, start, end);
+
+    return constructNewRow(startTime.getTime(), end);
 }
 
-function updateTimezoneOffset() {
-    document.getElementById('timezoneOffset').value =
-        new Date().toTimeString().split(' ')[1].replace('GMT', '');
+function fillISOStartTime(inputElement) {
+    if (inputElement.value == null || inputElement.value === "") return;
+    inputElement.parentNode.children["ISO-start-time"].value = new Date(inputElement.value).toISOString();
 }
 
-function constructNewRow(dateValue, startTimeValue, endTimeValue) {
+function fillISOEndTime(inputElement) {
+    const children = inputElement.parentNode.children;
+    const endTimeDate = inputElement.valueAsDate;
+    const startTimeDate = new Date(children["ISO-start-time"].value);
+
+    if (endTimeDate == null || startTimeDate == null) return;
+
+    startTimeDate.setHours(endTimeDate.getHours())
+    startTimeDate.setMinutes(endTimeDate.getMinutes())
+    children["ISO-end-time"].value = startTimeDate.toISOString();
+}
+
+function constructNewRow(startTimeValue, endTimeValue) {
     const newRow = document.createElement("div");
 
     const startTime = document.createElement("input");
     startTime.type = "datetime-local";
     startTime.name = "start-time";
-    startTime.value = startTimeValue;
+    startTime.valueAsNumber = startTimeValue;
 
     const ISOStartTime = document.createElement("input");
     ISOStartTime.name = "ISO-start-time";
     //ISOStartTime.hidden = true;
 
-    startTime.addEventListener("change", (e) => {
-        const inputElement = e.target;
-        inputElement.parentNode.children["ISO-start-time"].value = new Date(inputElement.value).toISOString();
-    });
+    startTime.addEventListener("change", (e) => fillISOStartTime(e.target));
 
     const endTime = document.createElement("input");
     endTime.type = "time";
@@ -91,22 +81,15 @@ function constructNewRow(dateValue, startTimeValue, endTimeValue) {
     ISOEndTime.name = "ISO-end-time";
     //ISOEndTime.hidden = true;
 
-    endTime.addEventListener("change", (e) => {
-        const inputElement = e.target;
-        const children = inputElement.parentNode.children;
-        const endTimeDate = inputElement.valueAsDate;
-        const startTimeDate = new Date(children["ISO-start-time"].value);
-
-        startTimeDate.setHours(endTimeDate.getHours())
-        startTimeDate.setMinutes(endTimeDate.getMinutes())
-        children["ISO-end-time"].value = startTimeDate.toISOString();
-    });
+    endTime.addEventListener("change", (e) => fillISOEndTime(e.target));
 
     newRow.appendChild(startTime);
     newRow.appendChild(endTime);
     newRow.appendChild(ISOStartTime);
     newRow.appendChild(ISOEndTime);
 
+    fillISOStartTime(startTime); // initialise with a value for submission
+    fillISOEndTime(endTime); // initialise with a value for submission
     return newRow;
 }
 
