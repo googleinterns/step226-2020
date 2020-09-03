@@ -19,7 +19,12 @@ function initialise() {
 }
 
 function populateRows() {
-    getExistingTimeSlots().then(rows => rows.forEach(row => addRow(row)));
+    getExistingTimeSlots().then(rows => {
+        const sorted = [...rows].sort((a, b) => (new Date(a.children["ISO-start-time"].value)).getTime() >
+        (new Date(b.children["ISO-start-time"].value)).getTime() ? 1 : -1);
+        console.log("ROWS", rows, sorted);
+        rows.forEach(row => addRow(row))
+    });
 
     //TODO add delete button to each row
 
@@ -28,7 +33,11 @@ function populateRows() {
 
 async function getExistingTimeSlots() {
     const slots = await (await fetch('/volunteer-availability')).json();
-    return slots.map(slot => slotToRow(slot));
+    const rows = slots.map(slot => slotToRow(slot));
+    return rows;
+    // Sort timeslots by start time
+    //return [...rows].sort((a, b) => (new Date(a.children["ISO-start-time"].value)).getTime() >
+    //(new Date(b.children["ISO-start-time"].value)).getTime() ? 1 : -1);
 }
 
 function slotToRow(slot) {
@@ -36,7 +45,10 @@ function slotToRow(slot) {
     const startTime = new Date(slot.start.seconds * 1000);
     const endTime = new Date(slot.end.seconds * 1000);
 
-    const end = endTime.getHours() + ":" + endTime.getMinutes();
+    // Get local time in HH:MM format
+    const hours = String(endTime.getHours()).padStart(2, "0");
+    const minutes = String(endTime.getMinutes()).padStart(2, "0");
+    const end = hours + ":" + minutes;
 
     return constructNewRow(startTime.getTime(), end);
 }
@@ -44,18 +56,22 @@ function slotToRow(slot) {
 function fillISOStartTime(inputElement) {
     if (inputElement.value == null || inputElement.value === "") return;
     inputElement.parentNode.children["ISO-start-time"].value = new Date(inputElement.value).toISOString();
+    //TODO also update end time accordingly to date change
 }
 
 function fillISOEndTime(inputElement) {
     const children = inputElement.parentNode.children;
-    const endTimeDate = inputElement.valueAsDate;
-    const startTimeDate = new Date(children["ISO-start-time"].value);
+    const endValue = inputElement.value;
+    // Get the date from the start datetime object
+    const date = new Date(children["ISO-start-time"].value);
 
-    if (endTimeDate == null || startTimeDate == null) return;
+    if (endValue == null || !endValue || date == null) return;
 
-    startTimeDate.setHours(endTimeDate.getHours())
-    startTimeDate.setMinutes(endTimeDate.getMinutes())
-    children["ISO-end-time"].value = startTimeDate.toISOString();
+    const timeParts = endValue.split(':');
+
+    date.setHours(timeParts[0]);
+    date.setMinutes(timeParts[1]);
+    children["ISO-end-time"].value = date.toISOString();
 }
 
 function constructNewRow(startTimeValue, endTimeValue) {
