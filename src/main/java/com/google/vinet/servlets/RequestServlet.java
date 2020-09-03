@@ -26,16 +26,12 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
 
+import java.time.*;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
-import java.time.Duration;
-import java.time.DateTimeException;
 import java.time.format.DateTimeParseException;
 import java.util.stream.Stream;
 
@@ -250,19 +246,20 @@ public class RequestServlet extends HttpServlet {
      * Instead, the startTime and endTime are stored.
      */
 
-    final LocalDate day;
-    try{
-      day = LocalDate.parse(date);
-    } catch (DateTimeParseException exception) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "error parsing date");
-      return;
-    }
-
     final ZoneOffset timezoneOffset;
     try {
       timezoneOffset = ZoneOffset.of(timezone);
     } catch (DateTimeException exception) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST, "error parsing timezone");
+      return;
+    }
+
+
+    final LocalDate day;
+    try{
+      day = LocalDate.parse(date);
+    } catch (DateTimeParseException exception) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "error parsing date");
       return;
     }
 
@@ -290,6 +287,12 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
+    final OffsetDateTime startDateTime = OffsetDateTime.of(day, start, timezoneOffset);
+    final OffsetDateTime endDateTime = OffsetDateTime.of(day, end, timezoneOffset);
+
+    final Instant startInstant = startDateTime.toInstant();
+    final Instant endInstant = endDateTime.toInstant();
+
     final Gson gson = new Gson();
 
     final Entity ticketEntity = new Entity(TICKET_TABLE_NAME);
@@ -297,8 +300,8 @@ public class RequestServlet extends HttpServlet {
     ticketEntity.setProperty("volunteerId", null);
     ticketEntity.setProperty("date", day.toString());
     ticketEntity.setProperty("duration", requestDuration.toString());
-    ticketEntity.setProperty("startTime", start.toString());
-    ticketEntity.setProperty("endTime", end.toString());
+    ticketEntity.setProperty("startTime", startInstant.toString());
+    ticketEntity.setProperty("endTime", endInstant.toString());
     ticketEntity.setProperty("subjects", gson.toJson(subjects));
     ticketEntity.setProperty("details", gson.toJson(details));
 
