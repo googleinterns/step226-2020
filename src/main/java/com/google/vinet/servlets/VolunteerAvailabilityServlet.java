@@ -88,6 +88,7 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
         new VolunteerTimeSlot(startInstant, endInstant, volunteer).toDatastore();
       } catch (IllegalArgumentException | NullPointerException e) {
         System.err.println("Error saving volunteer timeslot!");
+        e.printStackTrace();
       }
     }
     response.sendRedirect("volunteer/availability.html");
