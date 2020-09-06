@@ -33,7 +33,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.format.DateTimeParseException;
 import java.util.stream.Stream;
 
 @WebServlet("/request")
@@ -179,7 +178,7 @@ public class RequestServlet extends HttpServlet {
     /*
      * All of the below are java.time representations of the associated parameters.
      */
-    final ZoneOffset timezoneOffset;
+    final ZoneId timezoneId;
     final LocalDate localDate;
     final LocalTime localStartTime;
     final LocalTime localEndTime;
@@ -188,7 +187,7 @@ public class RequestServlet extends HttpServlet {
     /* If any of the below fail, then the request cannot be accepted, as we cannot determine
     * when the request is due to take place. */
     try {
-      timezoneOffset = ZoneOffset.of(timezone);
+      timezoneId = ZoneId.of(timezone);
       localDate = LocalDate.parse(date);
       localStartTime = LocalTime.parse(startTime);
       localEndTime = LocalTime.parse(endTime);
@@ -199,12 +198,12 @@ public class RequestServlet extends HttpServlet {
     }
 
     /* Combine the date, time, and timezones. */
-    final OffsetDateTime startDateTime = OffsetDateTime.of(localDate, localStartTime, timezoneOffset);
-    final OffsetDateTime endDateTime = OffsetDateTime.of(localDate, localEndTime, timezoneOffset);
+    final ZonedDateTime zonedStartDateTime = ZonedDateTime.of(localDate, localStartTime, timezoneId);
+    final ZonedDateTime zonedEndDateTime = ZonedDateTime.of(localDate, localEndTime, timezoneId);
 
     /* Convert the start/end date-times to an Instant to be compatible with the TimeSlot interface. */
-    final Instant start = startDateTime.toInstant();
-    final Instant end = endDateTime.toInstant();
+    final Instant start = zonedStartDateTime.toInstant();
+    final Instant end = zonedEndDateTime.toInstant();
 
     final Gson gson = new Gson();
 
