@@ -31,7 +31,6 @@ public class MatchingRunner {
   private Set<IsolateTimeSlot> isolateTimeSlots;
   private Set<VolunteerTimeSlot> volunteerTimeSlots;
   private LocalDate date;
-  private Set<IsolateTimeSlot> matches;
 
   protected MatchingRunner() {
     this.datastore = DatastoreServiceFactory.getDatastoreService();
@@ -48,7 +47,7 @@ public class MatchingRunner {
     if (this.isolateTimeSlots == null) this.isolateTimeSlots = this.getIsolateTimeSlots();
     if (this.volunteerTimeSlots == null) this.volunteerTimeSlots = this.getVolunteerTimeSlots();
 
-    matches = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+    final Set<IsolateTimeSlot> matches = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
 
     for (IsolateTimeSlot matching : matches) {
       Entity matchingEntity = new Entity("Matching");
