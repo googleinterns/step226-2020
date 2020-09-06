@@ -32,8 +32,8 @@ public class MatchingRunner {
   private Set<VolunteerTimeSlot> volunteerTimeSlots;
   private LocalDate date;
 
-  protected MatchingRunner() {
-    this.datastore = DatastoreServiceFactory.getDatastoreService();
+  public MatchingRunner() {
+
   }
 
   protected MatchingRunner(DatastoreService datastore) {
@@ -103,5 +103,15 @@ public class MatchingRunner {
   @SuppressWarnings("unchecked")
   public static Set<IsolateTimeSlot> getIsolateTimeSlots(LocalDate date, DatastoreService datastore) {
     return (Set<IsolateTimeSlot>) getTimeSlots("IsolateTimeSlot", date, datastore);
+  }
+
+  public void setIsolateTimeSlots(Set<IsolateTimeSlot> isolateTimeSlots) {
+    assert(isolateTimeSlots != null);
+    this.isolateTimeSlots = isolateTimeSlots;
+  }
+
+  public void setVolunteerTimeSlots(Set<VolunteerTimeSlot> volunteerTimeSlots) {
+    assert(volunteerTimeSlots != null);
+    this.volunteerTimeSlots = volunteerTimeSlots;
   }
 }
