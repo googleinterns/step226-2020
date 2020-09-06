@@ -73,7 +73,7 @@ window.invertTimeInputVisibility = () => {
 };
 
 window.onload = () => {
-  const timezone = new Date().toTimeString().split(' ')[1].replace('GMT', ''); 
-  const timezoneOffsetElement = document.getElementById('timezoneOffset');
-  timezoneOffsetElement.value = timezone;
+  const timezoneId = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const timezoneIdElement = document.getElementById('timezoneId');
+  timezoneIdElement.value = timezoneId;
 };

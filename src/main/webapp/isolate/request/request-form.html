@@ -43,6 +43,7 @@
   </div>
   <div class="form-group">
     <label for="duration">Estimated Fulfillment Duration</label>
+    <small class="form-text text-muted">How long would it take to fulfill this request? (Excluding travel time)</small>
     <select name="duration" id="duration" class="form-control w-auto">
       <option value="15">15 Minutes</option>
       <option value="30">30 Minutes</option>
@@ -52,10 +53,6 @@
       <option value="90">1 hour 30 minutes</option>
       <option value="105">1 hour 45 minutes</option>
       <option value="120">2 hours</option>
-      <option value="135">2 hours 15 minutes</option>
-      <option value="150">2 hours 30 minutes</option>
-      <option value="165">2 hours 45 minutes</option>
-      <option value="180">3 hours</option>
     </select>
   </div>
   <div class="form-group">
@@ -70,7 +67,7 @@
   <!-- TODO: Clean up and document how timezone capturing works. -->
   <input
       type="text"
-      name="timezoneOffset"
-      id="timezoneOffset"
+      name="timezoneId"
+      id="timezoneId"
       hidden>
 </form>
