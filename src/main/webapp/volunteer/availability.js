@@ -27,8 +27,6 @@ function initialise() {
 function populateRows() {
     getExistingTimeSlots().then(rows => rows.forEach(row => addRow(row)));
 
-    //TODO add delete button to each row
-
     //TODO validate fields so they're not empty, and start time is before end time
 }
 
@@ -110,19 +108,36 @@ function fillISOEndTime(inputElement) {
 async function constructNewRow(startTimeValue, endTimeValue) {
     const newRow = document.createElement("div");
 
-    const [startElement, ISOStartElement, endElement, ISOEndElement] =
+    const [startElement, ISOStartElement, endElement, ISOEndElement, deleteButton] =
         await Promise.all([getStartElement(startTimeValue), getISOStartElement(),
-            getEndTime(endTimeValue), getISOEndElement()]);
+            getEndTime(endTimeValue), getISOEndElement(), getDeleteButton()]);
 
     newRow.appendChild(startElement);
     newRow.appendChild(ISOStartElement);
     newRow.appendChild(endElement);
     newRow.appendChild(ISOEndElement);
+    newRow.appendChild(deleteButton);
 
     fillISOStartTime(startElement);
     fillISOEndTime(endElement);
 
     return newRow;
+}
+
+/**
+ * Creates a delete button for the specified row.
+ * @returns {Promise<HTMLButtonElement>} The delete button element.
+ */
+async function getDeleteButton() {
+    const button = document.createElement("button");
+    button.innerHTML = "Delete";
+
+    button.addEventListener("click", (event) => {
+        const parent = event.target.parentNode;
+        parent.parentNode.removeChild(parent);
+    });
+
+    return button;
 }
 
 /**
