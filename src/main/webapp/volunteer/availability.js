@@ -39,9 +39,16 @@ function populateRows() {
 async function getExistingTimeSlots() {
     const slots = await (await fetch('/volunteer-availability')).json();
     const rows = await Promise.all(slots.map(slot => slotToRow(slot)));
+    await sortTimeSlots(rows);
+    return rows;
+}
 
-    // Sort timeslots by start time
-    return [...rows].sort((a, b) => (new Date(a.children["ISO-start-time"].value)).getTime() >
+/**
+ * Sorts the rows of timeslots by start date & time.
+ * @param rows The array of rows to sort.
+ */
+async function sortTimeSlots(rows) {
+    rows.sort((a, b) => (new Date(a.children["ISO-start-time"].value)).getTime() >
     (new Date(b.children["ISO-start-time"].value)).getTime() ? 1 : -1);
 }
 
@@ -185,6 +192,6 @@ function addRow(row) {
 /**
  * Insert an empty row in the submission form.
  */
-function addEmptyRow() {
-    addRow(constructNewRow());
+async function addEmptyRow() {
+    addRow(await constructNewRow());
 }
