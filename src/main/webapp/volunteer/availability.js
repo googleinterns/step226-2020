@@ -38,7 +38,7 @@ function populateRows() {
  */
 async function getExistingTimeSlots() {
     const slots = await (await fetch('/volunteer-availability')).json();
-    const rows = slots.map(slot => slotToRow(slot));
+    const rows = await Promise.all(slots.map(slot => slotToRow(slot)));
 
     // Sort timeslots by start time
     return [...rows].sort((a, b) => (new Date(a.children["ISO-start-time"].value)).getTime() >
@@ -46,11 +46,11 @@ async function getExistingTimeSlots() {
 }
 
 /**
- * Convert slot element to row div for insertion intro form.
+ * Convert slot element to row div for insertion into form.
  * @param slot The slot element to convert.
- * @returns {HTMLDivElement} The row containing the slot data.
+ * @returns {Promise<HTMLDivElement>} The row containing the slot data.
  */
-function slotToRow(slot) {
+async function slotToRow(slot) {
     // Get start and end instant and display as local timezone.
     const startTime = new Date(slot.start.seconds * 1000);
     const endTime = new Date(slot.end.seconds * 1000);
@@ -87,55 +87,91 @@ function fillISOEndTime(inputElement) {
 
     if (endValue == null || !endValue || date == null) return;
 
-    const timeParts = endValue.split(':');
+    const [first, second] = endValue.split(':');
 
-    date.setHours(timeParts[0]);
-    date.setMinutes(timeParts[1]);
+    date.setHours(Number(first));
+    date.setMinutes(Number(second));
     children["ISO-end-time"].value = date.toISOString();
 }
 
 /**
  * Creates a new row element with the timeslots details.
- * @param {String} startTimeValue The value for datetime-local start date and time.
- * @param {String} endTimeValue The value for local end time.
- * @returns {HTMLDivElement} The div containing the row.
+ * @param {Number} startTimeValue The initial value for datetime-local start date and time, as UNIX timestamp.
+ * @param {String} endTimeValue The initial value for local end time, as HH:MM.
+ * @returns {Promise<HTMLDivElement>} The div containing the row.
  */
-function constructNewRow(startTimeValue, endTimeValue) {
+async function constructNewRow(startTimeValue, endTimeValue) {
     const newRow = document.createElement("div");
 
+    const [startElement, ISOStartElement, endElement, ISOEndElement] =
+        await Promise.all([getStartElement(startTimeValue), getISOStartElement(),
+            getEndTime(endTimeValue), getISOEndElement()]);
+
+    newRow.appendChild(startElement);
+    newRow.appendChild(ISOStartElement);
+    newRow.appendChild(endElement);
+    newRow.appendChild(ISOEndElement);
+
+    fillISOStartTime(startElement);
+    fillISOEndTime(endElement);
+
+    return newRow;
+}
+
+/**
+ * Construct the start datetime-local element in a timeslot row.
+ * @param {Number} startTimeValue The value for datetime-local start date and time.
+ * @returns {Promise<HTMLInputElement>} The start datetime-local element.
+ */
+async function getStartElement(startTimeValue) {
     const startTime = document.createElement("input");
     startTime.type = "datetime-local";
     startTime.name = "start-time";
     startTime.valueAsNumber = startTimeValue;
     startTime.required = true;
 
+    startTime.addEventListener("change", (e) => fillISOStartTime(e.target));
+
+    return startTime;
+}
+
+/**
+ * Creates a hidden ISO start instant element.
+ * @returns {Promise<HTMLInputElement>} The hidden text-input element.
+ */
+async function getISOStartElement() {
     const ISOStartTime = document.createElement("input");
     ISOStartTime.name = "ISO-start-time";
     ISOStartTime.hidden = true;
+    return ISOStartTime;
+}
 
-    startTime.addEventListener("change", (e) => fillISOStartTime(e.target));
-
+/**
+ * Creates a local time input element for the end time.
+ * @param {String} endTimeValue The initial local time input, as HH:MM.
+ * @returns {Promise<HTMLInputElement>} The local time input element.
+ */
+async function getEndTime(endTimeValue) {
     const endTime = document.createElement("input");
     endTime.type = "time";
     endTime.name = "end-time";
     endTime.value = endTimeValue;
     endTime.required = true;
 
+    endTime.addEventListener("change", (e) => fillISOEndTime(e.target));
+
+    return endTime;
+}
+
+/**
+ * Creates a hidden ISO end instant element.
+ * @returns {Promise<HTMLInputElement>} The hidden text-input element.
+ */
+async function getISOEndElement() {
     const ISOEndTime = document.createElement("input");
     ISOEndTime.name = "ISO-end-time";
     ISOEndTime.hidden = true;
-
-    endTime.addEventListener("change", (e) => fillISOEndTime(e.target));
-
-    newRow.appendChild(startTime);
-    newRow.appendChild(endTime);
-    newRow.appendChild(ISOStartTime);
-    newRow.appendChild(ISOEndTime);
-
-    // Initialise with fetches values, if any
-    fillISOStartTime(startTime);
-    fillISOEndTime(endTime);
-    return newRow;
+    return ISOEndTime;
 }
 
 /**
