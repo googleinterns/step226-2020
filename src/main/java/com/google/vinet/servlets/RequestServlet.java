@@ -97,7 +97,7 @@ public class RequestServlet extends HttpServlet {
     String duration = request.getParameter("duration");
     String startTime = request.getParameter("startTime");
     String endTime = request.getParameter("endTime");
-    String timezone = request.getParameter("timezone");
+    String timezone = request.getParameter("timezoneId");
     String[] subjects = request.getParameterValues("subject");
     String[] details = request.getParameterValues("details");
 
@@ -105,18 +105,12 @@ public class RequestServlet extends HttpServlet {
         || duration == null
         || startTime == null
         || endTime == null
-        || timezone == null) {
+        || timezone == null
+        || subjects == null
+        || details == null) {
       response.sendError(
           HttpServletResponse.SC_BAD_REQUEST,
           "one or more of the parameters were null"
-      );
-      return;
-    }
-
-    if (subjects == null || details == null|| subjects.length == 0 || details.length == 0) {
-      response.sendError(
-          HttpServletResponse.SC_BAD_REQUEST,
-          "subjects and details arrays must not be null or empty"
       );
       return;
     }
@@ -133,7 +127,9 @@ public class RequestServlet extends HttpServlet {
         || duration.isEmpty()
         || startTime.isEmpty()
         || endTime.isEmpty()
-        || timezone.isEmpty()) {
+        || timezone.isEmpty()
+        || subjects.length == 0
+        || details.length == 0) {
       response.sendError(
           HttpServletResponse.SC_BAD_REQUEST,
           "one or more of the parameters were empty"
@@ -185,7 +181,7 @@ public class RequestServlet extends HttpServlet {
     final Duration requestDuration;
 
     /* If any of the below fail, then the request cannot be accepted, as we cannot determine
-    * when the request is due to take place. */
+     * when the request is due to take place. */
     try {
       timezoneId = ZoneId.of(timezone);
       localDate = LocalDate.parse(date);
@@ -214,7 +210,7 @@ public class RequestServlet extends HttpServlet {
     ticketEntity.setProperty("details", gson.toJson(details));
 
     /* Put the ticket into the datastore, then create an IsolateTimeSlot which points to this ticket,
-    * and put that IsolateTimeSlot into the datastore. */
+     * and put that IsolateTimeSlot into the datastore. */
     try{
       final Key ticketKey = this.datastore.put(ticketEntity);
 
@@ -255,7 +251,7 @@ public class RequestServlet extends HttpServlet {
       );
       return;
     }
-    
+
     String keyString = request.getParameter("key");
 
     if (keyString == null) {
