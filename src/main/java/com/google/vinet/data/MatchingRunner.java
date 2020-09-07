@@ -24,7 +24,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.Collections;
 
 public class MatchingRunner {
   private DatastoreService datastore;
@@ -47,7 +46,18 @@ public class MatchingRunner {
     if (this.isolateTimeSlots == null) this.isolateTimeSlots = this.getIsolateTimeSlots();
     if (this.volunteerTimeSlots == null) this.volunteerTimeSlots = this.getVolunteerTimeSlots();
 
+    System.out.println("========ISOLATES========");
+    System.out.println(this.isolateTimeSlots);
+    System.out.println("========ISOLATES========");
+    System.out.println("========VOLUNTEERS========");
+    System.out.println(this.volunteerTimeSlots);
+    System.out.println("========VOLUNTEERS========");
+
     final Set<IsolateTimeSlot> matches = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
+
+    System.out.println("========MATCHES========");
+    System.out.println(matches);
+    System.out.println("========MATCHES========");
 
     for (IsolateTimeSlot matching : matches) {
       Entity matchingEntity = new Entity("Matching");
@@ -69,7 +79,7 @@ public class MatchingRunner {
     return getVolunteerTimeSlots(this.date, this.datastore);
   }
 
-  public static Set<? extends TimeSlot> getTimeSlots(String entityName, LocalDate date, DatastoreService datastore) {
+  public static PreparedQuery getTimeSlotsQuery(String entityName, LocalDate date, DatastoreService datastore) {
     final Query query = new Query(entityName);
 
     final Filter dateFilter = new FilterPredicate("date", FilterOperator.EQUAL, date.toString());
@@ -77,6 +87,12 @@ public class MatchingRunner {
     query.setFilter(dateFilter);
 
     final PreparedQuery preparedQuery = datastore.prepare(query);
+
+    return preparedQuery;
+  }
+
+  public static Set<IsolateTimeSlot> getIsolateTimeSlots(LocalDate date, DatastoreService datastore) {
+    PreparedQuery preparedQuery =  getTimeSlotsQuery("IsolateTimeSlot", date, datastore);
 
     final FetchOptions fetchOptions = FetchOptions.Builder.withDefaults();
 
@@ -92,17 +108,25 @@ public class MatchingRunner {
       timeSlots.add(isolateTimeSlot);
     }
 
-    return Collections.unmodifiableSet(timeSlots);
+    return timeSlots;
   }
 
-  @SuppressWarnings("unchecked")
   public static Set<VolunteerTimeSlot> getVolunteerTimeSlots(LocalDate date, DatastoreService datastore) {
-    return (Set<VolunteerTimeSlot>) getTimeSlots("VolunteerTimeSlot", date, datastore);
-  }
+    final PreparedQuery preparedQuery = getTimeSlotsQuery("volunteer_timeslots", date, datastore);
 
-  @SuppressWarnings("unchecked")
-  public static Set<IsolateTimeSlot> getIsolateTimeSlots(LocalDate date, DatastoreService datastore) {
-    return (Set<IsolateTimeSlot>) getTimeSlots("IsolateTimeSlot", date, datastore);
+    final FetchOptions fetchOptions = FetchOptions.Builder.withDefaults();
+
+    final Set<VolunteerTimeSlot> timeSlots = new HashSet<>();
+
+    for (Entity entity : preparedQuery.asIterable(fetchOptions)) {
+      final Volunteer volunteer = new Volunteer((String) entity.getProperty("userId"));
+      final Instant start = Instant.parse((String) entity.getProperty("startTime"));
+      final Instant end = Instant.parse((String) entity.getProperty("endTime"));
+      final VolunteerTimeSlot volunteerTimeSlot = new VolunteerTimeSlot(start, end, volunteer);
+      timeSlots.add(volunteerTimeSlot);
+    }
+
+    return timeSlots;
   }
 
   public void setIsolateTimeSlots(Set<IsolateTimeSlot> isolateTimeSlots) {
