@@ -16,10 +16,7 @@
 
 package com.google.vinet.data;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.*;
 import java.time.Instant;
 import java.time.LocalDate;
 
@@ -68,8 +65,8 @@ public class IsolateTimeSlot extends TimeSlot implements Datastoreable{
   @Override
   public void toDatastore() {
     /* TODO: Check that all instance variables are non-null before posting to Datastore. */
-   final  Entity entity = new Entity(ISOLATE_TIME_SLOT_TABLE_NAME);
-    entity.setProperty("ticketKey", ticket);
+    final  Entity entity = new Entity(ISOLATE_TIME_SLOT_TABLE_NAME);
+    entity.setProperty("ticketKey", KeyFactory.keyToString(ticket));
     entity.setProperty("isolateId", this.getIsolate().userId);
     entity.setProperty("date", date.toString());
     entity.setProperty("startTime", start.toString());
