@@ -24,10 +24,11 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.google.gson.Gson;
+import com.google.gson.*;
 
 import com.google.vinet.data.*;
 import java.time.*;
+import java.util.*;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -221,7 +222,7 @@ public class RequestServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
-    response.sendRedirect("/isolate/");
+    response.sendRedirect("/isolate/home.html");
   }
 
   @Override
@@ -252,56 +253,12 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    String keyString = request.getParameter("key");
-
-    if (keyString == null) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-      return;
-    }
-
-    keyString = keyString.trim();
-
-    if (keyString.equals("")) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-      return;
-    }
-
-
-    /* An IllegalArgumentException is thrown when the keyString cannot be parsed.
-     */
-    final Key key;
-    try {
-      key = registrationServlet.stringToKey(keyString);
-    } catch (IllegalArgumentException exception) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-      return;
-    }
-
-    /*
-     * An EntityNotFoundException or IllegalArgumentException imply the client has sent a bad
-     * request, which is why these are mapped to SC_BAD_REQUEST.
-     * A DataStoreFailureException implies that DataStore has failed, and this is interpreted
-     * as a server-side error, therefore SC_INTERNAL_SERVER_ERROR is thrown.
-     */
-    final Entity requestEntity;
-    try{
-      requestEntity = this.datastore.get(key);
-    } catch (DatastoreFailureException exception) {
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      throw exception;
-    } catch (EntityNotFoundException | IllegalArgumentException exception) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-      return;
-    }
-
-    if (requestEntity == null) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-      return;
-    }
+    IsolateTimeSlot.datastore = this.datastore;
+    final List<IsolateTimeSlot> timeSlots = IsolateTimeSlot.getTimeslotsByUserId(this.userService.getCurrentUser().getUserId());
 
     try{
-      Gson gson = new Gson();
-      response.getWriter().println(gson.toJson(requestEntity.getProperties()));
+      Gson gson = new GsonBuilder().setPrettyPrinting().create();
+      response.getWriter().println(gson.toJson(timeSlots));
     } catch (Exception exception) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       throw exception;
