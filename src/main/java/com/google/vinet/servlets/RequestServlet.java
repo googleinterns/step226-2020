@@ -210,6 +210,8 @@ public class RequestServlet extends HttpServlet {
     ticketEntity.setProperty("subjects", gson.toJson(subjects));
     ticketEntity.setProperty("details", gson.toJson(details));
 
+    IsolateTimeSlot.datastore = this.datastore;
+
     /* Put the ticket into the datastore, then create an IsolateTimeSlot which points to this ticket,
      * and put that IsolateTimeSlot into the datastore. */
     try{
