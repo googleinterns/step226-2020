@@ -14,8 +14,11 @@
  *  limitations under the License.
  */
 
+* {
+    font-family: courier, serif;
+}
+
 #matches-table {
-    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
     border-collapse: collapse;
     width: 100%;
 }
