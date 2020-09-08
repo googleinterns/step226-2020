@@ -17,6 +17,9 @@
 package com.google.vinet.data;
 
 import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Query;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
@@ -27,21 +30,20 @@ public class IsolateTimeSlot extends TimeSlot implements Datastoreable{
 
   protected final Key ticket;
   protected final LocalDate date;
-  protected final DatastoreService datastore;
+  public static DatastoreService datastore;
 
   public IsolateTimeSlot(Entity entity){
-    super(
+    this(
         Instant.parse((String)entity.getProperty("startTime")),
         Instant.parse((String)entity.getProperty("endTime")),
-        new Isolate((String) entity.getProperty("isolateId"))
+        new Isolate((String) entity.getProperty("isolateId")),
+        LocalDate.parse((String) entity.getProperty("date")),
+        KeyFactory.stringToKey((String) entity.getProperty("ticketKey"))
     );
-    this.ticket = KeyFactory.stringToKey((String) entity.getProperty("ticketKey"));
-    this.date = LocalDate.parse((String) entity.getProperty("date"));
-    this.datastore = DatastoreServiceFactory.getDatastoreService();
   }
 
   /**
-   * Construct an IsolateTimeSlot with a dependency on the default implementation of Datastore.
+   Construct an IsolateTimeSlot.
    * @param start The start of the TimeSlot.
    * @param end The end of the TimeSlot.
    * @param isolate The isolate associated with the TimeSlot.
@@ -49,23 +51,9 @@ public class IsolateTimeSlot extends TimeSlot implements Datastoreable{
    * @param ticket The Datastore key of the request ticket for this TimeSlot.
    */
   public IsolateTimeSlot(Instant start, Instant end, Isolate isolate, LocalDate date, Key ticket) {
-    this(start, end, isolate, date, ticket, DatastoreServiceFactory.getDatastoreService());
-  }
-
-  /**
-   Construct an IsolateTimeSlot with a dependency on the provided implementation of Datastore.
-   * @param start The start of the TimeSlot.
-   * @param end The end of the TimeSlot.
-   * @param isolate The isolate associated with the TimeSlot.
-   * @param date The date on which the TimeSlot is scheduled.
-   * @param ticket The Datastore key of the request ticket for this TimeSlot.
-   * @param datastore The implementation of Datastore to depend on.
-   */
-  public IsolateTimeSlot(Instant start, Instant end, Isolate isolate, LocalDate date, Key ticket, DatastoreService datastore) {
     super(start, end, isolate);
     this.date = date;
     this.ticket = ticket;
-    this.datastore = datastore;
   }
 
   public Isolate getIsolate() {
@@ -83,9 +71,7 @@ public class IsolateTimeSlot extends TimeSlot implements Datastoreable{
         new Query(ISOLATE_TIME_SLOT_TABLE_NAME)
             .setFilter(new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId));
 
-    final DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
-
-    return datastoreService.prepare(query);
+    return datastore.prepare(query);
   }
 
   /**
@@ -101,6 +87,6 @@ public class IsolateTimeSlot extends TimeSlot implements Datastoreable{
     entity.setProperty("startTime", start.toString());
     entity.setProperty("endTime", end.toString());
 
-    this.datastore.put(entity);
+    datastore.put(entity);
   }
 }
