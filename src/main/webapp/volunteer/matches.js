@@ -21,10 +21,22 @@ function initialise() {
 async function displayMatches() {
     const matches = await getMatches();
     console.log(matches);
-    //TODO insert matches into webpage
+    const table = document.getElementById("matches-table");
+    matches.forEach(match => addTableRow(table, match));
 }
 
 async function getMatches() {
-    const result = await (await fetch('/match-fetcher')).json();
-    return result;
+    return (await fetch('/match-fetcher')).json();
+}
+
+function addTableRow(table, match) {
+    console.log("Match: ", match);
+    const row = table.insertRow();
+
+    Object.keys(match).forEach(key => {
+        let value = match[key];
+        if (key === "date") value = new Date(match[key]).toLocaleDateString();
+        if (key === "start" || key === "end") value = new Date(match[key]).toLocaleTimeString();
+        row.insertCell().appendChild(document.createTextNode(value))
+    });
 }

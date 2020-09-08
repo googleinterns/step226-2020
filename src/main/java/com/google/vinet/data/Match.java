@@ -21,6 +21,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.gson.Gson;
 
 /**
  * To represent a match for displaying to the user
@@ -29,7 +30,8 @@ public class Match {
   private static final DatastoreService datastoreService =
           DatastoreServiceFactory.getDatastoreService();
 
-  private final String date, start, end, firstName, lastName, subjects, details;
+  private final String date, start, end, firstName, lastName;
+  private final String[] subjects, details;
 
   public Match(
           String date,
@@ -37,8 +39,8 @@ public class Match {
           String end,
           String firstName,
           String lastName,
-          String subjects,
-          String details) {
+          String[] subjects,
+          String[] details) {
     this.date = date;
     this.start = start;
     this.end = end;
@@ -80,8 +82,8 @@ public class Match {
 
     Entity ticket = query.asSingleEntity(); // TODO check in case missing or duplicate
 
-    subjects = (String) ticket.getProperty("subjects");
-    details = (String) ticket.getProperty("details");
+    subjects = new Gson().fromJson((String) ticket.getProperty("subjects"), String[].class);
+    details = new Gson().fromJson((String) ticket.getProperty("details"), String[].class);
   }
 
   public String getDate() {
@@ -104,11 +106,11 @@ public class Match {
     return lastName;
   }
 
-  public String getSubjects() {
+  public String[] getSubjects() {
     return subjects;
   }
 
-  public String getDetails() {
+  public String[] getDetails() {
     return details;
   }
 }
