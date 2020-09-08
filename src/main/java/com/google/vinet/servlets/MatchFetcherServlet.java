@@ -81,7 +81,6 @@ public class MatchFetcherServlet extends HttpServlet {
                     .map(match -> new Match(match, isVolunteer))
                     .collect(Collectors.toList());
 
-    System.out.println("userId " + userId + " isvolunteer " + isVolunteer + " matches #: " + matches.size());
 
     response.setContentType("application/json;");
     new Gson().toJson(matches, response.getWriter());
