@@ -5,6 +5,8 @@ import com.google.appengine.api.users.*;
 import com.google.gson.*;
 import com.google.vinet.data.*;
 import java.io.*;
+import java.time.*;
+import java.time.format.*;
 import java.util.*;
 import javax.servlet.annotation.*;
 import javax.servlet.http.*;
@@ -54,8 +56,8 @@ public class IsolateRequestServlet  extends HttpServlet{
     try{
       for (Entity entity : results.asIterable()){
         final String date = (String) entity.getProperty("date");
-        final String start = ((String) entity.getProperty("startTime")).split("T")[0];
-        final String end = ((String) entity.getProperty("endTime")).split("T")[0];
+        final String start = OffsetDateTime.parse((String) entity.getProperty("startTime")).format(DateTimeFormatter.ISO_LOCAL_TIME);
+        final String end = OffsetDateTime.parse((String) entity.getProperty("endTime")).format(DateTimeFormatter.ISO_LOCAL_TIME);
 
         final Key ticketKey = KeyFactory.stringToKey((String) entity.getProperty("ticketKey"));
         final Entity ticket = datastore.get(ticketKey);
@@ -63,7 +65,7 @@ public class IsolateRequestServlet  extends HttpServlet{
         final String[] subjects = gson.fromJson((String) ticket.getProperty("subjects"), String[].class);
         final String[] details = gson.fromJson((String) ticket.getProperty("details"), String[].class);
 
-        final Match isolateRequest = new Match(date, start, end, null, null, subjects, details);
+        final Match isolateRequest = new Match(date, start, end, "", "", subjects, details);
         isolateRequests.add(isolateRequest);
       }
     } catch (EntityNotFoundException exception) {
@@ -75,7 +77,7 @@ public class IsolateRequestServlet  extends HttpServlet{
     }
 
     try {
-      response.getWriter().println(isolateRequests);
+      response.getWriter().println(gson.toJson(isolateRequests.toArray(new Match[] {})));
     } catch (Exception exception) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
