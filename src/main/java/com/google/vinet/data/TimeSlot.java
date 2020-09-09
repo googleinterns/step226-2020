@@ -44,7 +44,7 @@ public abstract class TimeSlot implements Comparable<TimeSlot> {
   public TimeSlot(Instant start, Instant end, RegisteredUser registeredUser) {
     this.start = Objects.requireNonNull(start, "Start time must not be null!");
     this.end = Objects.requireNonNull(end, "End time must not be null!");
-    if (start.isAfter(end)) throw new IllegalArgumentException();
+    if (!start.isBefore(end)) throw new IllegalArgumentException();
     this.registeredUser = registeredUser;
   }
 
