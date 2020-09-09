@@ -25,7 +25,7 @@ import com.google.gson.Gson;
 
 /** To represent a match for displaying to the user */
 public class Match {
-  public DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+  public transient DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
   protected final String date, start, end, firstName, lastName;
   protected final String[] subjects, details;
