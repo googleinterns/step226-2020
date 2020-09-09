@@ -23,8 +23,8 @@
     <script src="requests.js"></script>
 </head>
 <body>
-    <div id="container" class="container">
-        <table id="requests" class="table table-striped table-hover">
+    <div id="container" class="container-fluid">
+        <table id="requests" class="table table-striped">
             <thead class="thead-dark">
                 <th>
                     Date
@@ -36,7 +36,7 @@
                     End
                 </th>
                 <th>
-                    Ticket
+                    Request Tickets
                 </th>
             </thead>
         </table>
