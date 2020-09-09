@@ -26,7 +26,7 @@ import java.util.*;
 import java.util.stream.*;
 
 public class IsolateTimeSlot extends TimeSlot implements Datastoreable{
-  protected final static String ISOLATE_TIME_SLOT_TABLE_NAME = "IsolateTimeSlot";
+  public final static String ISOLATE_TIME_SLOT_TABLE_NAME = "IsolateTimeSlot";
 
   protected final Key ticket;
   protected final LocalDate date;

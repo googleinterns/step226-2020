@@ -17,6 +17,8 @@
 package com.google.vinet.data;
 
 public class Isolate extends RegisteredUser {
+  public static final String TICKET_TABLE_NAME = "Ticket";
+
   public Isolate(String userId) {
     super(userId);
   }
