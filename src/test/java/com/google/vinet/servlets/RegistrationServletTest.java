@@ -1,17 +1,17 @@
 /*
- * Copyright 2020 Google LLC
+ *  Copyright 2020 Google LLC
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     https://www.apache.org/licenses/LICENSE-2.0
+ *      https:www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package com.google.vinet.servlets;
@@ -25,7 +25,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -38,7 +37,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -105,17 +103,6 @@ public class RegistrationServletTest {
   }
 
   /**
-   * Sets up an argument captor to get the HTTP status code from the response
-   *
-   * @return The argument captor that will contain the HTTP status code, as an Integer
-   */
-  private ArgumentCaptor<Integer> captureResponseStatus() {
-    ArgumentCaptor<Integer> valueCapture = ArgumentCaptor.forClass(Integer.class);
-    doNothing().when(response).setStatus(valueCapture.capture());
-    return valueCapture;
-  }
-
-  /**
    * Sets the HTTP request parameters. Can also be used to pass null values.
    */
   private void setRequestParameters(
@@ -148,7 +135,7 @@ public class RegistrationServletTest {
    *
    * @param code The HTTP response code that the response contains
    */
-  private void assertResponseCode(int code) {
+  private void doPostAndAssertResponseCode(int code) {
     registrationServlet.doPost(request, response);
     verify(response).setStatus(code);
   }
@@ -159,7 +146,7 @@ public class RegistrationServletTest {
    * @param parameterName The name of the parameter, as passed in the HTTP request
    */
   private void checkNullParameter(String parameterName) {
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("Parameter " + parameterName + " is null!", getErrors());
   }
 
@@ -169,7 +156,7 @@ public class RegistrationServletTest {
    * @param parameterName The name of the parameter, as passed in the HTTP request
    */
   private void checkMissingParameter(String parameterName) {
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("Missing parameter " + parameterName + " for registration request!", getErrors());
   }
 
@@ -179,10 +166,13 @@ public class RegistrationServletTest {
    * @param parameterName The name of the parameter that is blank
    */
   private void checkBlankParameter(String parameterName) {
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("Parameter " + parameterName + " is blank!", getErrors());
   }
 
+  /**
+   * Test passes if no exception is thrown.
+   */
   @Test
   public void testPostNullRequest() {
     registrationServlet = new RegistrationServlet();
@@ -192,20 +182,20 @@ public class RegistrationServletTest {
   @Test
   public void testPostNotLoggedIn() {
     when(userService.isUserLoggedIn()).thenReturn(false);
-    assertResponseCode(HttpServletResponse.SC_UNAUTHORIZED);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
   @Test
   public void testPostNoUserId() {
     when(userService.isUserLoggedIn()).thenReturn(true);
     when(userService.getCurrentUser()).thenReturn(user);
-    assertResponseCode(HttpServletResponse.SC_UNAUTHORIZED);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
   @Test
   public void testPostEmptyRequest() {
     setupUser();
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
   }
 
   @Test
@@ -319,7 +309,7 @@ public class RegistrationServletTest {
     setupUser();
     setNonNullRequestParameters(
             "afirstname", "alastname", "ekugfghweig", "-85.300738", "-85.300738");
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("Wrong type parameter!", getErrors());
   }
 
@@ -327,7 +317,7 @@ public class RegistrationServletTest {
   public void testPostInvalidLatitude() {
     setupUser();
     setNonNullRequestParameters("afirstname", "alastname", "isolate", "weifeuf", "-85.300738");
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("The latitude is not formatted as a double!", getErrors());
   }
 
@@ -335,7 +325,7 @@ public class RegistrationServletTest {
   public void testPostInvalidLongitude() {
     setupUser();
     setNonNullRequestParameters("afirstname", "alastname", "isolate", "-85.300738", "newf873nf");
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("The longitude is not formatted as a double!", getErrors());
   }
 
@@ -343,7 +333,7 @@ public class RegistrationServletTest {
   public void testPost1LetterFirstname() {
     setupUser();
     setNonNullRequestParameters("a", "alastname", "isolate", "-85.300738", "-85.300738");
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("Parameter firstname is not within length bounds!", getErrors());
   }
 
@@ -351,7 +341,7 @@ public class RegistrationServletTest {
   public void testPost2LetterFirstname() {
     setupUser();
     setNonNullRequestParameters("ab", "alastname", "isolate", "-85.300738", "-85.300738");
-    assertResponseCode(HttpServletResponse.SC_OK);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_OK);
     assertEquals("", getErrors());
   }
 
@@ -364,7 +354,7 @@ public class RegistrationServletTest {
             "isolate",
             "-85.300738",
             "-85.300738");
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("Parameter lastname is not within length bounds!", getErrors());
   }
 }
