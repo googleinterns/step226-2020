@@ -25,9 +25,7 @@ function initialise() {
  * Inserts existing timeslots in webpage.
  */
 function populateRows() {
-    getExistingTimeSlots().then(rows => rows.forEach(row => addRow(row)));
-
-    //TODO validate fields so they're not empty, and start time is before end time
+    getExistingTimeSlots().then(rows => rows.forEach(row => addRow(row)), (e) => alert(e));
 }
 
 /**
@@ -35,10 +33,17 @@ function populateRows() {
  * @returns {Promise<Array>} Array of timeslot objects.
  */
 async function getExistingTimeSlots() {
-    const slots = await (await fetch('/volunteer-availability')).json();
-    const rows = await Promise.all(slots.map(slot => slotToRow(slot)));
-    await sortTimeSlots(rows);
-    return rows;
+    try {
+        const result = await fetch('/volunteer-availability');
+        if (result.status === 401) return Promise.reject(new Error('Please login to use this feature!'));
+        if (!result) return Promise.reject(new Error('fail'));
+        const slots = await result.json();
+        const rows = await Promise.all(slots.map(slot => slotToRow(slot)));
+        await sortTimeSlots(rows);
+        return rows;
+    } catch (e) {
+        return Promise.reject(new Error('There was an error loading existing slots!\nPlease refresh the page to try again.'));
+    }
 }
 
 /**
@@ -75,8 +80,9 @@ async function slotToRow(slot) {
 function fillISOStartTime(inputElement) {
     if (inputElement.value == null || inputElement.value === "") return;
     inputElement.parentNode.children["ISO-start-time"].value = new Date(inputElement.value).toISOString();
-    //TODO also update end time accordingly to date change
-    //TODO re-sort this slot in list after changing?
+
+    // Also update end time, as it is dependant on the start time's date value.
+    fillISOEndTime(inputElement.parentNode.children["ISO-end-time"]);
 }
 
 /**
@@ -86,9 +92,12 @@ function fillISOStartTime(inputElement) {
 function fillISOEndTime(inputElement) {
     const children = inputElement.parentNode.children;
     const endValue = inputElement.value;
+    const ISOStartTime = children["ISO-start-time"]
+
+    if (ISOStartTime == null || !ISOStartTime) return;
 
     // Get the date from the start datetime object
-    const date = new Date(children["ISO-start-time"].value);
+    const date = new Date(ISOStartTime.value);
 
     if (endValue == null || !endValue || date == null) return;
 
@@ -118,8 +127,12 @@ async function constructNewRow(startTimeValue, endTimeValue) {
     newRow.appendChild(ISOEndElement);
     newRow.appendChild(deleteButton);
 
+    // Update hidden ISO time values
     fillISOStartTime(startElement);
-    fillISOEndTime(endElement);
+
+    // Validate time
+    newRow.addEventListener("change", event => validateTimeSlot(event));
+    newRow.isValid = false; // Default to false as there's no values
 
     return newRow;
 }
@@ -209,4 +222,30 @@ function addRow(row) {
  */
 async function addEmptyRow() {
     addRow(await constructNewRow());
+}
+
+/**
+ * Validate times picked so that start is before end time.
+ */
+function validateTimeSlot(event) {
+    const div = event.target.parentNode;
+    const children = div.children;
+    console.log(event);
+    const startTime = new Date(children["ISO-start-time"].value);
+    const endTime = new Date(children["ISO-end-time"].value);
+
+    console.log("start", startTime, "end", endTime);
+    div.isValid = startTime.getTime() < endTime.getTime();
+    console.log("is valid? " + div.isValid);
+
+    //const anyInvalid = Array.from(div.parentNode.children).some(d => !d.isValid);
+    let anyInvalid = false;
+    const divs = div.parentNode.getElementsByTagName("div");
+    for (let i = 0; i < divs.length; i++) {
+        if (!divs[i].isValid) anyInvalid = true;
+    }
+    console.log("any invalid?", anyInvalid);
+
+    // Disable submit button if any of the rows is not valid
+    document.getElementById("availability-submit").disabled = anyInvalid;
 }
