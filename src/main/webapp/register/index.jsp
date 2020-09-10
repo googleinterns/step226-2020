@@ -22,6 +22,7 @@
   <title>Registration</title>
   <%@ include file="/bootstrap-css.html" %>
   <script src="maps.js"></script>
+  <script src="scripts/registration.js"></script>
   <script defer
       src="https://maps.googleapis.com/maps/api/js?key=<API_KEY_HERE>&callback=loadMap&libraries=places">
   </script>
