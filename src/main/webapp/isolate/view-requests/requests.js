@@ -40,7 +40,7 @@ const populateTable = async () => {
         ticketBody.appendChild(details);
 
         subject.innerText = subjectText;
-        detail.innerText = detailsText;
+        details.innerText = detailsText;
 
         return ticket;
       };
