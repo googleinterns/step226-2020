@@ -4,7 +4,7 @@ window.runMatching = async () => {
   statusElement.innerText = 'Awaiting response from server.';
   statusElement.classList.add('alert-warning');
 
-  const res = await fetch('/admin/run-matching');
+  const res = await fetch('/admin/run-matching' , {method: 'POST'});
 
   statusElement.classList.remove('alert-warning');
   statusElement.innerText = '';

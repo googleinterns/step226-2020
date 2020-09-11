@@ -27,7 +27,7 @@ import java.io.IOException;
 @WebServlet("/admin/run-matching")
 public class MatchingServlet extends HttpServlet {
   @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException{
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
     /* Construct a MatchingRunner with no initial parameters. All necessary data will be
      * pulled from DataStore once runner.run() is called. */
     MatchingRunner runner = new MatchingRunner();
