@@ -48,8 +48,8 @@ const populateTable = async () => {
   /**
    * Create a row of the requests table, with date, start time, and end time.
    * @param {string} dateText The date of the request
-   * @param {string} startText The start time of the request's delivery window
-   * @param {string} endText The end time of the request's delivery window
+   * @param {string} startText The start time of the request's delivery window - must be in ISO8601 format
+   * @param {string} endText The end time of the request's delivery window - must be in ISO8601 format
    */
   const createRow =
       (dateText, startText, endText) => {
@@ -60,8 +60,8 @@ const populateTable = async () => {
         const end = document.createElement('td');
 
         date.innerText = dateText;
-        start.innerText = startText;
-        end.innerText = endText;
+        start.innerText = moment.utc(startText).local().format('hh:mmA');
+        end.innerText = moment.utc(endText).local().format('hh:mmA');
 
         row.appendChild(date);
         row.appendChild(start);

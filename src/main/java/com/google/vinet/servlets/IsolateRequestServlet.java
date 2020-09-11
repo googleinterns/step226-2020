@@ -57,11 +57,14 @@ public class IsolateRequestServlet  extends HttpServlet{
 
     Gson gson = new Gson();
 
+    /* An EntityNotFoundException implies the system has stored an isolate's request, but failed to link
+     * that request to the correct Ticket entity in Datastore, the exception must be thrown to allow Google
+     * Cloud Console to observe and log it. It should not be caught by the caller. */
     try{
       for (Entity entity : results.asIterable()){
         final String date = (String) entity.getProperty("date");
-        final String start = OffsetDateTime.parse((String) entity.getProperty("startTime")).format(DateTimeFormatter.ISO_LOCAL_TIME);
-        final String end = OffsetDateTime.parse((String) entity.getProperty("endTime")).format(DateTimeFormatter.ISO_LOCAL_TIME);
+        final String start = (String) entity.getProperty("startTime");
+        final String end = (String) entity.getProperty("endTime");
 
         final Key ticketKey = KeyFactory.stringToKey((String) entity.getProperty("ticketKey"));
         final Entity ticket = datastore.get(ticketKey);
@@ -74,13 +77,12 @@ public class IsolateRequestServlet  extends HttpServlet{
       }
     } catch (EntityNotFoundException exception) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      /* Since an EntityNotFoundException implies the system has stored an isolate's request, but failed to link
-       * that request to the correct Ticket entity in Datastore, the exception must be thrown to allow Google
-       * Cloud Console to observe and log it. It should not be caught by the caller. */
       throw new RuntimeException(exception);
     }
 
     try {
+      /* Converting the Isolate's Requests from a LinkedList to an array was found to solve an error
+       * with Gson following circular references, and causing a StackOverflowError to be thrown. */
       response.getWriter().println(gson.toJson(isolateRequests.toArray(new Match[] {})));
     } catch (Exception exception) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
