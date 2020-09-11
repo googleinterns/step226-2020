@@ -21,6 +21,7 @@
     <title>Your Requests</title>
     <%@ include file="/bootstrap-css.html" %>
     <script src="requests.js"></script>
+    <script src="/scripts/HTTPStatusCodes.js"></script>
 </head>
 <body>
     <div id="container" class="container-fluid">
