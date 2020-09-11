@@ -1,4 +1,8 @@
 window.onload = async () => {
+  await populateTable();
+}
+
+const populateTable = async () => {
   const table = document.getElementById('requests');
 
   const res = await fetch('/fetch-requests');
@@ -13,6 +17,11 @@ window.onload = async () => {
 
   const requests = await res.json();
 
+  /**
+   * Create a ticket, with subject and details.
+   * @param {string} subjectText The subject of the ticket
+   * @param {string} detailsText The details of the ticket
+   */
   const createTicket =
       (subjectText, detailsText) => {
         const ticket = document.createElement('div');
@@ -36,6 +45,12 @@ window.onload = async () => {
         return ticket;
       };
 
+  /**
+   * Create a row of the requests table, with date, start time, and end time.
+   * @param {string} dateText The date of the request
+   * @param {string} startText The start time of the request's delivery window
+   * @param {string} endText The end time of the request's delivery window
+   */
   const createRow =
       (dateText, startText, endText) => {
         const row = document.createElement('tr');
@@ -69,4 +84,4 @@ window.onload = async () => {
 
     table.appendChild(row);
   }
-}
+};
