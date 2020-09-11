@@ -53,9 +53,11 @@ public class IsolateRequestServlet  extends HttpServlet{
 
     final PreparedQuery results = datastore.prepare(query);
 
-    List<Match> isolateRequests = new LinkedList<>();
+
 
     Gson gson = new Gson();
+
+    List<IsolateRequest> isolateRequests = new LinkedList<>();
 
     /* An EntityNotFoundException implies the system has stored an isolate's request, but failed to link
      * that request to the correct Ticket entity in Datastore, the exception must be thrown to allow Google
@@ -72,7 +74,7 @@ public class IsolateRequestServlet  extends HttpServlet{
         final String[] subjects = gson.fromJson((String) ticket.getProperty("subjects"), String[].class);
         final String[] details = gson.fromJson((String) ticket.getProperty("details"), String[].class);
 
-        final Match isolateRequest = new Match(date, start, end, "", "", subjects, details);
+        final IsolateRequest isolateRequest = new IsolateRequest(date, start, end, subjects, details);
         isolateRequests.add(isolateRequest);
       }
     } catch (EntityNotFoundException exception) {
@@ -83,9 +85,22 @@ public class IsolateRequestServlet  extends HttpServlet{
     try {
       /* Converting the Isolate's Requests from a LinkedList to an array was found to solve an error
        * with Gson following circular references, and causing a StackOverflowError to be thrown. */
-      response.getWriter().println(gson.toJson(isolateRequests.toArray(new Match[] {})));
+      response.getWriter().println(gson.toJson(isolateRequests.toArray(new IsolateRequest[] {})));
     } catch (Exception exception) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  public static class IsolateRequest{
+    private final String date, start, end;
+    private final String[] subjects, details;
+
+    public IsolateRequest(String date, String start, String end, String[] subjects, String[] details) {
+      this.date = date;
+      this.start = start;
+      this.end = end;
+      this.subjects = subjects;
+      this.details = details;
     }
   }
 }
