@@ -17,6 +17,10 @@ public class IsolateRequestServlet  extends HttpServlet{
   public UserService userService = UserServiceFactory.getUserService();
   public RegistrationServlet registrationServlet = new RegistrationServlet();
 
+  /**
+   * Fetch the current user's tickets from DataStore, and return them as JSON, sorted in descending
+   * order on the basis of their date.
+   */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     if (response == null) {
