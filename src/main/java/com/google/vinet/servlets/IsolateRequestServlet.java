@@ -53,8 +53,6 @@ public class IsolateRequestServlet  extends HttpServlet{
 
     final PreparedQuery results = datastore.prepare(query);
 
-
-
     Gson gson = new Gson();
 
     List<IsolateRequest> isolateRequests = new LinkedList<>();
