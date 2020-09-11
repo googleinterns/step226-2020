@@ -36,6 +36,8 @@ public class MatchingServlet extends HttpServlet {
      * Try to run the matcher. Report any failures to the caller.
      * In a production environment, there would be an integration here with the bug tracking system
      * used by the deployer, to alert the owner that the matching has failed.
+     * At present, all errors are visible in the Google Cloud Console, and email alerts can be set
+     * up to emulate a paging system.
      */
     try {
       runner.run();
