@@ -22,8 +22,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 
 public class MatchingRunner {
   private DatastoreService datastore;
@@ -31,33 +30,33 @@ public class MatchingRunner {
   private Set<VolunteerTimeSlot> volunteerTimeSlots;
   private LocalDate date;
 
+  /**
+   * Construct a MatchingRunner with none of its data set.
+   */
   public MatchingRunner() {
 
   }
 
+  /**
+   * Construct a matching runner with a dependency on the provided DataStore implementation.
+   * @param datastore The DataStore implementation that this MatchingRunnner will depend on.
+   */
   protected MatchingRunner(DatastoreService datastore) {
     assert(datastore != null);
     this.datastore = datastore;
   }
 
+  /**
+   * Run the matching algorithm and store the results in DataStore.
+   * Any necessary data that is not already set will be pulled from DataStore.
+   */
   public void run() {
     if (this.datastore == null) this.datastore = DatastoreServiceFactory.getDatastoreService();
     if (this.date == null) this.date = LocalDate.now().plusDays(1);
-    if (this.isolateTimeSlots == null) this.isolateTimeSlots = this.getIsolateTimeSlots();
-    if (this.volunteerTimeSlots == null) this.volunteerTimeSlots = this.getVolunteerTimeSlots();
-
-    System.out.println("========ISOLATES========");
-    System.out.println(this.isolateTimeSlots);
-    System.out.println("========ISOLATES========");
-    System.out.println("========VOLUNTEERS========");
-    System.out.println(this.volunteerTimeSlots);
-    System.out.println("========VOLUNTEERS========");
+    if (this.isolateTimeSlots == null) this.isolateTimeSlots = this.fetchIsolateTimeSlots();
+    if (this.volunteerTimeSlots == null) this.volunteerTimeSlots = this.fetchVolunteerTimeSlots();
 
     final Set<IsolateTimeSlot> matches = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
-
-    System.out.println("========MATCHES========");
-    System.out.println(matches);
-    System.out.println("========MATCHES========");
 
     for (IsolateTimeSlot matching : matches) {
       Entity matchingEntity = new Entity("Matching");
@@ -71,27 +70,48 @@ public class MatchingRunner {
     }
   }
 
-  public Set<IsolateTimeSlot> getIsolateTimeSlots() {
-    return getIsolateTimeSlots(this.date, this.datastore);
+  /**
+   * @return the IsolateTimeSlots scheduled for this MatchingRunner's date from this MatchingRunner's implementation of DataStore.
+   */
+  public Set<IsolateTimeSlot> fetchIsolateTimeSlots() {
+    return fetchIsolateTimeSlots(this.date, this.datastore);
   }
 
-  public Set<VolunteerTimeSlot> getVolunteerTimeSlots() {
-    return getVolunteerTimeSlots(this.date, this.datastore);
+  /**
+   * @return the VolunteerTimeSlots scheduled for this MatchingRunner's date from this MatchingRunner's implementation of DataStore.
+   */
+  public Set<VolunteerTimeSlot> fetchVolunteerTimeSlots() {
+    return fetchVolunteerTimeSlots(this.date, this.datastore);
   }
 
-  public static PreparedQuery getTimeSlotsQuery(String entityName, LocalDate date, DatastoreService datastore) {
+  /**
+   * Get a PreparedQuery which will return all TimeSlots with the date and entity type provided when
+   * executed using the provided DataStore implementation.
+   *
+   * @param entityName The entity name of the TimeSlots to be fetched.
+   * @param date The date that the fetched TimeSlots must be scheduled on.
+   * @param datastore The DataStore implementation to be used when preparing the query.
+   * @return A PreparedQuery which will return all TimeSlots with the date and entity type provided
+   * when executed using the provided DataStore implementation.
+   */
+  public static PreparedQuery getTimeSlotsQuery(
+      String entityName, LocalDate date, DatastoreService datastore) {
     final Query query = new Query(entityName);
 
     final Filter dateFilter = new FilterPredicate("date", FilterOperator.EQUAL, date.toString());
 
     query.setFilter(dateFilter);
 
-    final PreparedQuery preparedQuery = datastore.prepare(query);
-
-    return preparedQuery;
+    return datastore.prepare(query);
   }
 
-  public static Set<IsolateTimeSlot> getIsolateTimeSlots(LocalDate date, DatastoreService datastore) {
+  /**
+   * Fetch all IsolateTimeSlots scheduled for the provided date using the provided DataStore implementation.
+   * @param date The date to filter the IsolateTimeSlots by.
+   * @param datastore The DataStore implementation to be queried.
+   * @return All IsolateTimeSlots scheduled for the provided date using the provided DataStore implementation.
+   */
+  public static Set<IsolateTimeSlot> fetchIsolateTimeSlots(LocalDate date, DatastoreService datastore) {
     PreparedQuery preparedQuery =  getTimeSlotsQuery("IsolateTimeSlot", date, datastore);
 
     final FetchOptions fetchOptions = FetchOptions.Builder.withDefaults();
@@ -111,7 +131,13 @@ public class MatchingRunner {
     return timeSlots;
   }
 
-  public static Set<VolunteerTimeSlot> getVolunteerTimeSlots(LocalDate date, DatastoreService datastore) {
+  /**
+   * Fetch all VolunteerTimeSlots scheduled for the provided date using the provided DataStore implementation.
+   * @param date The date to filter the VolunteerTimeSlots by.
+   * @param datastore The DataStore implementation to be queried.
+   * @return All VolunteerTimeSlots scheduled for the provided date using the provided DataStore implementation.
+   */
+  public static Set<VolunteerTimeSlot> fetchVolunteerTimeSlots(LocalDate date, DatastoreService datastore) {
     final PreparedQuery preparedQuery = getTimeSlotsQuery("volunteer_timeslots", date, datastore);
 
     final FetchOptions fetchOptions = FetchOptions.Builder.withDefaults();
@@ -129,11 +155,21 @@ public class MatchingRunner {
     return timeSlots;
   }
 
+  /**
+   * Set the IsolateTimeSlots to be used for matching by this MatchingRunner.
+   * @param isolateTimeSlots The IsolateTimeSlots to be matched.
+   * @throws AssertionError If isolateTimeSlots is null.
+   */
   public void setIsolateTimeSlots(Set<IsolateTimeSlot> isolateTimeSlots) {
     assert(isolateTimeSlots != null);
     this.isolateTimeSlots = isolateTimeSlots;
   }
 
+  /**
+   * Set the VolunteerTimeSlots to be used for matching by this MatchingRunner.
+   * @param volunteerTimeSlots The volunteerTimeSlots to be matched.
+   * @throws AssertionError If volunteerTimeSlots is null.
+   */
   public void setVolunteerTimeSlots(Set<VolunteerTimeSlot> volunteerTimeSlots) {
     assert(volunteerTimeSlots != null);
     this.volunteerTimeSlots = volunteerTimeSlots;
