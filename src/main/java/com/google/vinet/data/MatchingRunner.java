@@ -89,14 +89,14 @@ public class MatchingRunner {
   /**
    * @return the IsolateTimeSlots scheduled for this MatchingRunner's date from this MatchingRunner's implementation of DataStore.
    */
-  public Set<IsolateTimeSlot> fetchIsolateTimeSlots() {
+  protected Set<IsolateTimeSlot> fetchIsolateTimeSlots() {
     return fetchIsolateTimeSlots(this.date, this.datastore);
   }
 
   /**
    * @return the VolunteerTimeSlots scheduled for this MatchingRunner's date from this MatchingRunner's implementation of DataStore.
    */
-  public Set<VolunteerTimeSlot> fetchVolunteerTimeSlots() {
+  protected Set<VolunteerTimeSlot> fetchVolunteerTimeSlots() {
     return fetchVolunteerTimeSlots(this.date, this.datastore);
   }
 
@@ -110,7 +110,7 @@ public class MatchingRunner {
    * @return A PreparedQuery which will return all TimeSlots with the date and entity type provided
    * when executed using the provided DataStore implementation.
    */
-  public static PreparedQuery getTimeSlotsQuery(
+  protected static PreparedQuery getTimeSlotsQuery(
       String entityName, LocalDate date, DatastoreService datastore) {
     final Query query = new Query(entityName);
 
@@ -127,7 +127,7 @@ public class MatchingRunner {
    * @param datastore The DataStore implementation to be queried.
    * @return All IsolateTimeSlots scheduled for the provided date using the provided DataStore implementation.
    */
-  public static Set<IsolateTimeSlot> fetchIsolateTimeSlots(LocalDate date, DatastoreService datastore) {
+  protected static Set<IsolateTimeSlot> fetchIsolateTimeSlots(LocalDate date, DatastoreService datastore) {
     PreparedQuery preparedQuery =  getTimeSlotsQuery("IsolateTimeSlot", date, datastore);
 
     final FetchOptions fetchOptions = FetchOptions.Builder.withDefaults();
@@ -153,7 +153,7 @@ public class MatchingRunner {
    * @param datastore The DataStore implementation to be queried.
    * @return All VolunteerTimeSlots scheduled for the provided date using the provided DataStore implementation.
    */
-  public static Set<VolunteerTimeSlot> fetchVolunteerTimeSlots(LocalDate date, DatastoreService datastore) {
+  protected static Set<VolunteerTimeSlot> fetchVolunteerTimeSlots(LocalDate date, DatastoreService datastore) {
     final PreparedQuery preparedQuery = getTimeSlotsQuery("volunteer_timeslots", date, datastore);
 
     final FetchOptions fetchOptions = FetchOptions.Builder.withDefaults();
