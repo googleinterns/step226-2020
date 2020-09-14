@@ -42,7 +42,7 @@ public class MatchingRunner {
    * @param datastore The DataStore implementation that this MatchingRunnner will depend on.
    */
   protected MatchingRunner(DatastoreService datastore) {
-    assert(datastore != null);
+    Objects.requireNonNull(datastore);
     this.datastore = datastore;
   }
 
@@ -174,20 +174,20 @@ public class MatchingRunner {
   /**
    * Set the IsolateTimeSlots to be used for matching by this MatchingRunner.
    * @param isolateTimeSlots The IsolateTimeSlots to be matched.
-   * @throws AssertionError If isolateTimeSlots is null.
+   * @throws NullPointerException If isolateTimeSlots is null.
    */
   public void setIsolateTimeSlots(Set<IsolateTimeSlot> isolateTimeSlots) {
-    assert(isolateTimeSlots != null);
+    Objects.requireNonNull(isolateTimeSlots);
     this.isolateTimeSlots = isolateTimeSlots;
   }
 
   /**
    * Set the VolunteerTimeSlots to be used for matching by this MatchingRunner.
    * @param volunteerTimeSlots The volunteerTimeSlots to be matched.
-   * @throws AssertionError If volunteerTimeSlots is null.
+   * @throws NullPointerException If volunteerTimeSlots is null.
    */
   public void setVolunteerTimeSlots(Set<VolunteerTimeSlot> volunteerTimeSlots) {
-    assert(volunteerTimeSlots != null);
+    Objects.requireNonNull(volunteerTimeSlots);
     this.volunteerTimeSlots = volunteerTimeSlots;
   }
 }
