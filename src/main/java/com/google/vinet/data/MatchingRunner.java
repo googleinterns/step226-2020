@@ -56,6 +56,8 @@ public class MatchingRunner {
     if (this.isolateTimeSlots == null) this.isolateTimeSlots = this.fetchIsolateTimeSlots();
     if (this.volunteerTimeSlots == null) this.volunteerTimeSlots = this.fetchVolunteerTimeSlots();
 
+    deletePreviousMatches(this.date, this.datastore);
+
     final Set<IsolateTimeSlot> matches = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
 
     for (IsolateTimeSlot matching : matches) {
@@ -67,6 +69,20 @@ public class MatchingRunner {
       matchingEntity.setProperty("end", matching.end.toString());
       matchingEntity.setProperty("ticket", KeyFactory.keyToString(matching.ticket));
       datastore.put(matchingEntity);
+    }
+  }
+
+  public static void deletePreviousMatches(LocalDate date, DatastoreService datastore){
+    Query query = new Query("Matching")
+                          .setFilter(new FilterPredicate("date", FilterOperator.LESS_THAN, date.toString()))
+                              .setKeysOnly();
+
+    PreparedQuery preparedQuery = datastore.prepare(query);
+
+    List<Entity> oldEntries =  preparedQuery.asList(FetchOptions.Builder.withDefaults());
+
+    for (Entity entry : oldEntries){
+      datastore.delete(entry.getKey());
     }
   }
 
