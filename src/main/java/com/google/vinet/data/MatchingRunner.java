@@ -51,12 +51,12 @@ public class MatchingRunner {
    * Any necessary data that is not already set will be pulled from DataStore.
    */
   public void run() {
-    if (this.datastore == null) this.datastore = DatastoreServiceFactory.getDatastoreService();
-    if (this.date == null) this.date = LocalDate.now().plusDays(1);
-    if (this.isolateTimeSlots == null) this.isolateTimeSlots = this.fetchIsolateTimeSlots();
-    if (this.volunteerTimeSlots == null) this.volunteerTimeSlots = this.fetchVolunteerTimeSlots();
+    if (datastore == null) datastore = DatastoreServiceFactory.getDatastoreService();
+    if (date == null) date = LocalDate.now().plusDays(1);
+    if (isolateTimeSlots == null) isolateTimeSlots = this.fetchIsolateTimeSlots();
+    if (volunteerTimeSlots == null) volunteerTimeSlots = this.fetchVolunteerTimeSlots();
 
-    deletePreviousMatches(this.date, this.datastore);
+    deletePreviousMatches(date, datastore);
 
     final Set<IsolateTimeSlot> matches = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
 
