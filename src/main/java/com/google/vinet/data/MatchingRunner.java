@@ -162,8 +162,8 @@ public class MatchingRunner {
 
     for (Entity entity : preparedQuery.asIterable(fetchOptions)) {
       final Volunteer volunteer = new Volunteer((String) entity.getProperty("userId"));
-      final Instant start = Instant.parse((String) entity.getProperty("startTime"));
-      final Instant end = Instant.parse((String) entity.getProperty("endTime"));
+      final Instant start = Instant.parse((String) entity.getProperty("start"));
+      final Instant end = Instant.parse((String) entity.getProperty("end"));
       final VolunteerTimeSlot volunteerTimeSlot = new VolunteerTimeSlot(start, end, volunteer);
       timeSlots.add(volunteerTimeSlot);
     }
