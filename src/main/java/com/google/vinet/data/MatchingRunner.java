@@ -48,7 +48,8 @@ public class MatchingRunner {
 
   /**
    * Run the matching algorithm and store the results in DataStore.
-   * Any necessary data that is not already set will be pulled from DataStore.
+   * Any necessary data that is not already set will be pulled from DataStore, with an assumption
+   * that matches should be created that will be scheduled for tomorrow.
    */
   public void run() {
     if (datastore == null) datastore = DatastoreServiceFactory.getDatastoreService();
