@@ -19,6 +19,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Volunteer Matcher</title>
+    <%@ include file="/bootstrap-css.html" %>
     <script src="availability.js"></script>
 </head>
 <body onload="initialise();">
@@ -33,5 +34,7 @@
 </form>
 
 </body>
+<!-- Include necessary js libraries for bootstrap functionality. -->
+<%@ include file="/bootstrap-js.html" %>
 </html>
 
