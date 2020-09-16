@@ -55,6 +55,12 @@ public class RequestServlet extends HttpServlet {
     this.registrationServlet = registrationServlet;
   }
 
+  /**
+   * Post an Isolate's request to the servlet. Both the request and its tickets will be put into the DataStore.
+   * @param request The request to be read.
+   * @param response The response to be written to.
+   * @throws IOException If an IOException occurs while reading from the request or writing to the reponse.
+   */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
