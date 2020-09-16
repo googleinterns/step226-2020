@@ -25,6 +25,9 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.*;
 
+/**
+ * A TimeSlot during which an Isolate is due to have a request fulfilled.
+ */
 public class IsolateTimeSlot extends TimeSlot implements Datastoreable {
   /** The Datastore Entity name for an IsolateTimeSlot. */
   protected static final String ISOLATE_TIME_SLOT_TABLE_NAME = "IsolateTimeSlot";
