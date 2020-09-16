@@ -84,7 +84,7 @@ public class IsolateTimeSlot extends TimeSlot implements Datastoreable{
   }
 
   /**
-   * Put this IsolateTimeSlot into Datstore.
+   * Put this IsolateTimeSlot into Datastore.
    */
   @Override
   public void toDatastore() {
