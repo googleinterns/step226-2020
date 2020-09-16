@@ -63,7 +63,7 @@ public class IsolateTimeSlot extends TimeSlot implements Datastoreable {
    *              {@link java.lang.String}
    *          </td>
    *          <td>
-   *              The start time of the delivry window.
+   *              The start time of the delivery window.
    *          </td>
    *      </tr>
    *      <tr>
