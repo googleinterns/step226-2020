@@ -19,7 +19,6 @@ package com.google.vinet.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.DatastoreFailureException;
-import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.UserService;
@@ -36,19 +35,35 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.stream.Stream;
 
+/**
+ * A web servlet for posting user requests.
+ */
 @WebServlet("/request")
 public class RequestServlet extends HttpServlet {
+  /** The Datastore entity name for the ticket(s) associated with a request. */
   public static final String TICKET_TABLE_NAME = "Ticket";
+  /** The {@code DatastoreService} implementation that this {@code RequestServlet depends on}. */
   private final DatastoreService datastore;
+  /** The {@code UserService} implementation that this {@code RequestServlet depends on}. */
   private final UserService userService;
+  /** The {@code RegistrationServlet} implementation that this {@code RequestServlet depends on}. */
   private final RegistrationServlet registrationServlet;
 
+  /**
+   * Construct a RequestServlet with all of its dependencies set to their default implementations.
+   */
   public RequestServlet() {
     this.datastore = DatastoreServiceFactory.getDatastoreService();
     this.userService = UserServiceFactory.getUserService();
     this.registrationServlet = new RegistrationServlet();
   }
 
+  /**
+   * Construct a RequestServlet which depends on the provided dependencies.
+   * @param datastore The DatastoreService implementation to depend on.
+   * @param userService The UserService implementation to depend on.
+   * @param registrationServlet The RegistrationServlet implementation to depend on.
+   */
   public RequestServlet(DatastoreService datastore, UserService userService, RegistrationServlet registrationServlet) {
     this.datastore = datastore;
     this.userService = userService;
