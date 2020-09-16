@@ -139,16 +139,29 @@ public class IsolateTimeSlot extends TimeSlot implements Datastoreable {
     this.ticket = ticket;
   }
 
+  /**
+   * @return the {@link Isolate} which this IsolateTimeSlot is linked to.
+   */
   public Isolate getIsolate() {
     return (Isolate) registeredUser;
   }
 
+  /**
+   * Fetch an Isolate's TimeSlots from Datastore.
+   * @param userId The ID of the Isolate who's TimeSlots will be fetched from Datastore.
+   * @return The TimeSlots currently in Datastore associated with the provided Isolate's userID.
+   */
   public static List<IsolateTimeSlot> getTimeslotsByUserId(String userId) {
     return StreamSupport.stream(queryTimeSlots(userId).asIterable().spliterator(), true)
         .map(IsolateTimeSlot::new)
         .collect(Collectors.toList());
   }
 
+  /**
+   * Create a PreparedQuery for Datastore that will return the IsolateTimeSlots associated with the provided userId.
+   * @param userId The ID of the Isolate who's TimeSlots will be returned by the PreparedQuery.
+   * @return A PreparedQuery which, when executed, will return the IsolateTimeSlots linked to the provided Isolate's userID.
+   */
   private static PreparedQuery queryTimeSlots(String userId) {
     Query query =
         new Query(ISOLATE_TIME_SLOT_TABLE_NAME)
