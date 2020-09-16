@@ -106,7 +106,9 @@ public class IsolateTimeSlot extends TimeSlot implements Datastoreable {
    *          <td>
    *              {@link com.google.appengine.api.datastore.Key}
    *          </td>
-   *          The Datastore key of the ticket associated with this IsolateTimeSlot.
+   *          <td>
+   *              The Datastore key of the ticket associated with this IsolateTimeSlot.
+   *          </td>
    *      </tr>
    *  </table>
    *
