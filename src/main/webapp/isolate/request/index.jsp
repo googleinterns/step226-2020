@@ -27,6 +27,7 @@
     <div class="row">
       <div class="column">
         <h1>Please submit your request below.</h1>
+        <h2 class="alert alert-warning">Note: Requests will only be accepted up until 8pm each day.</h2>
       </div>
     </div>
     <%@ include file = "request-form.html" %>
