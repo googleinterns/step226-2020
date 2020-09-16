@@ -85,7 +85,7 @@ public class RegistrationServlet extends HttpServlet {
 
       UserType userType = null;
       final Set<String> propertyNames =
-              Sets.newHashSet("firstname", "lastname", "type", "latitude", "longitude");
+          Sets.newHashSet("firstname", "lastname", "type", "latitude", "longitude");
       final Map<String, String[]> parameterMap = request.getParameterMap();
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -95,7 +95,7 @@ public class RegistrationServlet extends HttpServlet {
       for (String propertyName : propertyNames) {
         final String[] parameterArray;
         if (!parameterMap.containsKey(propertyName)
-                || (parameterArray = parameterMap.get(propertyName)).length < 1) {
+            || (parameterArray = parameterMap.get(propertyName)).length < 1) {
           System.err.printf("Missing parameter %s for registration request!\n", propertyName);
           return;
         }
@@ -163,9 +163,7 @@ public class RegistrationServlet extends HttpServlet {
     }
   }
 
-  /**
-   * Returns whether the logged-in User has registered with the service.
-   */
+  /** Returns whether the logged-in User has registered with the service. */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     if (response == null) {
@@ -182,25 +180,23 @@ public class RegistrationServlet extends HttpServlet {
     }
 
     final boolean registered;
-    try{
+    try {
       registered = isUserRegistered(this.userService);
-    } catch(RuntimeException ex){
+    } catch (RuntimeException ex) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       return;
     }
 
     final Gson gson = new Gson();
-    
-    try{
+
+    try {
       response.getWriter().println(gson.toJson(registered));
     } catch (Exception ex) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 
-
-
-  public boolean isUserRegistered(UserService userService) throws RuntimeException{
+  public boolean isUserRegistered(UserService userService) throws RuntimeException {
     final PreparedQuery preparedQuery = getUserQuery(userService);
 
     final Entity userEntity = getSingleEntity(preparedQuery);
@@ -213,19 +209,19 @@ public class RegistrationServlet extends HttpServlet {
     return registered;
   }
 
-  public boolean isUserIsolate(UserService userService) throws RuntimeException{
+  public boolean isUserIsolate(UserService userService) throws RuntimeException {
     final UserType type = getUserType(userService);
 
     return type == UserType.ISOLATE;
   }
 
-  public boolean isUserVolunteer(UserService userService) throws RuntimeException{
+  public boolean isUserVolunteer(UserService userService) throws RuntimeException {
     final UserType type = getUserType(userService);
 
     return type == UserType.VOLUNTEER;
   }
 
-  public UserType getUserType(UserService userService) throws RuntimeException{
+  public UserType getUserType(UserService userService) throws RuntimeException {
     final PreparedQuery preparedQuery = getUserQuery(userService);
 
     final Entity userEntity = getSingleEntity(preparedQuery);
@@ -245,7 +241,7 @@ public class RegistrationServlet extends HttpServlet {
     return type;
   }
 
-  public Entity getSingleEntity(PreparedQuery preparedQuery) throws RuntimeException{
+  public Entity getSingleEntity(PreparedQuery preparedQuery) throws RuntimeException {
     final Entity entity;
 
     /* Try to retrieve the results of the query as a single Entity.
@@ -257,7 +253,7 @@ public class RegistrationServlet extends HttpServlet {
      */
     try {
       entity = preparedQuery.asSingleEntity();
-    } catch(TooManyResultsException exception) {
+    } catch (TooManyResultsException exception) {
       throw exception;
     } catch (IllegalStateException exception) {
       throw exception;
@@ -266,7 +262,7 @@ public class RegistrationServlet extends HttpServlet {
     return entity;
   }
 
-  public PreparedQuery getUserQuery(UserService userService) throws RuntimeException{
+  public PreparedQuery getUserQuery(UserService userService) throws RuntimeException {
     final User user = userService.getCurrentUser();
     final String userId = user.getUserId();
 
@@ -287,9 +283,10 @@ public class RegistrationServlet extends HttpServlet {
 
   /**
    * Wrapper around {@code KeyFactory.keyToString(String s)}, used to allow stubbing during tests.
+   *
    * @param s The String to pass to {@code KeyFactory.keyToString(String s)}.
    */
-  public Key stringToKey(String s){
+  public Key stringToKey(String s) {
     return KeyFactory.stringToKey(s);
   }
 }
