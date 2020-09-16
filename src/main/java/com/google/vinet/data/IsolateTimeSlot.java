@@ -26,12 +26,21 @@ import java.util.*;
 import java.util.stream.*;
 
 public class IsolateTimeSlot extends TimeSlot implements Datastoreable{
+  /** The Datastore Entity name for an IsolateTimeSlot. */
   protected final static String ISOLATE_TIME_SLOT_TABLE_NAME = "IsolateTimeSlot";
-
+  /** The ticket associated with this TimeSlot. */
   protected final Key ticket;
+  /** The date this IsolateTimeSlot is scheduled on. */
   protected final LocalDate date;
+  /** The DatastoreService implementation to depend on. */
   public static DatastoreService datastore;
 
+  /**
+   * Construct an IsolateTimeSlot using the properties of the provided Datastore {@code Entity}
+   * @param entity The entity to pull data from in order to construct this IsolateTimeSlot.
+   * @see <a href="https://cloud.google.com/appengine/docs/standard/java/javadoc/com/google/appengine/api/datastore/Entity.html">
+   *     The Datastore documentation on the {@code Entity} class.</a>
+   */
   public IsolateTimeSlot(Entity entity){
     this(
         Instant.parse((String)entity.getProperty("startTime")),
