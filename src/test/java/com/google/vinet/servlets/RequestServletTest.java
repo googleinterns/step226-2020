@@ -76,7 +76,7 @@ public class RequestServletTest {
   @Test
   public void testGetLoggedOutRegistered() throws Exception {
     when(userService.isUserLoggedIn()).thenReturn(false);
-    when(registrationServlet.isUserRegistered(any())).thenReturn(true);
+    when(registrationServlet.isUserRegistered()).thenReturn(true);
     
     requestServlet.doGet(request, response);
 
@@ -97,7 +97,7 @@ public class RequestServletTest {
   @Test
   public void testGetLoggedOutNotRegistered() throws Exception {
     when(userService.isUserLoggedIn()).thenReturn(false);
-    when(registrationServlet.isUserRegistered(any())).thenReturn(false);
+    when(registrationServlet.isUserRegistered()).thenReturn(false);
     
     requestServlet.doGet(request, response);
 
@@ -118,7 +118,7 @@ public class RequestServletTest {
   @Test
   public void testGetLoggedInRegistered() throws Exception {
     when(userService.isUserLoggedIn()).thenReturn(true);
-    when(registrationServlet.isUserRegistered(any())).thenReturn(true);
+    when(registrationServlet.isUserRegistered()).thenReturn(true);
 
     requestServlet.doGet(request, response);
 
@@ -139,7 +139,7 @@ public class RequestServletTest {
   @Test
   public void testGetLoggedInNotRegistered() throws Exception {
     when(userService.isUserLoggedIn()).thenReturn(true);
-    when(registrationServlet.isUserRegistered(any())).thenReturn(false);
+    when(registrationServlet.isUserRegistered()).thenReturn(false);
 
     requestServlet.doGet(request, response);
 
@@ -160,7 +160,7 @@ public class RequestServletTest {
   @Test
   public void testGetNullKey() throws Exception {
     when(userService.isUserLoggedIn()).thenReturn(true);
-    when(registrationServlet.isUserRegistered(any())).thenReturn(true);
+    when(registrationServlet.isUserRegistered()).thenReturn(true);
 
     when(request.getParameter("key")).thenReturn(null);
 
@@ -177,7 +177,7 @@ public class RequestServletTest {
   @Test
   public void testGetEmptyKey() throws Exception {
     when(userService.isUserLoggedIn()).thenReturn(true);
-    when(registrationServlet.isUserRegistered(any())).thenReturn(true);
+    when(registrationServlet.isUserRegistered()).thenReturn(true);
 
     when(request.getParameter("key")).thenReturn("    \t\t\t\n\n\n");
 
@@ -195,7 +195,7 @@ public class RequestServletTest {
   @Test
   public void testGetInvalidKey() throws Exception {
     when(userService.isUserLoggedIn()).thenReturn(true);
-    when(registrationServlet.isUserRegistered(any())).thenReturn(true);
+    when(registrationServlet.isUserRegistered()).thenReturn(true);
 
     when(request.getParameter("key")).thenReturn("key that is invalid");
     when(registrationServlet.stringToKey(anyString())).thenReturn(mock(Key.class));
@@ -215,7 +215,7 @@ public class RequestServletTest {
   @Test
   public void testGetKeyNotFound() throws Exception {
     when(userService.isUserLoggedIn()).thenReturn(true);
-    when(registrationServlet.isUserRegistered(any())).thenReturn(true);
+    when(registrationServlet.isUserRegistered()).thenReturn(true);
 
     when(request.getParameter("key")).thenReturn("key that can't be found");
     when(registrationServlet.stringToKey(anyString())).thenReturn(mock(Key.class));
@@ -237,7 +237,7 @@ public class RequestServletTest {
   @Test
   public void testGetDatastoreFailed() throws Exception {
     when(userService.isUserLoggedIn()).thenReturn(true);
-    when(registrationServlet.isUserRegistered(any())).thenReturn(true);
+    when(registrationServlet.isUserRegistered()).thenReturn(true);
 
     when(request.getParameter("key")).thenReturn("key that will cause datastore to fail");
     when(registrationServlet.stringToKey(anyString())).thenReturn(mock(Key.class));
