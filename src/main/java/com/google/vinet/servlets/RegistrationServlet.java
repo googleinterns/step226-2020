@@ -41,26 +41,41 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Web Servlet for registering a User with the service, and checking a User's registration status.
+ */
 @WebServlet("/registration")
 public class RegistrationServlet extends HttpServlet {
-
+  /** The minimum allowable length for the "name" attributes of a User. */
   private static final int MIN_NAME_LENGTH = 2;
+  /** The maximum allowable length for the "name" attributes of a User. */
   private static final int MAX_NAME_LENGTH = 300;
-  private static final String USER_TABLE_NAME = "UserInfo";
+  /** The Datastore Entity name for the User's information. */
+  public static final String USER_TABLE_NAME = "UserInfo";
+  /** The homepage for the Isolate user group. */
   public static final String ISOLATE_HOME_PAGE = "/isolate/home.html";
+  /** The homepage for the Volunteer user group. */
   public static final String VOLUNTEER_HOME_PAGE = "/volunteer/home.html";
-
+  
   private enum UserType {
     ISOLATE,
     VOLUNTEER
   }
 
+  /** The UserService implementation that this RegistrationServlet depends on. */
   private UserService userService;
 
+  /**
+   * Construct a Registrationservlet with its dependencies set to their default implementations.
+   */
   public RegistrationServlet() {
     this.userService = UserServiceFactory.getUserService();
   }
 
+  /**
+   * Set the UserService implementation that this RegistrationServlet will depend on.
+   * @param userService
+   */
   public void setUserService(UserService userService) {
     this.userService = userService;
   }
@@ -181,7 +196,7 @@ public class RegistrationServlet extends HttpServlet {
 
     final boolean registered;
     try {
-      registered = isUserRegistered(this.userService);
+      registered = isUserRegistered();
     } catch (RuntimeException ex) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       return;
@@ -196,9 +211,12 @@ public class RegistrationServlet extends HttpServlet {
     }
   }
 
-  public boolean isUserRegistered(UserService userService) throws RuntimeException {
-    final PreparedQuery preparedQuery = getUserQuery(userService);
-
+  /**
+   * @return true, if the currently logged in User is registered.
+   */
+  public boolean isUserRegistered()  {
+    final PreparedQuery preparedQuery = getUserQuery();
+    
     final Entity userEntity = getSingleEntity(preparedQuery);
 
     /* If the query returns a non-null value, then the User is registered.
@@ -209,20 +227,23 @@ public class RegistrationServlet extends HttpServlet {
     return registered;
   }
 
-  public boolean isUserIsolate(UserService userService) throws RuntimeException {
-    final UserType type = getUserType(userService);
+  /** @return true, if the currently logged in User is registered as an Isolate. */
+  public boolean isUserIsolate()  {
+    final UserType type = getUserType();
 
     return type == UserType.ISOLATE;
   }
 
-  public boolean isUserVolunteer(UserService userService) throws RuntimeException {
-    final UserType type = getUserType(userService);
+  /** @return true, if the currently logged in User is registered as an Volunteer. */
+  public boolean isUserVolunteer()  {
+    final UserType type = getUserType();
 
     return type == UserType.VOLUNTEER;
   }
 
-  public UserType getUserType(UserService userService) throws RuntimeException {
-    final PreparedQuery preparedQuery = getUserQuery(userService);
+  /** @return the UserType of the currently logged in User. */
+  public UserType getUserType()  {
+    final PreparedQuery preparedQuery = getUserQuery();
 
     final Entity userEntity = getSingleEntity(preparedQuery);
 
@@ -241,7 +262,12 @@ public class RegistrationServlet extends HttpServlet {
     return type;
   }
 
-  public Entity getSingleEntity(PreparedQuery preparedQuery) throws RuntimeException {
+  /**
+   * Get the single result of executing the provided PreparedQuery.
+   * @param preparedQuery The PreparedQuery to execute.
+   * @return The single result of executing the provided PreparedQuery.
+   */
+  public Entity getSingleEntity(PreparedQuery preparedQuery)  {
     final Entity entity;
 
     /* Try to retrieve the results of the query as a single Entity.
@@ -262,7 +288,8 @@ public class RegistrationServlet extends HttpServlet {
     return entity;
   }
 
-  public PreparedQuery getUserQuery(UserService userService) throws RuntimeException {
+  /** @return a PreparedQuery for accessing the currently logged in User's information. */
+  public PreparedQuery getUserQuery()  {
     final User user = userService.getCurrentUser();
     final String userId = user.getUserId();
 
@@ -286,7 +313,7 @@ public class RegistrationServlet extends HttpServlet {
    *
    * @param s The String to pass to {@code KeyFactory.keyToString(String s)}.
    */
-  public Key stringToKey(String s) {
+  protected Key stringToKey(String s) {
     return KeyFactory.stringToKey(s);
   }
 }
