@@ -95,7 +95,7 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    final boolean registered = registrationServlet.isUserRegistered(this.userService);
+    final boolean registered = registrationServlet.isUserRegistered();
 
     if (!registered) {
       response.sendError(
@@ -105,7 +105,7 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    final boolean isIsolate = registrationServlet.isUserIsolate(this.userService);
+    final boolean isIsolate = registrationServlet.isUserIsolate();
 
     if (!isIsolate) {
       response.sendError(
@@ -274,7 +274,7 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    final boolean registered = registrationServlet.isUserRegistered(this.userService);
+    final boolean registered = registrationServlet.isUserRegistered();
 
     if (!registered) {
       response.sendError(
