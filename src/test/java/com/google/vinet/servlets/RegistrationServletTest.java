@@ -16,6 +16,9 @@
 
 package com.google.vinet.servlets;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
@@ -38,7 +41,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,6 +52,8 @@ public class RegistrationServletTest {
 
   @Mock
   UserService userService;
+  @Mock
+  DatastoreService datastore;
   @Mock
   HttpServletRequest request;
   @Mock
@@ -366,5 +374,97 @@ public class RegistrationServletTest {
             "-85.300738");
     assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("Parameter lastname is not within length bounds!", getErrors());
+  }
+
+  /**
+   * Assert that an IllegalArgumentException is thrown when the request parameter is null.
+   */
+  @Test
+  public void testGetNullRequest() throws Exception {
+    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      registrationServlet.doGet(null, response);
+    });
+
+    assertEquals("request must not be null", exception.getMessage());
+  }
+
+  /**
+   * Assert that an IllegalArgumentException is thrown when the response parameter is null.
+   */
+  @Test
+  public void testGetNullResponse() throws Exception {
+    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      registrationServlet.doGet(request, null);
+    });
+
+    assertEquals("response must not be null", exception.getMessage());
+  }
+
+  @Test
+  public void testGetUserNotLoggedIn() throws Exception {
+    when(userService.isUserLoggedIn()).thenReturn(false);
+    registrationServlet.doGet(request, response);
+    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+  }
+
+  @Test
+  public void testGetUserLoggedInNotRegistered() throws Exception {
+    final String userId = "userid";
+
+    User user = mock(User.class);
+    when(user.getUserId()).thenReturn(userId);
+
+    when(userService.isUserLoggedIn()).thenReturn(true);
+    when(userService.getCurrentUser()).thenReturn(user);
+
+    PreparedQuery preparedQuery = mock(PreparedQuery.class);
+    when(preparedQuery.asSingleEntity()).thenReturn(null);
+
+    when(registrationServlet.getUserQuery()).thenReturn(preparedQuery);
+
+    registrationServlet.doGet(request, response);
+    verify(response.getWriter()).println("false");
+  }
+
+  @Test
+  public void testGetUserLoggedInRegisteredAsVolunteer() throws Exception {
+    final String userId = "userid";
+
+    User user = mock(User.class);
+    when(user.getUserId()).thenReturn(userId);
+
+    when(userService.isUserLoggedIn()).thenReturn(true);
+    when(userService.getCurrentUser()).thenReturn(user);
+
+    Entity entity = mock(Entity.class);
+    when(entity.getProperty("type")).thenReturn("VOLUNTEER");
+    PreparedQuery preparedQuery = mock(PreparedQuery.class);
+    when(preparedQuery.asSingleEntity()).thenReturn(entity);
+
+    when(registrationServlet.getUserQuery()).thenReturn(preparedQuery);
+
+    registrationServlet.doGet(request, response);
+    verify(response.getWriter()).println("true");
+  }
+
+  @Test
+  public void testGetUserLoggedInRegisteredAsIsolate() throws Exception {
+    final String userId = "userid";
+
+    User user = mock(User.class);
+    when(user.getUserId()).thenReturn(userId);
+
+    when(userService.isUserLoggedIn()).thenReturn(true);
+    when(userService.getCurrentUser()).thenReturn(user);
+
+    Entity entity = mock(Entity.class);
+    when(entity.getProperty("type")).thenReturn("ISOLATE");
+    PreparedQuery preparedQuery = mock(PreparedQuery.class);
+    when(preparedQuery.asSingleEntity()).thenReturn(entity);
+
+    when(registrationServlet.getUserQuery()).thenReturn(preparedQuery);
+
+    registrationServlet.doGet(request, response);
+    verify(response.getWriter()).println("true");
   }
 }
