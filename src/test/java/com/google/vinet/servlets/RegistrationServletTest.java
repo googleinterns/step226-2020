@@ -424,7 +424,13 @@ public class RegistrationServletTest {
 
   @Test
   public void testGetUserLoggedInRegisteredAsVolunteer() throws Exception {
+    final String userId = "userid";
+
+    User user = mock(User.class);
+    when(user.getUserId()).thenReturn(userId);
+
     when(userService.isUserLoggedIn()).thenReturn(true);
+    when(userService.getCurrentUser()).thenReturn(user);
 
     Entity entity = mock(Entity.class);
     when(entity.getProperty("type")).thenReturn("VOLUNTEER");
@@ -442,7 +448,13 @@ public class RegistrationServletTest {
 
   @Test
   public void testGetUserLoggedInRegisteredAsIsolate() throws Exception {
+    final String userId = "userid";
+
+    User user = mock(User.class);
+    when(user.getUserId()).thenReturn(userId);
+
     when(userService.isUserLoggedIn()).thenReturn(true);
+    when(userService.getCurrentUser()).thenReturn(user);
 
     Entity entity = mock(Entity.class);
     when(entity.getProperty("type")).thenReturn("ISOLATE");
