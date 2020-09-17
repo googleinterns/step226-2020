@@ -64,20 +64,31 @@ public class RegistrationServlet extends HttpServlet {
 
   /** The UserService implementation that this RegistrationServlet depends on. */
   private UserService userService;
+  /** The UserService implementation that this RegistrationServlet depends on. */
+  private DatastoreService datastore;
 
   /**
    * Construct a Registrationservlet with its dependencies set to their default implementations.
    */
   public RegistrationServlet() {
     this.userService = UserServiceFactory.getUserService();
+    this.datastore = DatastoreServiceFactory.getDatastoreService();
   }
 
   /**
    * Set the UserService implementation that this RegistrationServlet will depend on.
-   * @param userService
+   * @param userService The UserService implementation to be used.
    */
   public void setUserService(UserService userService) {
     this.userService = userService;
+  }
+
+  /**
+   * Set the DatastoreService implementation that this RegistrationServlet will depend on.
+   * @param datastore The DatastoreService implementation to be used.
+   */
+  public void setDatastore(DatastoreService datastore) {
+    this.datastore  = datastore;
   }
 
   @Override
@@ -302,7 +313,6 @@ public class RegistrationServlet extends HttpServlet {
     final Filter userIdFilter = new FilterPredicate("userId", FilterOperator.EQUAL, userId);
     final Query query = new Query(USER_TABLE_NAME).setFilter(userIdFilter);
 
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     final PreparedQuery preparedQuery = datastore.prepare(query);
 
     return preparedQuery;
