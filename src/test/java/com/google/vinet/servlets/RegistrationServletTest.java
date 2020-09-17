@@ -23,6 +23,7 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import java.io.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -35,14 +36,12 @@ import org.mockito.MockitoAnnotations;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -64,7 +63,7 @@ public class RegistrationServletTest {
   RegistrationServlet registrationServlet;
 
   private static final LocalServiceTestHelper helper =
-          new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
   private static ByteArrayOutputStream errorStream;
 
@@ -127,7 +126,7 @@ public class RegistrationServletTest {
    * Sets the HTTP request parameters. Can also be used to pass null values.
    */
   private void setRequestParameters(
-          String firstname, String lastname, String type, String latitude, String longitude) {
+      String firstname, String lastname, String type, String latitude, String longitude) {
     Map<String, String[]> parameterMap = new HashMap<>();
     parameterMap.put("firstname", new String[]{firstname});
     parameterMap.put("lastname", new String[]{lastname});
@@ -141,7 +140,7 @@ public class RegistrationServletTest {
    * Sets HTTP request parameters, but only if each value is not null
    */
   private void setNonNullRequestParameters(
-          String firstname, String lastname, String type, String latitude, String longitude) {
+      String firstname, String lastname, String type, String latitude, String longitude) {
     Map<String, String[]> parameterMap = new HashMap<>();
     if (firstname != null) parameterMap.put("firstname", new String[]{firstname});
     if (lastname != null) parameterMap.put("lastname", new String[]{lastname});
@@ -318,7 +317,7 @@ public class RegistrationServletTest {
   public void testPostBlankLongitude() {
     setupUser();
     setNonNullRequestParameters(
-            "afirstname", "alastname", "volunteer", "-85.300738", "                    ");
+        "afirstname", "alastname", "volunteer", "-85.300738", "                    ");
     checkBlankParameter("longitude");
   }
 
@@ -326,7 +325,7 @@ public class RegistrationServletTest {
   public void testPostInvalidType() {
     setupUser();
     setNonNullRequestParameters(
-            "afirstname", "alastname", "ekugfghweig", "-85.300738", "-85.300738");
+        "afirstname", "alastname", "ekugfghweig", "-85.300738", "-85.300738");
     assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("Wrong type parameter!", getErrors());
   }
@@ -367,11 +366,11 @@ public class RegistrationServletTest {
   public void testPostLongLastname() {
     setupUser();
     setNonNullRequestParameters(
-            "abenthy",
-            "alas tnamewbfjhukfjg orejg rg e3bfudrebjuhegujyddkuifheruigfh rui54rit y34795ty 87345 t785r4yh t845rht 875ryt 9875ry t5 54 yt54 y54 y654y ygffgh rth trh trh th t th thgrthrthrthrthtrhtrhtrhtrhrthrthtrhtrhthrthtrhtrhtrrrrrrrrrrrrrrrrrrevuyjeduyedgfjuyewgfruyefruyegfruye4g uye4wruywe4g uye4grfuywe4g rfuye4gfruye4w guyrf e4",
-            "isolate",
-            "-85.300738",
-            "-85.300738");
+        "abenthy",
+        "alas tnamewbfjhukfjg orejg rg e3bfudrebjuhegujyddkuifheruigfh rui54rit y34795ty 87345 t785r4yh t845rht 875ryt 9875ry t5 54 yt54 y54 y654y ygffgh rth trh trh th t th thgrthrthrthrthtrhtrhtrhtrhrthrthtrhtrhthrthtrhtrhtrrrrrrrrrrrrrrrrrrevuyjeduyedgfjuyewgfruyefruyegfruye4g uye4wruywe4g uye4grfuywe4g rfuye4gfruye4w guyrf e4",
+        "isolate",
+        "-85.300738",
+        "-85.300738");
     assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("Parameter lastname is not within length bounds!", getErrors());
   }
@@ -385,7 +384,7 @@ public class RegistrationServletTest {
       registrationServlet.doGet(null, response);
     });
 
-    assertEquals("request must not be null", exception.getMessage());
+    assertEquals("request cannot be null", exception.getMessage());
   }
 
   /**
@@ -397,7 +396,7 @@ public class RegistrationServletTest {
       registrationServlet.doGet(request, null);
     });
 
-    assertEquals("response must not be null", exception.getMessage());
+    assertEquals("response cannot be null", exception.getMessage());
   }
 
   @Test
@@ -422,8 +421,11 @@ public class RegistrationServletTest {
 
     when(registrationServlet.getUserQuery()).thenReturn(preparedQuery);
 
+    PrintWriter pw = mock(PrintWriter.class);
+    when(response.getWriter()).thenReturn(pw);
+
     registrationServlet.doGet(request, response);
-    verify(response.getWriter()).println("false");
+    verify(pw).println("false");
   }
 
   @Test
@@ -443,8 +445,11 @@ public class RegistrationServletTest {
 
     when(registrationServlet.getUserQuery()).thenReturn(preparedQuery);
 
+    PrintWriter pw = mock(PrintWriter.class);
+    when(response.getWriter()).thenReturn(pw);
+
     registrationServlet.doGet(request, response);
-    verify(response.getWriter()).println("true");
+    verify(pw).println("true");
   }
 
   @Test
@@ -464,7 +469,10 @@ public class RegistrationServletTest {
 
     when(registrationServlet.getUserQuery()).thenReturn(preparedQuery);
 
+    PrintWriter pw = mock(PrintWriter.class);
+    when(response.getWriter()).thenReturn(pw);
+
     registrationServlet.doGet(request, response);
-    verify(response.getWriter()).println("true");
+    verify(pw).println("true");
   }
 }
