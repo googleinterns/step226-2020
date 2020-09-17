@@ -27,7 +27,6 @@ import com.google.gson.*;
 
 import com.google.vinet.data.*;
 import java.time.*;
-import java.util.*;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -246,54 +245,6 @@ public class RequestServlet extends HttpServlet {
     }
 
     response.sendRedirect("/isolate/home.html");
-  }
-
-  /**
-   * Get all of the requests posted by the current user as JSON.
-   * @param request The request to be read.
-   * @param response The response to be written to.
-   * @throws IOException If an IOException occurs while reading from the request or writing to the response.
-   * @deprecated Please use {@link IsolateRequestServlet.doGet} instead
-   */
-  @Deprecated
-  @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException{
-    if (response == null) {
-      throw new IllegalArgumentException("response must not be null");
-    }
-
-    if (request == null) {
-      throw new IllegalArgumentException("request must not be null");
-    }
-
-    if (!this.userService.isUserLoggedIn()) {
-      response.sendError(
-          HttpServletResponse.SC_UNAUTHORIZED,
-          "user must be logged in to fetch a request"
-      );
-      return;
-    }
-
-    final boolean registered = registrationServlet.isUserRegistered();
-
-    if (!registered) {
-      response.sendError(
-          HttpServletResponse.SC_UNAUTHORIZED,
-          "user must be registered to fetch a request"
-      );
-      return;
-    }
-
-    IsolateTimeSlot.datastore = this.datastore;
-    final List<IsolateTimeSlot> timeSlots = IsolateTimeSlot.getTimeslotsByUserId(this.userService.getCurrentUser().getUserId());
-
-    try{
-      Gson gson = new GsonBuilder().setPrettyPrinting().create();
-      response.getWriter().println(gson.toJson(timeSlots));
-    } catch (Exception exception) {
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      throw exception;
-    }
   }
 
   /**
