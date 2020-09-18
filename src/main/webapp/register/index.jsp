@@ -22,6 +22,7 @@
   <title>Registration</title>
   <%@ include file="/bootstrap-css.html" %>
   <script src="maps.js"></script>
+  <script src="scripts/registration.js"></script>
   <!-- 
       TODO: ADD PRODUCTION KEY TO appengine-web.xml BEFORE DEPLOYMENT
       This app cannot be deployed without inserting your production API key into the MAPS_KEY

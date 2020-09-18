@@ -1,44 +1,49 @@
-<form id="isolate-registration-form" method="POST" action="/registration">
+<form id="registration-form">
   <div class="form-group">
+    <label for="firstname">First Name</label>
     <input
         type="text"
         name="firstname"
+        id="firstname"
         placeholder="First Name"
         required
         minlength="2"
         maxlength="300"
         class="form-control col">
   </div>
+  <label for="firstname">Last Name</label>
   <div class="form-group">
     <input
         type="text"
         name="lastname"
+        id="lastname"
         placeholder="Last Name"
         required
         minlength="2"
         maxlength="300"
         class="form-control col">
   </div>
-  <div class="form-group row">
-    <label for="type" class="col-form-label"><h6>I am a:&nbsp;</h6></label>
-    <div class="col">
-      <select name="type" id="type" class="form-control">
-        <option value="volunteer">Volunteer, available to give help.</option>
-        <option value="isolate">Isolate, looking to get help.</option>
-      </select>
+  <div class="form-group">
+    <label for="type">
+      Please select the below option that best describes your reason for registration:
+    </label>
+    <select name="type" id="type" class="form-control w-auto">
+      <option value="volunteer">I am a volunteer, available to give help.</option>
+      <option value="isolate">I am an isolate, looking to get help.</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="address-textinput">Address:</label>
+    <div class="alert alert-info" role="alert">
+      If you are isolating, please register with your <b>isolation address.</b>
     </div>
-  </div>
-  <div class="row">
-    <h4>
-      Please select your isolation address on the below map.
-    </h4>
-  </div>
-  <div class="row">
     <input
       type="text"
       id="address-textinput"
       placeholder="Address"
-      class="form-control w-75">
+      class="form-control">
+  </div>
+  <div class="form-group">
     <div id="map" class="w-100" style="height: 400px"></div>
   </div>
   <input
@@ -52,6 +57,35 @@
       id="latitude"
       required>
   <div class="form-group">
-    <button type="submit" class="btn btn-primary col">Register</button>
+    <button type="button" onclick="checkFormInputs().then()" id="registration-submit" class="btn btn-primary col">Register</button>
   </div>
 </form>
+
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-success">Registration Success!</h5>
+      </div>
+      <div class="modal-body" id="successModalBody">
+        <h3>Thank you for registering with VINet! You will be redirected to the home page shortly.</h3>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="failureModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-danger">Registration Failure</h5>
+      </div>
+      <div class="modal-body">
+        <h3 id="failureModalText"></h3>
+      </div>
+      <div class="modal-footer" id="failureModalFooter">
+
+      </div>
+    </div>
+  </div>
+</div>

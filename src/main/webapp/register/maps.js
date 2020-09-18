@@ -153,7 +153,6 @@ const loadMapMarker = (map, position) => {
 const loadSearchBox = (map, marker) => {
   const textinput = document.getElementById('address-textinput');
   const searchBox = new google.maps.places.SearchBox(textinput);
-  map.controls[google.maps.ControlPosition.TOP_CENTER].push(textinput);
 
   // Listen for the event fired when the user selects a prediction and retrieve
   // more details for that place.
