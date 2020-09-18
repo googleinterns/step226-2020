@@ -44,14 +44,7 @@ public class MatchingAlgorithm {
    */
   public static Set<IsolateTimeSlot> matchTimeSlots(
           Set<IsolateTimeSlot> isolateTimeSlots, Set<VolunteerTimeSlot> volunteerTimeSlots) {
-
-    if (isolateTimeSlots == null || volunteerTimeSlots == null)
-      throw new IllegalArgumentException("Null argument!");
-
-    // Remove null nodes, if present
-    isolateTimeSlots.remove(null);
-    volunteerTimeSlots.remove(null);
-
+    validateTimeSlotsInput(isolateTimeSlots, volunteerTimeSlots);
     addEdges(isolateTimeSlots, volunteerTimeSlots);
     isolateTimeSlots.add(NIL_NODE);
 
@@ -64,6 +57,16 @@ public class MatchingAlgorithm {
     }
 
     return isolateTimeSlots.stream().filter(TimeSlot::isPaired).collect(Collectors.toSet());
+  }
+
+  private static void validateTimeSlotsInput(
+          Set<IsolateTimeSlot> isolateTimeSlots, Set<VolunteerTimeSlot> volunteerTimeSlots) {
+    if (isolateTimeSlots == null || volunteerTimeSlots == null)
+      throw new IllegalArgumentException("Null argument!");
+
+    // Remove null nodes, if present
+    isolateTimeSlots.remove(null);
+    volunteerTimeSlots.remove(null);
   }
 
   /**
