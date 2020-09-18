@@ -25,9 +25,13 @@ import java.time.LocalDate;
 import java.util.*;
 
 public class MatchingRunner {
+  /** The Datastore to be used when fetching data and writing results. */
   private DatastoreService datastore;
+  /** The TimeSlots for Isolate deliveries that should be matched. */
   private Set<IsolateTimeSlot> isolateTimeSlots;
+  /** The TimeSlots for Volunteer availability that should be matched. */
   private Set<VolunteerTimeSlot> volunteerTimeSlots;
+  /** The date whose matches will be computed. */
   private LocalDate date;
 
   /**
@@ -75,12 +79,12 @@ public class MatchingRunner {
 
   /**
    * Delete all matches from the provided Datastore that are scheduled before the provided date.
-   * @param date The cutoff date for deciding if a Match will be deleted.
+   * @param cutoffDate The cutoff date for deciding if a Match will be deleted.
    * @param datastore The Datastore from which Matches should be deleted.
    */
-  protected static void deletePreviousMatches(LocalDate date, DatastoreService datastore){
+  protected static void deletePreviousMatches(LocalDate cutoffDate, DatastoreService datastore){
     Query query = new Query("Matching")
-                          .setFilter(new FilterPredicate("date", FilterOperator.LESS_THAN, date.toString()))
+                          .setFilter(new FilterPredicate("date", FilterOperator.LESS_THAN, cutoffDate.toString()))
                               .setKeysOnly();
 
     PreparedQuery preparedQuery = datastore.prepare(query);
