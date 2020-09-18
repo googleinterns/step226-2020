@@ -40,7 +40,9 @@ public class MatchingServlet extends HttpServlet {
      * up to emulate a paging system.
      */
     try {
-      runner.run();
+      /* Run the matching algorithm, and delete all matches scheduled before today. Today's matches
+       * will not be deleted. */
+      runner.run(true);
     } catch (Exception exception) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       throw exception;

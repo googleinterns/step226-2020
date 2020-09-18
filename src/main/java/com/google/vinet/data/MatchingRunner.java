@@ -54,14 +54,20 @@ public class MatchingRunner {
    * Run the matching algorithm and store the results in DataStore.
    * Any necessary data that is not already set will be pulled from DataStore, with an assumption
    * that matches should be created that will be scheduled for tomorrow.
+   * @param deletePreviousMatches If set to true, all matches scheduled before today will be deleted;
+   *                              today's matches will not be deleted.
+   *                              If set to false, no deletions will be made.
    */
-  public void run() {
+  public void run(boolean deletePreviousMatches) {
     if (datastore == null) datastore = DatastoreServiceFactory.getDatastoreService();
     if (date == null) date = LocalDate.now().plusDays(1);
     if (isolateTimeSlots == null) isolateTimeSlots = this.fetchIsolateTimeSlots();
     if (volunteerTimeSlots == null) volunteerTimeSlots = this.fetchVolunteerTimeSlots();
 
-    deletePreviousMatches(date, datastore);
+    if (deletePreviousMatches) {
+      /* Delete all matches scheduled for dates before, but not including, today. */
+      deletePreviousMatches(date, datastore);
+    }
 
     final Set<IsolateTimeSlot> matches = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
 
@@ -78,7 +84,9 @@ public class MatchingRunner {
   }
 
   /**
-   * Delete all matches from the provided Datastore that are scheduled before the provided date.
+   * Delete all matches from the provided Datastore that are scheduled <em>before</em> the provided date.
+   * Any matches scheduled on or after the date provided will not be deleted.
+   * <b>IMPORTANT: The {@code date} parameter is EXCLUSIVE.</b>
    * @param cutoffDate The cutoff date for deciding if a Match will be deleted.
    * @param datastore The Datastore from which Matches should be deleted.
    */
