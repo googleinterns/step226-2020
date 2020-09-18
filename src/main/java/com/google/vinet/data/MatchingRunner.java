@@ -148,7 +148,7 @@ public class MatchingRunner {
    * Get a PreparedQuery which will return all TimeSlots with the date and entity type provided when
    * executed using the provided DataStore implementation.
    *
-   * @param userType The entity name of the TimeSlots to be fetched.
+   * @param userType The type of Users whose TimeSlots are to be fetched.
    * @param date The date that the fetched TimeSlots must be scheduled on.
    * @param datastore The DataStore implementation to be used when preparing the query.
    * @return A PreparedQuery which will return all TimeSlots with the date and entity type provided
