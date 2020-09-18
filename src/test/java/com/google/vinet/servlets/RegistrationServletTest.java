@@ -408,7 +408,13 @@ public class RegistrationServletTest {
 
   @Test
   public void testGetUserLoggedInNotRegistered() throws Exception {
+    final String userId = "userid";
+
+    User user = mock(User.class);
+    when(user.getUserId()).thenReturn(userId);
+
     when(userService.isUserLoggedIn()).thenReturn(true);
+    when(userService.getCurrentUser()).thenReturn(user);
 
     PreparedQuery preparedQuery = mock(PreparedQuery.class);
     when(preparedQuery.asSingleEntity()).thenReturn(null);
