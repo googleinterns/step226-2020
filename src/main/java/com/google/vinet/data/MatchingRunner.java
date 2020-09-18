@@ -73,6 +73,11 @@ public class MatchingRunner {
     }
   }
 
+  /**
+   * Delete all matches from the provided Datastore that are scheduled before the provided date.
+   * @param date The cutoff date for deciding if a Match will be deleted.
+   * @param datastore The Datastore from which Matches should be deleted.
+   */
   protected static void deletePreviousMatches(LocalDate date, DatastoreService datastore){
     Query query = new Query("Matching")
                           .setFilter(new FilterPredicate("date", FilterOperator.LESS_THAN, date.toString()))
