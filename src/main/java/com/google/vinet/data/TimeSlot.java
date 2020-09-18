@@ -17,9 +17,7 @@
 package com.google.vinet.data;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -84,14 +82,6 @@ public abstract class TimeSlot implements Comparable<TimeSlot> {
     neighbours.add(timeSlot);
   }
 
-  /** Compares two time slots based on their start time */
-  @Override
-  public int compareTo(TimeSlot timeSlot) {
-    return start.compareTo(timeSlot.getStart());
-  }
-
-  public static Comparator<TimeSlot> TimeSlotEndComparator = Comparator.comparing(TimeSlot::getEnd);
-
   /**
    * Checks whether this timeslot contains another
    *
@@ -99,16 +89,7 @@ public abstract class TimeSlot implements Comparable<TimeSlot> {
    * @return Whether this slot contains the specified slot
    */
   public boolean contains(TimeSlot timeSlot) {
-    return compareTo(timeSlot) <= 0 && TimeSlotEndComparator.compare(this, timeSlot) >= 0;
-  }
-
-  public boolean hasMinimumOverlap(TimeSlot timeSlot, long minMinutesOverlap) {
-    if (start.isBefore(timeSlot.start)) {
-      // If difference is negative, they don't overlap, and will return false.
-      return ChronoUnit.MINUTES.between(timeSlot.start, end) > minMinutesOverlap;
-    } else {
-      return ChronoUnit.MINUTES.between(start, timeSlot.end) > minMinutesOverlap;
-    }
+    return start.isBefore(timeSlot.start) && end.isAfter(timeSlot.end);
   }
 
   @Override
