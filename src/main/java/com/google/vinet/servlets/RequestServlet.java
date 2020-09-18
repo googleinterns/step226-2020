@@ -27,6 +27,7 @@ import com.google.gson.*;
 
 import com.google.vinet.data.*;
 import java.time.*;
+import java.util.*;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -119,16 +120,16 @@ public class RequestServlet extends HttpServlet {
     String startTime = request.getParameter("startTime");
     String endTime = request.getParameter("endTime");
     String timezone = request.getParameter("timezoneId");
-    String[] subjects = request.getParameterValues("subject");
-    String[] details = request.getParameterValues("details");
+    String[] subjectsRAW = request.getParameterValues("subject");
+    String[] detailsRAW = request.getParameterValues("details");
 
     if (date == null
         || duration == null
         || startTime == null
         || endTime == null
         || timezone == null
-        || subjects == null
-        || details == null) {
+        || subjectsRAW == null
+        || detailsRAW == null) {
       response.sendError(
           HttpServletResponse.SC_BAD_REQUEST,
           "one or more of the parameters were null"
@@ -141,16 +142,16 @@ public class RequestServlet extends HttpServlet {
     startTime = startTime.trim();
     endTime = endTime.trim();
     timezone = timezone.trim();
-    trimMembers(subjects);
-    trimMembers(details);
+    final List<String> subjects = Collections.unmodifiableList(Arrays.asList(trimMembers(subjectsRAW)));
+    final List<String> details = Collections.unmodifiableList(Arrays.asList(trimMembers(detailsRAW)));
 
     if (date.isEmpty()
         || duration.isEmpty()
         || startTime.isEmpty()
         || endTime.isEmpty()
         || timezone.isEmpty()
-        || subjects.length == 0
-        || details.length == 0) {
+        || subjects.size() == 0
+        || details.size() == 0) {
       response.sendError(
           HttpServletResponse.SC_BAD_REQUEST,
           "one or more of the parameters were empty"
@@ -158,7 +159,7 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    if (Stream.of(subjects).anyMatch(e -> e == null || e.equals(""))) {
+    if (subjects.parallelStream().anyMatch(e -> e == null || e.equals(""))) {
       response.sendError(
           HttpServletResponse.SC_BAD_REQUEST,
           "all members of subjects array must not be null or empty"
@@ -166,7 +167,7 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    if (Stream.of(details).anyMatch(e -> e == null || e.equals(""))) {
+    if (details.parallelStream().anyMatch(e -> e == null || e.equals(""))) {
       response.sendError(
           HttpServletResponse.SC_BAD_REQUEST,
           "all members of details array must not be null or empty"
@@ -174,7 +175,10 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    if (subjects.length != details.length) {
+    /* subjects and details must be of equal length to ensure that the subjects and details
+     * have been received correctly.
+     */
+    if (subjects.size() != details.size()) {
       response.sendError(
           HttpServletResponse.SC_BAD_REQUEST,
           "subjects and details must be of equal length"
