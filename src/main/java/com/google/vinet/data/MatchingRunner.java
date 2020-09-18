@@ -20,6 +20,7 @@ import com.google.appengine.api.datastore.*;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.users.*;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
@@ -33,6 +34,16 @@ public class MatchingRunner {
   private Set<VolunteerTimeSlot> volunteerTimeSlots;
   /** The date whose matches will be computed. */
   private LocalDate date;
+
+  /**
+   * A Map matching UserType's to the Entity name of that UserType's TimeSlots in Datastore.
+   */
+  public static final Map<UserType, String> timeSlotEntityNames = createTimeSlotEntityNamesMap();
+
+  private enum UserType {
+    ISOLATE,
+    VOLUNTEER
+  };
 
   /**
    * Construct a MatchingRunner with none of its data set.
@@ -86,6 +97,20 @@ public class MatchingRunner {
   }
 
   /**
+   * @return an Unmodifiable Map matching a UserType to the Entity name of that user type's TimeSlots
+   * in Datastore.
+   */
+  private static Map<UserType, String> createTimeSlotEntityNamesMap() {
+    return Collections.unmodifiableMap(
+        new HashMap<UserType, String>() {
+          {
+            put(UserType.ISOLATE, IsolateTimeSlot.ISOLATE_TIME_SLOT_TABLE_NAME);
+            put(UserType.VOLUNTEER, "volunteer_timeslots");
+          }
+        });
+  }
+
+  /**
    * Delete all matches from the provided Datastore that are scheduled <em>before</em> the provided date.
    * Any matches scheduled on or after the date provided will not be deleted.
    * <b>IMPORTANT: The {@code date} parameter is EXCLUSIVE.</b>
@@ -124,15 +149,15 @@ public class MatchingRunner {
    * Get a PreparedQuery which will return all TimeSlots with the date and entity type provided when
    * executed using the provided DataStore implementation.
    *
-   * @param entityName The entity name of the TimeSlots to be fetched.
+   * @param userType The entity name of the TimeSlots to be fetched.
    * @param date The date that the fetched TimeSlots must be scheduled on.
    * @param datastore The DataStore implementation to be used when preparing the query.
    * @return A PreparedQuery which will return all TimeSlots with the date and entity type provided
    * when executed using the provided DataStore implementation.
    */
   protected static PreparedQuery getTimeSlotsQuery(
-      String entityName, LocalDate date, DatastoreService datastore) {
-    final Query query = new Query(entityName);
+      UserType userType, LocalDate date, DatastoreService datastore) {
+    final Query query = new Query(timeSlotEntityNames.get(userType));
 
     final Filter dateFilter = new FilterPredicate("date", FilterOperator.EQUAL, date.toString());
 
@@ -148,7 +173,7 @@ public class MatchingRunner {
    * @return All IsolateTimeSlots scheduled for the provided date using the provided DataStore implementation.
    */
   protected static Set<IsolateTimeSlot> fetchIsolateTimeSlots(LocalDate date, DatastoreService datastore) {
-    PreparedQuery preparedQuery =  getTimeSlotsQuery("IsolateTimeSlot", date, datastore);
+    PreparedQuery preparedQuery =  getTimeSlotsQuery(UserType.ISOLATE, date, datastore);
 
     final FetchOptions fetchOptions = FetchOptions.Builder.withDefaults();
 
@@ -174,7 +199,7 @@ public class MatchingRunner {
    * @return All VolunteerTimeSlots scheduled for the provided date using the provided DataStore implementation.
    */
   protected static Set<VolunteerTimeSlot> fetchVolunteerTimeSlots(LocalDate date, DatastoreService datastore) {
-    final PreparedQuery preparedQuery = getTimeSlotsQuery("volunteer_timeslots", date, datastore);
+    final PreparedQuery preparedQuery = getTimeSlotsQuery(UserType.VOLUNTEER, date, datastore);
 
     final FetchOptions fetchOptions = FetchOptions.Builder.withDefaults();
 
