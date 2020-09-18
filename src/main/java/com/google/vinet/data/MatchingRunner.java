@@ -31,8 +31,6 @@ public class MatchingRunner {
   private Set<IsolateTimeSlot> isolateTimeSlots;
   /** The TimeSlots for Volunteer availability that should be matched. */
   private Set<VolunteerTimeSlot> volunteerTimeSlots;
-  /** The date whose matches will be computed. */
-  private LocalDate date;
 
   /**
    * A Map matching UserType's to the Entity name of that UserType's TimeSlots in Datastore.
@@ -70,11 +68,11 @@ public class MatchingRunner {
    */
   public void run(boolean deletePreviousMatches) {
     final LocalDate today = LocalDate.now();
+    final LocalDate tomorrow = today.plusDays(1);
 
     if (datastore == null) datastore = DatastoreServiceFactory.getDatastoreService();
-    if (date == null) date = today.plusDays(1);
-    if (isolateTimeSlots == null) isolateTimeSlots = this.fetchIsolateTimeSlots();
-    if (volunteerTimeSlots == null) volunteerTimeSlots = this.fetchVolunteerTimeSlots();
+    if (isolateTimeSlots == null) isolateTimeSlots = this.fetchIsolateTimeSlots(tomorrow);
+    if (volunteerTimeSlots == null) volunteerTimeSlots = this.fetchVolunteerTimeSlots(tomorrow);
 
     if (deletePreviousMatches) {
       /* Delete all matches scheduled for dates before, but not including, today. */
@@ -131,17 +129,20 @@ public class MatchingRunner {
   }
 
   /**
-   * @return the IsolateTimeSlots scheduled for this MatchingRunner's date from this MatchingRunner's implementation of DataStore.
+   * Return the IsolateTimeSlots scheduled for the provided date, from this MatchingRunner's implementation of DataStore.
+   * @param date The date whose IsolateTimeSlots are to be fetched.
    */
-  protected Set<IsolateTimeSlot> fetchIsolateTimeSlots() {
-    return fetchIsolateTimeSlots(this.date, this.datastore);
+  protected Set<IsolateTimeSlot> fetchIsolateTimeSlots(LocalDate date) {
+    return fetchIsolateTimeSlots(date, this.datastore);
   }
 
   /**
-   * @return the VolunteerTimeSlots scheduled for this MatchingRunner's date from this MatchingRunner's implementation of DataStore.
+   * Return the VolunteerTimeSlots scheduled for the provided date, from this MatchingRunner's
+   * implementation of DataStore.
+   * @param date The date whose VolunteerTimeSlots are to be fetched.
    */
-  protected Set<VolunteerTimeSlot> fetchVolunteerTimeSlots() {
-    return fetchVolunteerTimeSlots(this.date, this.datastore);
+  protected Set<VolunteerTimeSlot> fetchVolunteerTimeSlots(LocalDate date) {
+    return fetchVolunteerTimeSlots(date, this.datastore);
   }
 
   /**
