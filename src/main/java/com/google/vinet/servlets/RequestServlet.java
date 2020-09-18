@@ -234,7 +234,7 @@ public class RequestServlet extends HttpServlet {
 
     /* Put the ticket into the datastore, then create an IsolateTimeSlot which points to this ticket,
      * and put that IsolateTimeSlot into the datastore. */
-    try{
+    try {
       final Key ticketKey = this.datastore.put(ticketEntity);
 
       final Isolate isolate = new Isolate(userId);
