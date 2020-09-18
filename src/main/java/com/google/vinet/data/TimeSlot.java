@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public abstract class TimeSlot implements Comparable<TimeSlot> {
+public abstract class TimeSlot {
 
   private final Instant start;
   private final Instant end;
@@ -89,7 +89,8 @@ public abstract class TimeSlot implements Comparable<TimeSlot> {
    * @return Whether this slot contains the specified slot
    */
   public boolean contains(TimeSlot timeSlot) {
-    return start.isBefore(timeSlot.start) && end.isAfter(timeSlot.end);
+    return (start.equals(timeSlot.start) || start.isBefore(timeSlot.start))
+            && (end.equals(timeSlot.end) || end.isAfter(timeSlot.end));
   }
 
   @Override
