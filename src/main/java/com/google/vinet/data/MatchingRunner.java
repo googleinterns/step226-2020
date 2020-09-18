@@ -59,14 +59,16 @@ public class MatchingRunner {
    *                              If set to false, no deletions will be made.
    */
   public void run(boolean deletePreviousMatches) {
+    final LocalDate today = LocalDate.now();
+
     if (datastore == null) datastore = DatastoreServiceFactory.getDatastoreService();
-    if (date == null) date = LocalDate.now().plusDays(1);
+    if (date == null) date = today.plusDays(1);
     if (isolateTimeSlots == null) isolateTimeSlots = this.fetchIsolateTimeSlots();
     if (volunteerTimeSlots == null) volunteerTimeSlots = this.fetchVolunteerTimeSlots();
 
     if (deletePreviousMatches) {
       /* Delete all matches scheduled for dates before, but not including, today. */
-      deletePreviousMatches(date, datastore);
+      deletePreviousMatches(today, datastore);
     }
 
     final Set<IsolateTimeSlot> matches = MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
