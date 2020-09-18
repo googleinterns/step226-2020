@@ -73,7 +73,7 @@ public class MatchingRunner {
     }
   }
 
-  public static void deletePreviousMatches(LocalDate date, DatastoreService datastore){
+  protected static void deletePreviousMatches(LocalDate date, DatastoreService datastore){
     Query query = new Query("Matching")
                           .setFilter(new FilterPredicate("date", FilterOperator.LESS_THAN, date.toString()))
                               .setKeysOnly();
