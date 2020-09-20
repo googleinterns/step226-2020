@@ -28,7 +28,7 @@ public class MatchingAlgorithm {
    * Represents a node connected to all isolate time slot nodes
    */
   public static final IsolateTimeSlot NIL_NODE =
-          new IsolateTimeSlot(Instant.MIN, Instant.MIN.plusNanos(1), null);
+          new IsolateTimeSlot(Instant.MIN, Instant.MIN.plusNanos(1), null, null, null);
 
   /**
    * An implementation of the Hopcroft-Karp algorithm to match requested help times with volunteer
