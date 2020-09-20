@@ -19,7 +19,7 @@ package com.google.vinet.data;
 import java.util.Objects;
 
 public class RegisteredUser {
-  private final String userId;
+  protected final String userId;
 
   public RegisteredUser(String userId) {
     this.userId = Objects.requireNonNull(userId, "User ID must not be null!");
