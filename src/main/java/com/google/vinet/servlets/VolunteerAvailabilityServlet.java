@@ -48,7 +48,7 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
       return;
     }
 
-    final boolean registered = RegistrationServlet.isUserRegistered(userService);
+    final boolean registered = RegistrationServlet.isUserRegistered();
 
     if (!registered) {
       response.sendError(
@@ -56,7 +56,7 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
       return;
     }
 
-    final boolean isVolunteer = RegistrationServlet.isUserVolunteer(userService);
+    final boolean isVolunteer = RegistrationServlet.isUserVolunteer();
 
     if (!isVolunteer) {
       response.sendError(
@@ -110,7 +110,7 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
       return;
     }
 
-    final boolean registered = RegistrationServlet.isUserRegistered(userService);
+    final boolean registered = RegistrationServlet.isUserRegistered();
 
     if (!registered) {
       response.sendError(
@@ -118,7 +118,7 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
       return;
     }
 
-    final boolean isVolunteer = RegistrationServlet.isUserVolunteer(userService);
+    final boolean isVolunteer = RegistrationServlet.isUserVolunteer();
 
     if (!isVolunteer) {
       response.sendError(
