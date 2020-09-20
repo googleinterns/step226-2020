@@ -251,7 +251,7 @@ public class RequestServlet extends HttpServlet {
       final Isolate isolate = new Isolate(userId);
       final IsolateTimeSlot timeSlot = new IsolateTimeSlot(start, end, isolate, localDate, ticketKey);
       timeSlot.toDatastore();
-    } catch (DatastoreFailureException exception) {
+    } catch (Exception exception) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
