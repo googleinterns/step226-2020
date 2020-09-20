@@ -56,7 +56,7 @@ public class MatchFetcherServlet extends HttpServlet {
       return;
     }
 
-    final boolean registered = registrationServlet.isUserRegistered(userService);
+    final boolean registered = registrationServlet.isUserRegistered();
 
     if (!registered) {
       response.sendError(
@@ -65,7 +65,7 @@ public class MatchFetcherServlet extends HttpServlet {
     }
 
     final String userId = userService.getCurrentUser().getUserId();
-    final boolean isVolunteer = registrationServlet.isUserVolunteer(userService);
+    final boolean isVolunteer = registrationServlet.isUserVolunteer();
     final String idFilterProperty = isVolunteer ? "volunteerId" : "isolateId";
 
 
