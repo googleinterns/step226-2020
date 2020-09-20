@@ -120,8 +120,15 @@ public class RequestServlet extends HttpServlet {
     String startTime = request.getParameter("startTime");
     String endTime = request.getParameter("endTime");
     String timezone = request.getParameter("timezoneId");
-    String[] subjectsRAW = request.getParameterValues("subject");
-    String[] detailsRAW = request.getParameterValues("details");
+
+    /* NOTE: Subejcts and Details will be matched in the order they are received.
+     * For example:
+     * subjects[0] will be linked to details [0],
+     * subjects[1] will be linked to details [1]
+     * and so on as above.
+     */
+    final String[] subjectsRAW = request.getParameterValues("subject");
+    final String[] detailsRAW = request.getParameterValues("details");
 
     if (date == null
         || duration == null
