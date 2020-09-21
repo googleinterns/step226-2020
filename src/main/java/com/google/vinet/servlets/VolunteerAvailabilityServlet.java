@@ -33,8 +33,16 @@ import java.util.Map;
 @WebServlet("/volunteer-availability")
 public class VolunteerAvailabilityServlet extends HttpServlet {
 
-  private final UserService userService = UserServiceFactory.getUserService();
-  private final RegistrationServlet registrationServlet = new RegistrationServlet();
+  private UserService userService = UserServiceFactory.getUserService();
+  private RegistrationServlet registrationServlet = new RegistrationServlet();
+
+  public void setUserService(UserService userService) {
+    this.userService = userService;
+  }
+
+  public void setRegistrationServlet(RegistrationServlet registrationServlet) {
+    this.registrationServlet = registrationServlet;
+  }
 
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
