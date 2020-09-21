@@ -13,9 +13,17 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+<div class="form-group">
+  <input name="subject" type="text" placeholder="Item Summary (e.g 'Shopping')" class="form-control" required>
+  <small class="form-text text-muted">Must be 2-300 characters long.</small>
+</div>
+<div class="form-group">
+  <textarea name="details" placeholder="Details" rows="5" class="form-control" required></textarea>
+  <small class="form-text text-muted">Must be 10-5,000 characters long.</small>
+</div>
+<div class="form-group">
+  <button type="button" onclick="deleteTicket(this.parentElement.parentElement.parentElement);" class="btn btn-outline-danger">
+    Delete Ticket
+  </button>
+</div>
 
-<input name="subject" type="text" placeholder="Subject" required>
-<input name="image" type="file" accept="image/*">
-<button onclick="deleteTicket(this.parentElement);">Delete Ticket</button>
-<br>
-<textarea name="details" placeholder="Details" rows="5" required></textarea>

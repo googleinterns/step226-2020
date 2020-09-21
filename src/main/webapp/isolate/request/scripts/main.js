@@ -22,6 +22,7 @@
  */
 
 import {addTicket, deleteTicket} from './tickets.js';
+import {invertVisibility} from './input.js';
 
 /* Add necessary functions to the global namespace. */
 
@@ -45,4 +46,34 @@ window.deleteTicket = async (element) => {
   } catch (error) {
     alert('Could not delete ticket from the request form. Please try again.')
   }
+};
+
+/**
+ * Invert the visibility of the delivery time input elements of the request form.
+ */
+window.invertTimeInputVisibility = () => {
+  const START_OF_DAY = "00:00";
+  const END_OF_DAY = "23:59";
+
+  const startTimeContainer = document.getElementById('startTimeContainer');
+  const endTimeContainer = document.getElementById('endTimeContainer');
+
+  invertVisibility(startTimeContainer);
+  invertVisibility(endTimeContainer);
+
+  /* Update the values of the now hidden time input elements, to ensure that
+   * the entire day is marked as available.
+   */
+
+  const startTime = document.getElementById('startTime');
+  const endTime = document.getElementById('endTime');
+
+  startTime.value = START_OF_DAY;
+  endTime.value = END_OF_DAY;
+};
+
+window.onload = () => {
+  const timezoneId = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const timezoneIdElement = document.getElementById('timezoneId');
+  timezoneIdElement.value = timezoneId;
 };

@@ -15,7 +15,8 @@
  */
 
 import {TicketFactory} from './TicketFactory.js';
-import {removeFromDOM} from './DOMUtils.js';
+import {removeFromDOM} from '/scripts/DOMUtils.js';
+
 
 /* Create a TicketFactory to create tickets during the session */
 const ticketFactory = new TicketFactory();
@@ -52,10 +53,10 @@ export const deleteTicket =
  */
 export const addTicket =
     async () => {
-  const form = document.getElementById('request-submission-form');
+  const ticketsContainer = document.getElementById('tickets');
 
   try{
-    form.appendChild(await createRequestTicket());
+    ticketsContainer.appendChild(await createRequestTicket());
   } catch(error) {
     throw(`Could not add ticket to the request form, failed with error: ${error}`);
   }

@@ -24,7 +24,6 @@ import java.util.Objects;
 import java.util.Set;
 
 public abstract class TimeSlot implements Comparable<TimeSlot> {
-
   protected final Instant start;
   protected final Instant end;
   protected final RegisteredUser registeredUser;
@@ -32,7 +31,7 @@ public abstract class TimeSlot implements Comparable<TimeSlot> {
   private TimeSlot pairedSlot = null;
   private double distance = 0;
 
-  public TimeSlot(Instant start, Instant end, RegisteredUser registeredUser) {
+  protected TimeSlot(Instant start, Instant end, RegisteredUser registeredUser) {
     if (start == null || end == null) throw new NullPointerException();
     if (start.isAfter(end)) throw new IllegalArgumentException();
     this.start = start;
