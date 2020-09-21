@@ -76,6 +76,7 @@ public class VolunteerTimeSlot extends TimeSlot implements Datastoreable {
   }
 
   public static void deleteAllTimeSlotsByUserId(String userId) {
+    if (datastoreService == null) datastoreService = DatastoreServiceFactory.getDatastoreService();
     datastoreService.delete(
             StreamSupport.stream(queryTimeSlots(userId).asIterable().spliterator(), true)
                     .map(Entity::getKey)
