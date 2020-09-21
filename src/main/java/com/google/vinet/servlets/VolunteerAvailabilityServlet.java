@@ -34,6 +34,7 @@ import java.util.Map;
 public class VolunteerAvailabilityServlet extends HttpServlet {
 
   private final UserService userService = UserServiceFactory.getUserService();
+  private final RegistrationServlet registrationServlet = new RegistrationServlet();
 
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -48,7 +49,7 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
       return;
     }
 
-    final boolean registered = RegistrationServlet.isUserRegistered();
+    final boolean registered = registrationServlet.isUserRegistered();
 
     if (!registered) {
       response.sendError(
@@ -56,7 +57,7 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
       return;
     }
 
-    final boolean isVolunteer = RegistrationServlet.isUserVolunteer();
+    final boolean isVolunteer = registrationServlet.isUserVolunteer();
 
     if (!isVolunteer) {
       response.sendError(
@@ -110,7 +111,7 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
       return;
     }
 
-    final boolean registered = RegistrationServlet.isUserRegistered();
+    final boolean registered = registrationServlet.isUserRegistered();
 
     if (!registered) {
       response.sendError(
@@ -118,7 +119,7 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
       return;
     }
 
-    final boolean isVolunteer = RegistrationServlet.isUserVolunteer();
+    final boolean isVolunteer = registrationServlet.isUserVolunteer();
 
     if (!isVolunteer) {
       response.sendError(
