@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Map;
 
 @WebServlet("/volunteer-availability")
@@ -74,32 +75,48 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
       return;
     }
 
-    // TODO check if it's a valid userId
     final String userId = userService.getCurrentUser().getUserId();
     final Volunteer volunteer = new Volunteer(userId);
 
-    // TODO check if any of the parameters are null / not present
     final Map<String, String[]> parameterMap = request.getParameterMap();
+    if (parameterMap == null || parameterMap.isEmpty()) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "no parameters provided!");
+      return;
+    }
+
     final String[] startTimes = parameterMap.get("ISO-start-time");
+    if (startTimes == null) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "start times not provided!");
+      return;
+    }
+
     final String[] endTimes = parameterMap.get("ISO-end-time");
+    if (endTimes == null) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "end times not provided!");
+      return;
+    }
 
     // Delete existing timeslots before storing new list of them.
     VolunteerTimeSlot.deleteAllTimeSlotsByUserId(userId);
 
+    // Loop through all parameters and create each slot object
     for (int i = 0; i < startTimes.length; i++) {
       String startTime = startTimes[i];
       String endTime = endTimes[i];
 
-      Instant startInstant = Instant.parse(startTime);
-      Instant endInstant = Instant.parse(endTime);
-
       try {
+        Instant startInstant = Instant.parse(startTime);
+        Instant endInstant = Instant.parse(endTime);
         new VolunteerTimeSlot(startInstant, endInstant, volunteer).toDatastore();
-      } catch (IllegalArgumentException | NullPointerException e) {
-        System.err.println("Error saving volunteer timeslot!");
+      } catch (NullPointerException e) {
+        System.err.println("Volunteer timeslot times are null!");
+        e.printStackTrace();
+      } catch (IllegalArgumentException | DateTimeParseException e) {
+        System.err.println("Error parsing volunteer timeslot times!");
         e.printStackTrace();
       }
     }
+
     response.sendRedirect("volunteer/availability.html");
   }
 
