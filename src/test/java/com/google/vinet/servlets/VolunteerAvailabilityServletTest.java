@@ -163,7 +163,7 @@ public class VolunteerAvailabilityServletTest {
    * @param parameterName The name of the parameter, as passed in the HTTP request
    */
   private void checkNullParameter(String parameterName) {
-    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST, "TODO");
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST, "");
   }
 
   /**
