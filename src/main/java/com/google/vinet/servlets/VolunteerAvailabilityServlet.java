@@ -16,6 +16,7 @@
 
 package com.google.vinet.servlets;
 
+import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
@@ -75,7 +76,17 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
       return;
     }
 
-    final String userId = userService.getCurrentUser().getUserId();
+    final User user = userService.getCurrentUser();
+    if (user == null) {
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "user is null!");
+      return;
+    }
+
+    final String userId = user.getUserId();
+    if (userId == null) {
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "user id is null!");
+      return;
+    }
     final Volunteer volunteer = new Volunteer(userId);
 
     final Map<String, String[]> parameterMap = request.getParameterMap();

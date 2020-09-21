@@ -37,7 +37,6 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,9 +50,10 @@ public class VolunteerAvailabilityServletTest {
   HttpServletResponse response;
   @Mock
   User user;
+  @Mock
+  RegistrationServlet registrationServlet;
   @InjectMocks
   VolunteerAvailabilityServlet volunteerAvailabilityServlet;
-  //RegistrationServlet registrationServlet = mock(RegistrationServlet.class);
 
   private static final LocalServiceTestHelper helper =
           new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
@@ -102,12 +102,11 @@ public class VolunteerAvailabilityServletTest {
     when(userService.isUserLoggedIn()).thenReturn(true);
     when(userService.getCurrentUser()).thenReturn(user);
     when(user.getUserId()).thenReturn("anuserid");
-    //when(registrationServlet.isUserRegistered()).thenReturn(true);
+    when(registrationServlet.isUserRegistered()).thenReturn(true);
+    when(registrationServlet.isUserVolunteer()).thenReturn(true);
   }
 
-  /**
-   * Sets the HTTP request parameters. Can also be used to pass null values.
-   */
+  /** Sets the HTTP request parameters. Can also be used to pass null values. */
   private void setRequestParameters(String startTime, String endTime) {
     Map<String, String[]> parameterMap = new HashMap<>();
     parameterMap.put("ISO-start-time", new String[]{startTime});
@@ -144,7 +143,8 @@ public class VolunteerAvailabilityServletTest {
   }
 
   /**
-   * Calls the POST request, and asserts that the HTTP response and error message were a certain value
+   * Calls the POST request, and asserts that the HTTP response and error message were a certain
+   * value
    *
    * @param code The HTTP response code that the response contains
    */
@@ -185,6 +185,30 @@ public class VolunteerAvailabilityServletTest {
   }
 
   @Test
+  void testPostUserNotLoggedInNotRegistered() throws Exception {
+    when(userService.isUserLoggedIn()).thenReturn(false);
+
+    when(registrationServlet.isUserRegistered()).thenReturn(false);
+    when(registrationServlet.isUserIsolate()).thenReturn(false);
+    when(registrationServlet.isUserVolunteer()).thenReturn(false);
+    doPostAndAssertResponseCode(
+            HttpServletResponse.SC_UNAUTHORIZED, "user must be logged in to post a request");
+  }
+
+  @Test
+  void testPostUserLoggedInRegisteredAsIsolate() {
+    when(userService.isUserLoggedIn()).thenReturn(true);
+
+    when(registrationServlet.isUserRegistered()).thenReturn(true);
+    when(registrationServlet.isUserIsolate()).thenReturn(true);
+    when(registrationServlet.isUserVolunteer()).thenReturn(false);
+
+    doPostAndAssertResponseCode(
+            HttpServletResponse.SC_UNAUTHORIZED,
+            "user must be registered as a volunteer to submit availability");
+  }
+
+  @Test
   public void testPostNullRequest() {
     volunteerAvailabilityServlet = new VolunteerAvailabilityServlet();
     assertThrows(
@@ -201,99 +225,20 @@ public class VolunteerAvailabilityServletTest {
   @Test
   public void testPostNotLoggedIn() {
     when(userService.isUserLoggedIn()).thenReturn(false);
-    doPostAndAssertResponseCode(HttpServletResponse.SC_UNAUTHORIZED, "user must be logged in to post a request");
+    doPostAndAssertResponseCode(
+            HttpServletResponse.SC_UNAUTHORIZED, "user must be logged in to post a request");
   }
 
   @Test
   public void testPostNoUserId() {
     when(userService.isUserLoggedIn()).thenReturn(true);
     when(userService.getCurrentUser()).thenReturn(user);
-    doPostAndAssertResponseCode(HttpServletResponse.SC_UNAUTHORIZED);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_UNAUTHORIZED, "user must be registered to submit availability");
   }
 
   @Test
   public void testPostEmptyRequest() {
     setupUser();
-    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST, "TODO");
-  }
-
-  @Test
-  public void testPostNullFirstname() {
-    setupUser();
-    setRequestParameters(null, "alastname");
-    checkNullParameter("firstname");
-  }
-
-  @Test
-  public void testPostNullLastname() {
-    setupUser();
-    setRequestParameters("afirstname", null);
-    checkNullParameter("lastname");
-  }
-
-  @Test
-  public void testPostMissingFirstname() {
-    setupUser();
-    setNonNullRequestParameters(null, "alastname", "volunteer", "-85.300738", "-85.300738");
-    checkMissingParameter("firstname");
-  }
-
-  @Test
-  public void testPostMissingLastname() {
-    setupUser();
-    setNonNullRequestParameters("afirstname", null, "volunteer", "-85.300738", "-85.300738");
-    checkMissingParameter("lastname");
-  }
-
-  @Test
-  public void testPostBlankFirstname() {
-    setupUser();
-    setNonNullRequestParameters("", "alastname", "volunteer", "-85.300738", "-85.300738");
-    checkBlankParameter("firstname");
-  }
-
-  @Test
-  public void testPostBlankLastname() {
-    setupUser();
-    setNonNullRequestParameters("afirstname", "       ", "volunteer", "-85.300738", "-85.300738");
-    checkBlankParameter("lastname");
-  }
-
-  @Test
-  public void testPostInvalidType() {
-    setupUser();
-    setNonNullRequestParameters(
-            "afirstname", "alastname", "ekugfghweig", "-85.300738", "-85.300738");
-    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST, "TODO");
-    assertEquals("Wrong type parameter!", getErrors());
-  }
-
-  @Test
-  public void testPost1LetterFirstname() {
-    setupUser();
-    setNonNullRequestParameters("a", "alastname", "isolate", "-85.300738", "-85.300738");
-    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST, "TODO");
-    assertEquals("Parameter firstname is not within length bounds!", getErrors());
-  }
-
-  @Test
-  public void testPost2LetterFirstname() {
-    setupUser();
-    setNonNullRequestParameters("ab", "alastname", "isolate", "-85.300738", "-85.300738");
-    doPostAndAssertResponseCode(HttpServletResponse.SC_OK, "TODO");
-    assertEquals("", getErrors());
-  }
-
-  @Test
-  public void testPostLongLastname() {
-    setupUser();
-    setNonNullRequestParameters(
-            "abenthy",
-            "alas tnamewbfjhukfjg orejg rg e3bfudrebjuhegujyddkuifheruigfh rui54rit y34795ty 87345 t785r4yh t845rht 875ryt 9875ry t5 54 yt54 y54 y654y ygffgh rth trh trh th t th thgrthrthrthrthtrhtrhtrhtrhrthrthtrhtrhthrthtrhtrhtrrrrrrrrrrrrrrrrrrevuyjeduyedgfjuyewgfruyefruyegfruye4g uye4wruywe4g uye4grfuywe4g rfuye4gfruye4w guyrf e4",
-            "isolate",
-            "-85.300738",
-            "-85.300738");
-    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST, "TODO");
-    assertEquals("Parameter lastname is not within length bounds!", getErrors());
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST, "no parameters provided!");
   }
 }
