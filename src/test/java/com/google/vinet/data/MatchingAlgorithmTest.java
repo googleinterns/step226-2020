@@ -16,6 +16,7 @@
 
 package com.google.vinet.data;
 
+import java.time.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -33,6 +34,7 @@ public class MatchingAlgorithmTest {
   private Set<IsolateTimeSlot> isolateTimeSlots;
   private Set<VolunteerTimeSlot> volunteerTimeSlots;
   private Instant now;
+  private ZoneId zone;
   /** This reference time is arbitrary. It is simply a fixed point in time. */
   private static final String DEFAULT_TEST_TIME = "2020-09-01T12:00:00Z";
 
@@ -45,7 +47,8 @@ public class MatchingAlgorithmTest {
 
   @Test
   public void testOneRequestOneVolunteerMatch() {
-    IsolateTimeSlot isolateSlot = new IsolateTimeSlot(now, now.plus(1, HOURS), null);
+    IsolateTimeSlot isolateSlot =
+        new IsolateTimeSlot(now, now.plus(1, HOURS), null, now.atZone(zone).toLocalDate(), null);
     VolunteerTimeSlot volunteerSlot = new VolunteerTimeSlot(now, now.plus(1, HOURS), null);
     isolateTimeSlots.add(isolateSlot);
     volunteerTimeSlots.add(volunteerSlot);
@@ -58,7 +61,7 @@ public class MatchingAlgorithmTest {
 
   @Test
   public void testOneRequestOneVolunteerNoMatch() {
-    IsolateTimeSlot isolateSlot = new IsolateTimeSlot(now.plus(1, HOURS), now.plus(2, HOURS), null);
+    IsolateTimeSlot isolateSlot = new IsolateTimeSlot(now.plus(1, HOURS),  now.plus(2, HOURS),  null, now.plus(1, HOURS).atZone(zone).toLocalDate(), null);
     VolunteerTimeSlot volunteerSlot = new VolunteerTimeSlot(now, now.plus(1, HOURS), null);
     isolateTimeSlots.add(isolateSlot);
     volunteerTimeSlots.add(volunteerSlot);
@@ -71,7 +74,7 @@ public class MatchingAlgorithmTest {
 
   @Test
   public void testOneRequestOneVolunteerVolunteerTooLongMatch() {
-    IsolateTimeSlot isolateSlot = new IsolateTimeSlot(now, now.plus(1, HOURS), null);
+    IsolateTimeSlot isolateSlot = new IsolateTimeSlot(now,  now.plus(1, HOURS),  null, now.atZone(zone).toLocalDate(), null);
     VolunteerTimeSlot volunteerSlot = new VolunteerTimeSlot(now, now.plus(2, HOURS), null);
     isolateTimeSlots.add(isolateSlot);
     volunteerTimeSlots.add(volunteerSlot);
@@ -89,9 +92,9 @@ public class MatchingAlgorithmTest {
    */
   @Test
   public void testTwoRequestsOneVolunteerVolunteerTooLongMatch() {
-    IsolateTimeSlot isolateSlot1 = new IsolateTimeSlot(now, now.plus(1, HOURS), null);
+    IsolateTimeSlot isolateSlot1 = new IsolateTimeSlot(now,  now.plus(1, HOURS),  null, now.atZone(zone).toLocalDate(), null);
     IsolateTimeSlot isolateSlot2 =
-            new IsolateTimeSlot(now.plus(1, HOURS), now.plus(2, HOURS), null);
+            new IsolateTimeSlot(now.plus(1, HOURS),  now.plus(2, HOURS),  null, now.plus(1, HOURS).atZone(zone).toLocalDate(), null);
     VolunteerTimeSlot volunteerSlot = new VolunteerTimeSlot(now, now.plus(2, HOURS), null);
     isolateTimeSlots.add(isolateSlot1);
     isolateTimeSlots.add(isolateSlot2);
@@ -103,9 +106,9 @@ public class MatchingAlgorithmTest {
 
   @Test
   public void testTwoRequestsTwoVolunteersVolunteerTooLongMatch() {
-    IsolateTimeSlot isolateSlot1 = new IsolateTimeSlot(now, now.plus(1, HOURS), null);
+    IsolateTimeSlot isolateSlot1 = new IsolateTimeSlot(now,  now.plus(1, HOURS),  null, now.atZone(zone).toLocalDate(), null);
     IsolateTimeSlot isolateSlot2 =
-            new IsolateTimeSlot(now.plus(1, HOURS), now.plus(2, HOURS), null);
+            new IsolateTimeSlot(now.plus(1, HOURS),  now.plus(2, HOURS),  null, now.plus(1, HOURS).atZone(zone).toLocalDate(), null);
     VolunteerTimeSlot volunteerSlot1 = new VolunteerTimeSlot(now, now.plus(2, HOURS), null);
     VolunteerTimeSlot volunteerSlot2 = new VolunteerTimeSlot(now, now.plus(1, HOURS), null);
     isolateTimeSlots.add(isolateSlot1);
@@ -129,7 +132,7 @@ public class MatchingAlgorithmTest {
 
   @Test
   public void testNullVolunteers() {
-    IsolateTimeSlot isolateSlot1 = new IsolateTimeSlot(now, now.plus(1, HOURS), null);
+    IsolateTimeSlot isolateSlot1 = new IsolateTimeSlot(now,  now.plus(1, HOURS),  null, now.atZone(zone).toLocalDate(), null);
     isolateTimeSlots.add(isolateSlot1);
     assertThrows(
             IllegalArgumentException.class,
@@ -144,7 +147,7 @@ public class MatchingAlgorithmTest {
 
   @Test
   public void testNoVolunteers() {
-    isolateTimeSlots.add(new IsolateTimeSlot(now, now.plus(1, HOURS), null));
+    isolateTimeSlots.add(new IsolateTimeSlot(now,  now.plus(1, HOURS),  null, now.atZone(zone).toLocalDate(), null));
     Set<IsolateTimeSlot> matched =
             MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
     assert (matched.size() == 0);
@@ -194,7 +197,7 @@ public class MatchingAlgorithmTest {
   public void testNullStartTime() {
     assertThrows(
             NullPointerException.class,
-            () -> isolateTimeSlots.add(new IsolateTimeSlot(null, now.plus(1, HOURS), null)));
+            () -> isolateTimeSlots.add(new IsolateTimeSlot(null,  now.plus(1, HOURS),  null, now.plus(1, HOURS).atZone(zone).toLocalDate(), null)));
     volunteerTimeSlots.add(new VolunteerTimeSlot(now, now.plus(2, HOURS), null));
     Set<IsolateTimeSlot> matched =
             MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
@@ -205,7 +208,7 @@ public class MatchingAlgorithmTest {
   public void testNullEndTime() {
     assertThrows(
             NullPointerException.class,
-            () -> isolateTimeSlots.add(new IsolateTimeSlot(now, null, null)));
+            () -> isolateTimeSlots.add(new IsolateTimeSlot(now,  null,  null, now.atZone(zone).toLocalDate(), null)));
     volunteerTimeSlots.add(new VolunteerTimeSlot(now, now.plus(2, HOURS), null));
     Set<IsolateTimeSlot> matched =
             MatchingAlgorithm.matchTimeSlots(isolateTimeSlots, volunteerTimeSlots);
@@ -216,7 +219,7 @@ public class MatchingAlgorithmTest {
   public void testStartAfterEnd() {
     assertThrows(
             IllegalArgumentException.class,
-            () -> isolateTimeSlots.add(new IsolateTimeSlot(now.plus(1, HOURS), now, null)));
+            () -> isolateTimeSlots.add(new IsolateTimeSlot(now.plus(1, HOURS),  now,  null, now.plus(1, HOURS).atZone(zone).toLocalDate(), null)));
     assertThrows(
             IllegalArgumentException.class,
             () -> volunteerTimeSlots.add(new VolunteerTimeSlot(now.plus(1, HOURS), now, null)));
