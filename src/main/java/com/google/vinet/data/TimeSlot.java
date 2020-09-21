@@ -24,8 +24,8 @@ import java.util.Set;
 
 public abstract class TimeSlot {
 
-  private final Instant start;
-  private final Instant end;
+  protected final Instant start;
+  protected final Instant end;
   protected final RegisteredUser registeredUser;
   private final Set<TimeSlot> neighbours = new HashSet<>();
   private TimeSlot pairedSlot = null;
@@ -35,8 +35,8 @@ public abstract class TimeSlot {
    * Create a new time slot. Start and end times must not be null, and start time must come before
    * end time.
    *
-   * @param start          The starting instant for the slot.
-   * @param end            The ending instant for the slot.
+   * @param start The starting instant for the slot.
+   * @param end The ending instant for the slot.
    * @param registeredUser The user for which this slot applies.
    */
   public TimeSlot(Instant start, Instant end, RegisteredUser registeredUser) {
@@ -90,7 +90,7 @@ public abstract class TimeSlot {
    */
   public boolean contains(TimeSlot timeSlot) {
     return (start.equals(timeSlot.start) || start.isBefore(timeSlot.start))
-            && (end.equals(timeSlot.end) || end.isAfter(timeSlot.end));
+        && (end.equals(timeSlot.end) || end.isAfter(timeSlot.end));
   }
 
   @Override
@@ -99,8 +99,8 @@ public abstract class TimeSlot {
     if (o == null || getClass() != o.getClass()) return false;
     TimeSlot timeSlot = (TimeSlot) o;
     return Objects.equals(start, timeSlot.start)
-            && Objects.equals(end, timeSlot.end)
-            && Objects.equals(registeredUser, timeSlot.registeredUser);
+        && Objects.equals(end, timeSlot.end)
+        && Objects.equals(registeredUser, timeSlot.registeredUser);
   }
 
   @Override
