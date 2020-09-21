@@ -42,7 +42,8 @@ public class MatchingAlgorithmTest {
   public void initialiseSets() {
     isolateTimeSlots = new HashSet<>();
     volunteerTimeSlots = new HashSet<>();
-    now = Clock.fixed(Instant.parse(DEFAULT_TEST_TIME), ZoneId.systemDefault()).instant();
+    zone = ZoneId.systemDefault();
+    now = Clock.fixed(Instant.parse(DEFAULT_TEST_TIME), zone).instant();
   }
 
   @Test
@@ -230,9 +231,9 @@ public class MatchingAlgorithmTest {
 
   @Test
   public void testNotEnoughVolunteers() {
-    isolateTimeSlots.add(new IsolateTimeSlot(now, now.plus(1, HOURS), null));
-    isolateTimeSlots.add(new IsolateTimeSlot(now, now.plus(1, HOURS), new Isolate("a")));
-    isolateTimeSlots.add(new IsolateTimeSlot(now, now.plus(1, HOURS), new Isolate("b")));
+    isolateTimeSlots.add(new IsolateTimeSlot(now, now.plus(1, HOURS), null, now.atZone(zone).toLocalDate(), null));
+    isolateTimeSlots.add(new IsolateTimeSlot(now, now.plus(1, HOURS), new Isolate("a"), now.atZone(zone).toLocalDate(), null));
+    isolateTimeSlots.add(new IsolateTimeSlot(now, now.plus(1, HOURS), new Isolate("b"), now.atZone(zone).toLocalDate(), null));
 
     volunteerTimeSlots.add(new VolunteerTimeSlot(now, now.plus(1, HOURS), null));
     volunteerTimeSlots.add(new VolunteerTimeSlot(now, now.plus(1, HOURS), new Volunteer("c")));
@@ -242,8 +243,8 @@ public class MatchingAlgorithmTest {
 
   @Test
   public void testNotEnoughIsolates() {
-    isolateTimeSlots.add(new IsolateTimeSlot(now, now.plus(1, HOURS), null));
-    isolateTimeSlots.add(new IsolateTimeSlot(now, now.plus(1, HOURS), new Isolate("a")));
+    isolateTimeSlots.add(new IsolateTimeSlot(now, now.plus(1, HOURS), null, now.atZone(zone).toLocalDate(), null));
+    isolateTimeSlots.add(new IsolateTimeSlot(now, now.plus(1, HOURS), new Isolate("a"), now.atZone(zone).toLocalDate(), null));
 
     volunteerTimeSlots.add(new VolunteerTimeSlot(now, now.plus(1, HOURS), null));
     volunteerTimeSlots.add(new VolunteerTimeSlot(now, now.plus(1, HOURS), new Volunteer("b")));
