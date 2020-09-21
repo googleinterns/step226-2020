@@ -1,22 +1,23 @@
 /*
- * Copyright 2020 Google LLC
+ *  Copyright 2020 Google LLC
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     https://www.apache.org/licenses/LICENSE-2.0
+ *      https:www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package com.google.vinet.data;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
@@ -24,11 +25,9 @@ import java.util.stream.Collectors;
 
 public class MatchingAlgorithm {
 
-  /**
-   * Represents a node connected to all isolate time slot nodes
-   */
+  /** Represents a node connected to all isolate time slot nodes */
   public static final IsolateTimeSlot NIL_NODE =
-          new IsolateTimeSlot(Instant.MIN, Instant.MIN, null);
+          new IsolateTimeSlot(Instant.MIN, Instant.MIN.plusNanos(1), null, null, null);
 
   /**
    * An implementation of the Hopcroft-Karp algorithm to match requested help times with volunteer
@@ -44,14 +43,7 @@ public class MatchingAlgorithm {
    */
   public static Set<IsolateTimeSlot> matchTimeSlots(
           Set<IsolateTimeSlot> isolateTimeSlots, Set<VolunteerTimeSlot> volunteerTimeSlots) {
-
-    if (isolateTimeSlots == null || volunteerTimeSlots == null)
-      throw new IllegalArgumentException("Null argument!");
-
-    // Remove null nodes, if present
-    isolateTimeSlots.remove(null);
-    volunteerTimeSlots.remove(null);
-
+    validateTimeSlotsInput(isolateTimeSlots, volunteerTimeSlots);
     addEdges(isolateTimeSlots, volunteerTimeSlots);
     isolateTimeSlots.add(NIL_NODE);
 
@@ -64,6 +56,16 @@ public class MatchingAlgorithm {
     }
 
     return isolateTimeSlots.stream().filter(TimeSlot::isPaired).collect(Collectors.toSet());
+  }
+
+  private static void validateTimeSlotsInput(
+          Set<IsolateTimeSlot> isolateTimeSlots, Set<VolunteerTimeSlot> volunteerTimeSlots) {
+    if (isolateTimeSlots == null || volunteerTimeSlots == null)
+      throw new IllegalArgumentException("Null argument!");
+
+    // Remove null nodes, if present
+    isolateTimeSlots.remove(null);
+    volunteerTimeSlots.remove(null);
   }
 
   /**
@@ -82,15 +84,6 @@ public class MatchingAlgorithm {
         // TODO consider the case where volunteer time slot is longer than isolate's
         // we could run the algorithm again with the remaining isolate slots and the chunks of
         // volunteer time slots that were not assigned
-
-        // Remove time slot if any of its instants are null
-        if (volunteerTimeSlot.getStart() == null || volunteerTimeSlot.getEnd() == null) {
-          volunteerTimeSlots.remove(volunteerTimeSlot);
-          continue;
-        } else if (isolateTimeSlot.getStart() == null || isolateTimeSlot.getEnd() == null) {
-          isolateTimeSlots.remove(isolateTimeSlot);
-          continue;
-        }
 
         if (volunteerTimeSlot.contains(isolateTimeSlot)) {
           isolateTimeSlot.addNeighbour(volunteerTimeSlot);

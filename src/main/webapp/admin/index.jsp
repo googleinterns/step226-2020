@@ -1,3 +1,4 @@
+
 <!--
   ~ Copyright 2020 Google LLC
   ~
@@ -17,12 +18,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Isolate Home</title>
+    <meta charset="UTF-8">
+    <title>Admin Matching Dashboard</title>
+    <%@ include file="/bootstrap-css.html" %>
+    <script src="scripts/main.js" type="module"></script>
 </head>
 <body>
-  <p><a href="/login?redirectURL=/register/">Registration</a></p>
-  <p><a href="matcher.html">Matcher</a></p>
-  <p><a href="./request/">Submit a request</a></p>
+  <div class="container">
+    <div class="row">
+      <div class="column">
+        <button onclick="runMatching()" class="btn btn-primary">Run Matching</button>
+        <h1 id="status" class="alert"></h1>
+      </div>
+    </div>
+  </div>
 </body>
+<!-- Include necessary js libraries for bootstrap functionality. -->
+<%@ include file="/bootstrap-js.html" %>
 </html>

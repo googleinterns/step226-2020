@@ -136,9 +136,23 @@ public class IsolateTimeSlot extends TimeSlot implements Datastoreable {
    * @param ticket The Datastore key of the request ticket for this TimeSlot.
    */
   public IsolateTimeSlot(Instant start, Instant end, Isolate isolate, LocalDate date, Key ticket) {
+    this(start, end, isolate, date, ticket, DatastoreServiceFactory.getDatastoreService());
+  }
+
+  /**
+   Construct an IsolateTimeSlot with a dependency on the provided implementation of Datastore.
+   * @param start The start of the TimeSlot.
+   * @param end The end of the TimeSlot.
+   * @param isolate The isolate associated with the TimeSlot.
+   * @param date The date on which the TimeSlot is scheduled.
+   * @param ticket The Datastore key of the request ticket for this TimeSlot.
+   * @param datastore The implementation of Datastore to depend on.
+   */
+  public IsolateTimeSlot(Instant start, Instant end, Isolate isolate, LocalDate date, Key ticket, DatastoreService datastore) {
     super(start, end, isolate);
     this.date = date;
     this.ticket = ticket;
+    this.datastore = datastore;
   }
 
   /**
