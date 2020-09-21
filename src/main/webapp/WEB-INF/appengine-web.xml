@@ -7,4 +7,8 @@
         <!-- prevent unwanted caching when accessing via the web preview server -->
         <include path="/**" expiration="0s" />
     </static-files>
+    <env-variables>
+      <!-- TODO: Insert Maps API Key before deployment.-->
+      <env-var name="MAPS_KEY" value="" />
+    </env-variables>
 </appengine-web-app>
