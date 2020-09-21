@@ -25,6 +25,10 @@ public class RegisteredUser {
     this.userId = Objects.requireNonNull(userId, "User ID must not be null!");
   }
 
+  public String getUserId() {
+    return userId;
+  }
+
   @Override
   public int hashCode() {
     return userId.hashCode();
