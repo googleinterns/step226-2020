@@ -23,6 +23,10 @@ public class RegisteredUser {
     this.userId = userId;
   }
 
+  public String getUserId() {
+    return userId;
+  }
+
   @Override
   public int hashCode() {
     return userId.hashCode();
