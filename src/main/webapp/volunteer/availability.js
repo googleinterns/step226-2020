@@ -42,7 +42,6 @@ async function getExistingTimeSlots() {
         await sortTimeSlots(rows);
         return rows;
     } catch (e) {
-        console.log(e);
         return Promise.reject(new Error('There was an error loading existing slots!\nPlease refresh the page to try again.'));
     }
 }
@@ -80,7 +79,6 @@ async function slotToRow(slot) {
  */
 function fillISOStartTime(inputElement) {
     if (inputElement.value == null || inputElement.value === "") return;
-    console.log("ISO START", inputElement.value);
     inputElement.parentNode.children["ISO-start-time"].value = new Date(inputElement.value).toISOString();
 
     // Also update end time, as it is dependant on the start time's date value.
@@ -108,7 +106,6 @@ function fillISOEndTime(inputElement) {
 
     date.setHours(Number(first));
     date.setMinutes(Number(second));
-    console.log("date", date, first, second);
     children["ISO-end-time"].value = date.toISOString();
 
     validateTimeSlot(div);
@@ -243,7 +240,6 @@ function validateTimeSlot(div) {
     const endTime = new Date(children["ISO-end-time"].value);
 
     div.isValid = startTime.getTime() < endTime.getTime();
-    console.log("validating", div, div.isValid);
 
     updateSubmitButtonDisabledStatus();
 }
@@ -258,8 +254,6 @@ function updateSubmitButtonDisabledStatus() {
     for (let i = 0; i < divs.length; i++) {
         if (!divs[i].isValid) anyInvalid = true;
     }
-
-    console.log("Any invalids?", anyInvalid);
 
     // Disable submit button if any of the rows is not valid
     document.getElementById("availability-submit").disabled = anyInvalid;
