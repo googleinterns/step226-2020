@@ -42,6 +42,7 @@ async function getExistingTimeSlots() {
         await sortTimeSlots(rows);
         return rows;
     } catch (e) {
+        console.log(e);
         return Promise.reject(new Error('There was an error loading existing slots!\nPlease refresh the page to try again.'));
     }
 }
@@ -79,10 +80,11 @@ async function slotToRow(slot) {
  */
 function fillISOStartTime(inputElement) {
     if (inputElement.value == null || inputElement.value === "") return;
+    console.log("ISO START", inputElement.value);
     inputElement.parentNode.children["ISO-start-time"].value = new Date(inputElement.value).toISOString();
 
     // Also update end time, as it is dependant on the start time's date value.
-    fillISOEndTime(inputElement.parentNode.children["ISO-end-time"]);
+    fillISOEndTime(inputElement.parentNode.children["end-time"]);
 }
 
 /**
@@ -90,7 +92,8 @@ function fillISOStartTime(inputElement) {
  * @param {HTMLInputElement} inputElement The end time element.
  */
 function fillISOEndTime(inputElement) {
-    const children = inputElement.parentNode.children;
+    const div = inputElement.parentNode;
+    const children = div.children;
     const endValue = inputElement.value;
     const ISOStartTime = children["ISO-start-time"]
 
@@ -105,7 +108,10 @@ function fillISOEndTime(inputElement) {
 
     date.setHours(Number(first));
     date.setMinutes(Number(second));
+    console.log("date", date, first, second);
     children["ISO-end-time"].value = date.toISOString();
+
+    validateTimeSlot(div);
 }
 
 /**
@@ -130,9 +136,7 @@ async function constructNewRow(startTimeValue, endTimeValue) {
     // Update hidden ISO time values
     fillISOStartTime(startElement);
 
-    // Validate time
-    newRow.addEventListener("change", event => validateTimeSlot(event));
-    newRow.isValid = false; // Default to false as there's no values
+    newRow.isValid = true; // Default to false as there's no values
 
     return newRow;
 }
@@ -144,10 +148,12 @@ async function constructNewRow(startTimeValue, endTimeValue) {
 async function getDeleteButton() {
     const button = document.createElement("button");
     button.innerHTML = "Delete";
+    button.className = "btn btn-danger m-1";
 
     button.addEventListener("click", (event) => {
         const parent = event.target.parentNode;
         parent.parentNode.removeChild(parent);
+        updateSubmitButtonDisabledStatus(parent);
     });
 
     return button;
@@ -164,6 +170,7 @@ async function getStartElement(startTimeValue) {
     startTime.name = "start-time";
     startTime.valueAsNumber = startTimeValue;
     startTime.required = true;
+    startTime.className = "m-1";
 
     startTime.addEventListener("change", (e) => fillISOStartTime(e.target));
 
@@ -192,6 +199,7 @@ async function getEndTime(endTimeValue) {
     endTime.name = "end-time";
     endTime.value = endTimeValue;
     endTime.required = true;
+    endTime.className = "m-1";
 
     endTime.addEventListener("change", (e) => fillISOEndTime(e.target));
 
@@ -214,7 +222,9 @@ async function getISOEndElement() {
  * @param {HTMLDivElement} row The row to add.
  */
 function addRow(row) {
-    document.getElementById("availability-form").appendChild(row);
+    const form = document.getElementById("availability-form");
+    form.appendChild(row);
+    updateSubmitButtonDisabledStatus(form);
 }
 
 /**
@@ -227,24 +237,29 @@ async function addEmptyRow() {
 /**
  * Validate times picked so that start is before end time.
  */
-function validateTimeSlot(event) {
-    const div = event.target.parentNode;
+function validateTimeSlot(div) {
     const children = div.children;
-    console.log(event);
     const startTime = new Date(children["ISO-start-time"].value);
     const endTime = new Date(children["ISO-end-time"].value);
 
-    console.log("start", startTime, "end", endTime);
     div.isValid = startTime.getTime() < endTime.getTime();
-    console.log("is valid? " + div.isValid);
+    console.log("validating", div, div.isValid);
 
-    //const anyInvalid = Array.from(div.parentNode.children).some(d => !d.isValid);
+    updateSubmitButtonDisabledStatus();
+}
+
+/**
+ * Check whether any row is invalid, and disable submit button accordingly.
+ */
+function updateSubmitButtonDisabledStatus() {
+    const form = document.getElementById("availability-form")
     let anyInvalid = false;
-    const divs = div.parentNode.getElementsByTagName("div");
+    const divs = form.getElementsByTagName("div");
     for (let i = 0; i < divs.length; i++) {
         if (!divs[i].isValid) anyInvalid = true;
     }
-    console.log("any invalid?", anyInvalid);
+
+    console.log("Any invalids?", anyInvalid);
 
     // Disable submit button if any of the rows is not valid
     document.getElementById("availability-submit").disabled = anyInvalid;

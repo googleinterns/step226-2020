@@ -189,7 +189,7 @@ public class VolunteerAvailabilityServletTest {
 
     try {
       volunteerAvailabilityServlet.doPost(request, response);
-      verify(response).sendRedirect("volunteer/availability.html");
+      verify(response).sendRedirect("volunteer/availability.jsp");
     } catch (IOException e) {
       e.printStackTrace();
     }
