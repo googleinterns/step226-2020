@@ -162,11 +162,20 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
       return;
     }
 
+    final User user = userService.getCurrentUser();
+    if (user == null) {
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "user is null!");
+      return;
+    }
+
+    final String userId = user.getUserId();
+    if (userId == null) {
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "userId is null!");
+      return;
+    }
+
     // Run a query to get all slot stored for logged-in volunteer
     response.setContentType("application/json;");
-    new Gson()
-            .toJson(
-                    VolunteerTimeSlot.getTimeslotsByUserId(userService.getCurrentUser().getUserId()),
-                    response.getWriter());
+    new Gson().toJson(VolunteerTimeSlot.getTimeslotsByUserId(userId), response.getWriter());
   }
 }
