@@ -30,7 +30,7 @@ import java.util.stream.*;
  */
 public class IsolateTimeSlot extends TimeSlot implements Datastoreable {
   /** The Datastore Entity name for an IsolateTimeSlot. */
-  protected static final String ISOLATE_TIME_SLOT_TABLE_NAME = "IsolateTimeSlot";
+  public static final String ISOLATE_TIME_SLOT_TABLE_NAME = "IsolateTimeSlot";
   /** The ticket associated with this TimeSlot. */
   protected final Key ticket;
   /** The date this IsolateTimeSlot is scheduled on. */
