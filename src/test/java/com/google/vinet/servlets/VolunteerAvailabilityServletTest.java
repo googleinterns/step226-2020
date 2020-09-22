@@ -34,9 +34,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -119,8 +121,9 @@ public class VolunteerAvailabilityServletTest {
       e.printStackTrace();
     }
   }
+
   @Test
-  void testPostUserNotLoggedInNotRegistered() throws Exception {
+  void testPostUserNotLoggedInNotRegistered() {
     when(userService.isUserLoggedIn()).thenReturn(false);
 
     when(registrationServlet.isUserRegistered()).thenReturn(false);
@@ -145,14 +148,12 @@ public class VolunteerAvailabilityServletTest {
 
   @Test
   public void testPostNullRequest() {
-    volunteerAvailabilityServlet = new VolunteerAvailabilityServlet();
     assertThrows(
             IllegalArgumentException.class, () -> volunteerAvailabilityServlet.doPost(null, response));
   }
 
   @Test
   public void testPostNullResponse() {
-    volunteerAvailabilityServlet = new VolunteerAvailabilityServlet();
     assertThrows(
             IllegalArgumentException.class, () -> volunteerAvailabilityServlet.doPost(request, null));
   }
@@ -177,7 +178,6 @@ public class VolunteerAvailabilityServletTest {
     setupUser();
     doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST, "no parameters provided!");
   }
-
 
   @Test
   public void testPostNormalRequest() {
@@ -262,7 +262,6 @@ public class VolunteerAvailabilityServletTest {
     parameterMap.put("ISO-end-time", new String[]{"werty"});
     when(request.getParameterMap()).thenReturn(parameterMap);
 
-
     volunteerAvailabilityServlet.doPost(request, response);
     assertEquals("Error parsing volunteer timeslot times!", getErrors());
   }
@@ -274,7 +273,6 @@ public class VolunteerAvailabilityServletTest {
     parameterMap.put("ISO-start-time", new String[]{null});
     parameterMap.put("ISO-end-time", new String[]{"swred"});
     when(request.getParameterMap()).thenReturn(parameterMap);
-
 
     volunteerAvailabilityServlet.doPost(request, response);
     assertEquals("Volunteer timeslot times are null!", getErrors());
@@ -290,5 +288,86 @@ public class VolunteerAvailabilityServletTest {
 
     // Expected not to through an exception.
     volunteerAvailabilityServlet.doPost(request, response);
+  }
+
+  ////////////////// GET REQUEST TESTS ////////////////////////////
+
+  @Test
+  public void testGetNullRequest() {
+    assertThrows(
+            IllegalArgumentException.class, () -> volunteerAvailabilityServlet.doGet(null, response));
+  }
+
+  @Test
+  public void testGetNullResponse() {
+    assertThrows(
+            IllegalArgumentException.class, () -> volunteerAvailabilityServlet.doGet(request, null));
+  }
+
+  @Test
+  void testGetUserLoggedInNotRegistered() throws IOException {
+    when(userService.isUserLoggedIn()).thenReturn(true);
+    when(registrationServlet.isUserRegistered()).thenReturn(false);
+    when(registrationServlet.isUserIsolate()).thenReturn(false);
+    when(registrationServlet.isUserVolunteer()).thenReturn(false);
+
+    volunteerAvailabilityServlet.doGet(request, response);
+    verify(response)
+            .sendError(
+                    HttpServletResponse.SC_UNAUTHORIZED, "user must be registered to get availability");
+  }
+
+  @Test
+  void testGetUserNotLoggedInNotRegistered() throws IOException {
+    when(userService.isUserLoggedIn()).thenReturn(false);
+    when(registrationServlet.isUserRegistered()).thenReturn(false);
+    when(registrationServlet.isUserIsolate()).thenReturn(false);
+    when(registrationServlet.isUserVolunteer()).thenReturn(false);
+
+    volunteerAvailabilityServlet.doGet(request, response);
+    verify(response)
+            .sendError(
+                    HttpServletResponse.SC_UNAUTHORIZED, "user must be logged in to get availability");
+  }
+
+  @Test
+  void testGetUserLoggedInRegisteredAsIsolate() throws IOException {
+    when(userService.isUserLoggedIn()).thenReturn(true);
+    when(registrationServlet.isUserRegistered()).thenReturn(true);
+    when(registrationServlet.isUserIsolate()).thenReturn(true);
+    when(registrationServlet.isUserVolunteer()).thenReturn(false);
+
+    volunteerAvailabilityServlet.doGet(request, response);
+    verify(response)
+            .sendError(
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "user must be registered as a volunteer to get availability");
+  }
+
+  @Test
+  public void testGetNullUser() throws IOException {
+    setupUser();
+    when(userService.getCurrentUser()).thenReturn(null);
+    volunteerAvailabilityServlet.doGet(request, response);
+    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "user is null!");
+  }
+
+  @Test
+  public void testGetNullUserId() throws IOException {
+    setupUser();
+    User user = new User("email", "domain");
+    when(userService.getCurrentUser()).thenReturn(user);
+    volunteerAvailabilityServlet.doGet(request, response);
+    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "userId is null!");
+  }
+
+  @Test
+  public void testGetNormal() throws IOException {
+    setupUser();
+    final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    when(response.getWriter()).thenReturn(new PrintWriter(outputStream));
+    volunteerAvailabilityServlet.doGet(request, response);
+    assertNotNull(response);
+    assert (outputStream.toString().isEmpty());
   }
 }
