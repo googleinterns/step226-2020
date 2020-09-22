@@ -111,7 +111,7 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
     VolunteerTimeSlot.deleteAllTimeSlotsByUserId(userId);
 
     // Loop through all parameters and create each slot object
-    for (int i = 0; i < startTimes.length; i++) {
+    for (int i = 0; i < (Math.min(startTimes.length, endTimes.length)); i++) {
       String startTime = startTimes[i];
       String endTime = endTimes[i];
 
@@ -121,10 +121,8 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
         new VolunteerTimeSlot(startInstant, endInstant, volunteer).toDatastore();
       } catch (NullPointerException e) {
         System.err.println("Volunteer timeslot times are null!");
-        e.printStackTrace();
       } catch (IllegalArgumentException | DateTimeParseException e) {
         System.err.println("Error parsing volunteer timeslot times!");
-        e.printStackTrace();
       }
     }
 
