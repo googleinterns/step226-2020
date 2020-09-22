@@ -83,8 +83,8 @@ public class MatchingRunner {
 
     for (IsolateTimeSlot matching : matches) {
       Entity matchingEntity = new Entity("Matching");
-      matchingEntity.setProperty("isolateId", matching.getIsolate().userId);
-      matchingEntity.setProperty("volunteerId", matching.getPairedSlot().registeredUser.userId);
+      matchingEntity.setProperty("isolateId", matching.getIsolate().getUserId());
+      matchingEntity.setProperty("volunteerId", matching.getPairedSlot().registeredUser.getUserId());
       matchingEntity.setProperty("date", matching.date.toString());
       matchingEntity.setProperty("start", matching.start.toString());
       matchingEntity.setProperty("end", matching.end.toString());
