@@ -27,10 +27,10 @@
 <h2>Welcome to volunteer matching!</h2>
 <h2 class="alert alert-warning">Note: Availability can only be posted until 8pm each day.</h2>
 <p>Please specify the time(s) in which you would be available to help:</p>
-<button onclick="addEmptyRow()">Add Row</button>
+<br>
 <form id="availability-form" method="POST" action="/volunteer-availability">
-    <input type="text" name="timezoneOffset" id="timezoneOffset" hidden>
-    <input type="submit" id="availability-submit">
+        <button type="button" class="btn btn-primary m-1" onclick="addEmptyRow()">Add Row</button>
+        <input class="btn btn-primary m-1" type="submit" id="availability-submit">
 </form>
 
 </body>

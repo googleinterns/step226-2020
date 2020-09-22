@@ -126,7 +126,7 @@ public class VolunteerAvailabilityServlet extends HttpServlet {
       }
     }
 
-    response.sendRedirect("volunteer/availability.html");
+    response.sendRedirect("volunteer/availability.jsp");
   }
 
   /**
