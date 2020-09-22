@@ -1,44 +1,48 @@
 /*
- * Copyright 2020 Google LLC
+ *  Copyright 2020 Google LLC
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     https://www.apache.org/licenses/LICENSE-2.0
+ *      https:www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package com.google.vinet.servlets;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import java.io.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,6 +50,8 @@ public class RegistrationServletTest {
 
   @Mock
   UserService userService;
+  @Mock
+  DatastoreService datastore;
   @Mock
   HttpServletRequest request;
   @Mock
@@ -56,7 +62,7 @@ public class RegistrationServletTest {
   RegistrationServlet registrationServlet;
 
   private static final LocalServiceTestHelper helper =
-          new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
   private static ByteArrayOutputStream errorStream;
 
@@ -105,21 +111,10 @@ public class RegistrationServletTest {
   }
 
   /**
-   * Sets up an argument captor to get the HTTP status code from the response
-   *
-   * @return The argument captor that will contain the HTTP status code, as an Integer
-   */
-  private ArgumentCaptor<Integer> captureResponseStatus() {
-    ArgumentCaptor<Integer> valueCapture = ArgumentCaptor.forClass(Integer.class);
-    doNothing().when(response).setStatus(valueCapture.capture());
-    return valueCapture;
-  }
-
-  /**
    * Sets the HTTP request parameters. Can also be used to pass null values.
    */
   private void setRequestParameters(
-          String firstname, String lastname, String type, String latitude, String longitude) {
+      String firstname, String lastname, String type, String latitude, String longitude) {
     Map<String, String[]> parameterMap = new HashMap<>();
     parameterMap.put("firstname", new String[]{firstname});
     parameterMap.put("lastname", new String[]{lastname});
@@ -133,7 +128,7 @@ public class RegistrationServletTest {
    * Sets HTTP request parameters, but only if each value is not null
    */
   private void setNonNullRequestParameters(
-          String firstname, String lastname, String type, String latitude, String longitude) {
+      String firstname, String lastname, String type, String latitude, String longitude) {
     Map<String, String[]> parameterMap = new HashMap<>();
     if (firstname != null) parameterMap.put("firstname", new String[]{firstname});
     if (lastname != null) parameterMap.put("lastname", new String[]{lastname});
@@ -148,7 +143,7 @@ public class RegistrationServletTest {
    *
    * @param code The HTTP response code that the response contains
    */
-  private void assertResponseCode(int code) {
+  private void doPostAndAssertResponseCode(int code) {
     registrationServlet.doPost(request, response);
     verify(response).setStatus(code);
   }
@@ -159,7 +154,7 @@ public class RegistrationServletTest {
    * @param parameterName The name of the parameter, as passed in the HTTP request
    */
   private void checkNullParameter(String parameterName) {
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("Parameter " + parameterName + " is null!", getErrors());
   }
 
@@ -169,7 +164,7 @@ public class RegistrationServletTest {
    * @param parameterName The name of the parameter, as passed in the HTTP request
    */
   private void checkMissingParameter(String parameterName) {
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("Missing parameter " + parameterName + " for registration request!", getErrors());
   }
 
@@ -179,10 +174,13 @@ public class RegistrationServletTest {
    * @param parameterName The name of the parameter that is blank
    */
   private void checkBlankParameter(String parameterName) {
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("Parameter " + parameterName + " is blank!", getErrors());
   }
 
+  /**
+   * Test passes if no exception is thrown.
+   */
   @Test
   public void testPostNullRequest() {
     registrationServlet = new RegistrationServlet();
@@ -192,20 +190,20 @@ public class RegistrationServletTest {
   @Test
   public void testPostNotLoggedIn() {
     when(userService.isUserLoggedIn()).thenReturn(false);
-    assertResponseCode(HttpServletResponse.SC_UNAUTHORIZED);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
   @Test
   public void testPostNoUserId() {
     when(userService.isUserLoggedIn()).thenReturn(true);
     when(userService.getCurrentUser()).thenReturn(user);
-    assertResponseCode(HttpServletResponse.SC_UNAUTHORIZED);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
   @Test
   public void testPostEmptyRequest() {
     setupUser();
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
   }
 
   @Test
@@ -310,7 +308,7 @@ public class RegistrationServletTest {
   public void testPostBlankLongitude() {
     setupUser();
     setNonNullRequestParameters(
-            "afirstname", "alastname", "volunteer", "-85.300738", "                    ");
+        "afirstname", "alastname", "volunteer", "-85.300738", "                    ");
     checkBlankParameter("longitude");
   }
 
@@ -319,7 +317,7 @@ public class RegistrationServletTest {
     setupUser();
     setNonNullRequestParameters(
             "afirstname", "alastname", "ekugfghweig", "-85.300738", "-85.300738");
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("Wrong type parameter!", getErrors());
   }
 
@@ -327,7 +325,7 @@ public class RegistrationServletTest {
   public void testPostInvalidLatitude() {
     setupUser();
     setNonNullRequestParameters("afirstname", "alastname", "isolate", "weifeuf", "-85.300738");
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("The latitude is not formatted as a double!", getErrors());
   }
 
@@ -335,7 +333,7 @@ public class RegistrationServletTest {
   public void testPostInvalidLongitude() {
     setupUser();
     setNonNullRequestParameters("afirstname", "alastname", "isolate", "-85.300738", "newf873nf");
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("The longitude is not formatted as a double!", getErrors());
   }
 
@@ -343,7 +341,7 @@ public class RegistrationServletTest {
   public void testPost1LetterFirstname() {
     setupUser();
     setNonNullRequestParameters("a", "alastname", "isolate", "-85.300738", "-85.300738");
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("Parameter firstname is not within length bounds!", getErrors());
   }
 
@@ -351,7 +349,7 @@ public class RegistrationServletTest {
   public void testPost2LetterFirstname() {
     setupUser();
     setNonNullRequestParameters("ab", "alastname", "isolate", "-85.300738", "-85.300738");
-    assertResponseCode(HttpServletResponse.SC_OK);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_OK);
     assertEquals("", getErrors());
   }
 
@@ -364,7 +362,108 @@ public class RegistrationServletTest {
             "isolate",
             "-85.300738",
             "-85.300738");
-    assertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+    doPostAndAssertResponseCode(HttpServletResponse.SC_BAD_REQUEST);
     assertEquals("Parameter lastname is not within length bounds!", getErrors());
+  }
+
+  /**
+   * Assert that an IllegalArgumentException is thrown when the request parameter is null.
+   */
+  @Test
+  public void testGetNullRequest() throws Exception {
+    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      registrationServlet.doGet(null, response);
+    });
+
+    assertEquals("request cannot be null", exception.getMessage());
+  }
+
+  /**
+   * Assert that an IllegalArgumentException is thrown when the response parameter is null.
+   */
+  @Test
+  public void testGetNullResponse() throws Exception {
+    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      registrationServlet.doGet(request, null);
+    });
+
+    assertEquals("response cannot be null", exception.getMessage());
+  }
+
+  @Test
+  public void testGetUserNotLoggedIn() throws Exception {
+    when(userService.isUserLoggedIn()).thenReturn(false);
+    registrationServlet.doGet(request, response);
+    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+  }
+
+  @Test
+  public void testGetUserLoggedInNotRegistered() throws Exception {
+    final String userId = "userid";
+
+    User user = mock(User.class);
+    when(user.getUserId()).thenReturn(userId);
+
+    when(userService.isUserLoggedIn()).thenReturn(true);
+    when(userService.getCurrentUser()).thenReturn(user);
+
+    PreparedQuery preparedQuery = mock(PreparedQuery.class);
+    when(preparedQuery.asSingleEntity()).thenReturn(null);
+
+    when(registrationServlet.getUserQuery()).thenReturn(preparedQuery);
+
+    PrintWriter pw = mock(PrintWriter.class);
+    when(response.getWriter()).thenReturn(pw);
+
+    registrationServlet.doGet(request, response);
+    verify(pw).println("false");
+  }
+
+  @Test
+  public void testGetUserLoggedInRegisteredAsVolunteer() throws Exception {
+    final String userId = "userid";
+
+    User user = mock(User.class);
+    when(user.getUserId()).thenReturn(userId);
+
+    when(userService.isUserLoggedIn()).thenReturn(true);
+    when(userService.getCurrentUser()).thenReturn(user);
+
+    Entity entity = mock(Entity.class);
+    when(entity.getProperty("type")).thenReturn("VOLUNTEER");
+    PreparedQuery preparedQuery = mock(PreparedQuery.class);
+    when(preparedQuery.asSingleEntity()).thenReturn(entity);
+
+    when(registrationServlet.getUserQuery()).thenReturn(preparedQuery);
+
+    PrintWriter pw = mock(PrintWriter.class);
+    when(response.getWriter()).thenReturn(pw);
+
+    registrationServlet.doGet(request, response);
+    verify(pw).println("true");
+  }
+
+  @Test
+  public void testGetUserLoggedInRegisteredAsIsolate() throws Exception {
+    final String userId = "userid";
+
+    User user = mock(User.class);
+    when(user.getUserId()).thenReturn(userId);
+
+    when(userService.isUserLoggedIn()).thenReturn(true);
+    when(userService.getCurrentUser()).thenReturn(user);
+
+    Entity entity = mock(Entity.class);
+    when(entity.getProperty("type")).thenReturn("ISOLATE");
+    PreparedQuery preparedQuery = mock(PreparedQuery.class);
+    when(preparedQuery.asSingleEntity()).thenReturn(entity);
+
+    when(registrationServlet.getUserQuery()).thenReturn(preparedQuery);
+
+    PrintWriter pw = mock(PrintWriter.class);
+    when(response.getWriter()).thenReturn(pw);
+
+    registrationServlet.doGet(request, response);
+    verify(pw).println("true");
   }
 }

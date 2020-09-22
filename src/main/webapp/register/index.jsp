@@ -23,6 +23,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js" integrity="sha512-rmZcZsyhe0/MAjquhTgiUcb4d9knaFc7b5xAfju483gbEXTkeJRUMIPk6s3ySZMYUHEcjKbjLjyddGWMrNEvZg==" crossorigin="anonymous"></script>
   <%@ include file="/bootstrap-css.html" %>
   <script src="maps.js"></script>
+  <script src="scripts/registration.js"></script>
   <!-- 
       TODO: ADD PRODUCTION KEY TO appengine-web.xml BEFORE DEPLOYMENT
       This app cannot be deployed without inserting your production API key into the MAPS_KEY

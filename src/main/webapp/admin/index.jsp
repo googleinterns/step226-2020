@@ -1,3 +1,4 @@
+
 <!--
   ~ Copyright 2020 Google LLC
   ~
@@ -18,7 +19,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Request Submission</title>
+    <title>Admin Matching Dashboard</title>
     <%@ include file="/bootstrap-css.html" %>
     <script src="scripts/main.js" type="module"></script>
 </head>
@@ -26,11 +27,10 @@
   <div class="container">
     <div class="row">
       <div class="column">
-        <h1>Please submit your request below.</h1>
-        <h2 class="alert alert-warning">Note: Requests will only be accepted up until 8pm each day.</h2>
+        <button onclick="runMatching()" class="btn btn-primary">Run Matching</button>
+        <h1 id="status" class="alert"></h1>
       </div>
     </div>
-    <%@ include file = "request-form.html" %>
   </div>
 </body>
 <!-- Include necessary js libraries for bootstrap functionality. -->

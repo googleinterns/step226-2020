@@ -19,7 +19,6 @@ package com.google.vinet.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.DatastoreFailureException;
-import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.UserService;
@@ -36,25 +35,47 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.stream.Stream;
 
+/**
+ * A web servlet for posting user requests.
+ */
 @WebServlet("/request")
 public class RequestServlet extends HttpServlet {
+  /** The Datastore entity name for the ticket(s) associated with a request. */
   public static final String TICKET_TABLE_NAME = "Ticket";
+  /** The {@code DatastoreService} implementation that this {@code RequestServlet depends on}. */
   private final DatastoreService datastore;
+  /** The {@code UserService} implementation that this {@code RequestServlet depends on}. */
   private final UserService userService;
+  /** The {@code RegistrationServlet} implementation that this {@code RequestServlet depends on}. */
   private final RegistrationServlet registrationServlet;
 
+  /**
+   * Construct a RequestServlet with all of its dependencies set to their default implementations.
+   */
   public RequestServlet() {
     this.datastore = DatastoreServiceFactory.getDatastoreService();
     this.userService = UserServiceFactory.getUserService();
     this.registrationServlet = new RegistrationServlet();
   }
 
+  /**
+   * Construct a RequestServlet which depends on the provided dependencies.
+   * @param datastore The DatastoreService implementation to depend on.
+   * @param userService The UserService implementation to depend on.
+   * @param registrationServlet The RegistrationServlet implementation to depend on.
+   */
   public RequestServlet(DatastoreService datastore, UserService userService, RegistrationServlet registrationServlet) {
     this.datastore = datastore;
     this.userService = userService;
     this.registrationServlet = registrationServlet;
   }
 
+  /**
+   * Post an Isolate's request to the servlet. Both the request and its tickets will be put into the DataStore.
+   * @param request The request to be read.
+   * @param response The response to be written to.
+   * @throws IOException If an IOException occurs while reading from the request or writing to the reponse.
+   */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
@@ -74,7 +95,7 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    final boolean registered = registrationServlet.isUserRegistered(this.userService);
+    final boolean registered = registrationServlet.isUserRegistered();
 
     if (!registered) {
       response.sendError(
@@ -84,7 +105,7 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    final boolean isIsolate = registrationServlet.isUserIsolate(this.userService);
+    final boolean isIsolate = registrationServlet.isUserIsolate();
 
     if (!isIsolate) {
       response.sendError(
@@ -99,16 +120,23 @@ public class RequestServlet extends HttpServlet {
     String startTime = request.getParameter("startTime");
     String endTime = request.getParameter("endTime");
     String timezone = request.getParameter("timezoneId");
-    String[] subjects = request.getParameterValues("subject");
-    String[] details = request.getParameterValues("details");
+
+    /* NOTE: Subjects and Details will be matched in the order they are received.
+     * For example:
+     * subjects[0] will be linked to details [0],
+     * subjects[1] will be linked to details [1]
+     * and so on as above.
+     */
+    final String[] subjectsRAW = request.getParameterValues("subject");
+    final String[] detailsRAW = request.getParameterValues("details");
 
     if (date == null
         || duration == null
         || startTime == null
         || endTime == null
         || timezone == null
-        || subjects == null
-        || details == null) {
+        || subjectsRAW == null
+        || detailsRAW == null) {
       response.sendError(
           HttpServletResponse.SC_BAD_REQUEST,
           "one or more of the parameters were null"
@@ -121,16 +149,16 @@ public class RequestServlet extends HttpServlet {
     startTime = startTime.trim();
     endTime = endTime.trim();
     timezone = timezone.trim();
-    trimMembers(subjects);
-    trimMembers(details);
+    final List<String> subjects = Collections.unmodifiableList(Arrays.asList(trimMembers(subjectsRAW)));
+    final List<String> details = Collections.unmodifiableList(Arrays.asList(trimMembers(detailsRAW)));
 
     if (date.isEmpty()
         || duration.isEmpty()
         || startTime.isEmpty()
         || endTime.isEmpty()
         || timezone.isEmpty()
-        || subjects.length == 0
-        || details.length == 0) {
+        || subjects.size() == 0
+        || details.size() == 0) {
       response.sendError(
           HttpServletResponse.SC_BAD_REQUEST,
           "one or more of the parameters were empty"
@@ -138,7 +166,7 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    if (Stream.of(subjects).anyMatch(e -> e == null || e.equals(""))) {
+    if (subjects.parallelStream().anyMatch(e -> e == null || e.equals(""))) {
       response.sendError(
           HttpServletResponse.SC_BAD_REQUEST,
           "all members of subjects array must not be null or empty"
@@ -146,7 +174,7 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    if (Stream.of(details).anyMatch(e -> e == null || e.equals(""))) {
+    if (details.parallelStream().anyMatch(e -> e == null || e.equals(""))) {
       response.sendError(
           HttpServletResponse.SC_BAD_REQUEST,
           "all members of details array must not be null or empty"
@@ -154,7 +182,10 @@ public class RequestServlet extends HttpServlet {
       return;
     }
 
-    if (subjects.length != details.length) {
+    /* subjects and details must be of equal length to ensure that the subjects and details
+     * have been received correctly.
+     */
+    if (subjects.size() != details.size()) {
       response.sendError(
           HttpServletResponse.SC_BAD_REQUEST,
           "subjects and details must be of equal length"
@@ -214,57 +245,17 @@ public class RequestServlet extends HttpServlet {
 
     /* Put the ticket into the datastore, then create an IsolateTimeSlot which points to this ticket,
      * and put that IsolateTimeSlot into the datastore. */
-    try{
+    try {
       final Key ticketKey = this.datastore.put(ticketEntity);
 
       final Isolate isolate = new Isolate(userId);
       final IsolateTimeSlot timeSlot = new IsolateTimeSlot(start, end, isolate, localDate, ticketKey);
       timeSlot.toDatastore();
-    } catch (DatastoreFailureException exception) {
+    } catch (Exception exception) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
     response.sendRedirect("/isolate/home.html");
-  }
-
-  @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException{
-    if (response == null) {
-      throw new IllegalArgumentException("response must not be null");
-    }
-
-    if (request == null) {
-      throw new IllegalArgumentException("request must not be null");
-    }
-
-    if (!this.userService.isUserLoggedIn()) {
-      response.sendError(
-          HttpServletResponse.SC_UNAUTHORIZED,
-          "user must be logged in to fetch a request"
-      );
-      return;
-    }
-
-    final boolean registered = registrationServlet.isUserRegistered(this.userService);
-
-    if (!registered) {
-      response.sendError(
-          HttpServletResponse.SC_UNAUTHORIZED,
-          "user must be registered to fetch a request"
-      );
-      return;
-    }
-
-    IsolateTimeSlot.datastore = this.datastore;
-    final List<IsolateTimeSlot> timeSlots = IsolateTimeSlot.getTimeslotsByUserId(this.userService.getCurrentUser().getUserId());
-
-    try{
-      Gson gson = new GsonBuilder().setPrettyPrinting().create();
-      response.getWriter().println(gson.toJson(timeSlots));
-    } catch (Exception exception) {
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      throw exception;
-    }
   }
 
   /**
