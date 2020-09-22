@@ -27,10 +27,6 @@ public class RegisteredUser {
     return userId;
   }
 
-  public String getUserId() {
-    return userId;
-  }
-
   @Override
   public int hashCode() {
     return userId.hashCode();
