@@ -28,7 +28,7 @@ import javax.servlet.annotation.*;
 import javax.servlet.http.*;
 
 @WebServlet("/fetch-requests")
-public class IsolateRequestServlet  extends HttpServlet{
+public class IsolateRequestServlet  extends HttpServlet {
   public DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
   public UserService userService = UserServiceFactory.getUserService();
   public RegistrationServlet registrationServlet = new RegistrationServlet();
@@ -74,10 +74,10 @@ public class IsolateRequestServlet  extends HttpServlet{
     List<IsolateRequest> isolateRequests = new LinkedList<>();
 
     /* An EntityNotFoundException implies the system has stored an isolate's request, but failed to link
-     * that request to the correct Ticket entity in Datastore, the exception must be thrown to allow Google
+     * that request to the correct Ticket entity in Datastore. The exception must be thrown to allow Google
      * Cloud Console to observe and log it. It should not be caught by the caller. */
-    try{
-      for (Entity entity : results.asIterable()){
+    try {
+      for (Entity entity : results.asIterable()) {
         final String date = (String) entity.getProperty("date");
         final String start = (String) entity.getProperty("startTime");
         final String end = (String) entity.getProperty("endTime");
@@ -105,7 +105,7 @@ public class IsolateRequestServlet  extends HttpServlet{
     }
   }
 
-  public static class IsolateRequest{
+  public static class IsolateRequest {
     private final String date, start, end;
     private final String[] subjects, details;
 
