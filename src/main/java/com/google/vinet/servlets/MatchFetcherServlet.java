@@ -20,10 +20,12 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
 import com.google.vinet.data.Match;
+import com.google.vinet.data.MatchingRunner;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -39,9 +41,17 @@ import java.util.stream.StreamSupport;
  */
 @WebServlet("/match-fetcher")
 public class MatchFetcherServlet extends HttpServlet {
-  private final UserService userService = UserServiceFactory.getUserService();
-  private final RegistrationServlet registrationServlet = new RegistrationServlet();
+  private UserService userService = UserServiceFactory.getUserService();
+  private RegistrationServlet registrationServlet = new RegistrationServlet();
   private final DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
+
+  public void setUserService(UserService userService) {
+    this.userService = userService;
+  }
+
+  public void setRegistrationServlet(RegistrationServlet registrationServlet) {
+    this.registrationServlet = registrationServlet;
+  }
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -64,14 +74,24 @@ public class MatchFetcherServlet extends HttpServlet {
       return;
     }
 
-    final String userId = userService.getCurrentUser().getUserId();
+    final User user = userService.getCurrentUser();
+    if (user == null) {
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "user is null!");
+      return;
+    }
+
+    final String userId = user.getUserId();
+    if (userId == null) {
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "userId is null!");
+      return;
+    }
+
     final boolean isVolunteer = registrationServlet.isUserVolunteer();
     final String idFilterProperty = isVolunteer ? "volunteerId" : "isolateId";
 
-
     // Run a query to get all matches for this user
     Query query =
-            new Query("Matching") // TODO make into constant
+            new Query(MatchingRunner.MATCHING_TABLE_NAME)
                     .setFilter(
                             new Query.FilterPredicate(idFilterProperty, Query.FilterOperator.EQUAL, userId));
 
@@ -80,7 +100,6 @@ public class MatchFetcherServlet extends HttpServlet {
             StreamSupport.stream(pq.asIterable().spliterator(), true)
                     .map(match -> new Match(match, isVolunteer))
                     .collect(Collectors.toList());
-
 
     response.setContentType("application/json;");
     new Gson().toJson(matches, response.getWriter());
