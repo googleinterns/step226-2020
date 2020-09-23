@@ -1,53 +1,91 @@
-# New Project Template
+# VInet (Volunteer Isolate Network)
 
-This repository contains a template that can be used to seed a repository for a
-new Google open source project.
+VINet is a Web App, designed to connect those isolating as a result of CoViD-19 with volunteers. The aim of the app is to allow isolate's to request help from volunteers, for tasks the isolate cannot complete due to the restrictions on movement during the CoViD-19 pandemic. These tasks could include going to the store for some groceries, collecting a package from the couriers and so on.
 
-See [go/releasing](http://go/releasing) (available externally at
-https://opensource.google/docs/releasing/) for more information about
-releasing a new Google open source project.
+## Core Features
+The core features of the VInet Web App include:
+- User Authentication
+- Isolate Issue Tracking
+- Volunteer Availability Tracking
+- Isolate / Volunteer Matching
 
-This template uses the Apache license, as is Google's default.  See the
-documentation for instructions on using alternate license.
+### User Authentication
+User Authentication for the VInet Web App is done via the App Engine UserService API.
 
-## How to use this template
+This allows users to log in with their Google accounts, providing a seamless experience for users.
 
-1. Clone it from GitHub.
-    * There is no reason to fork it.
-1. Create a new local repository and copy the files from this repo into it.
-1. Modify README.md and docs/contributing.md to represent your project, not the
-   template project.
-1. Develop your new project!
+All ingress / egress points have user authentication, ensuring that user data is safe and secure on the app's backend.
 
-``` shell
-git clone https://github.com/google/new-project
-mkdir my-new-thing
-cd my-new-thing
-git init
-cp -r ../new-project/* ../new-project/.github .
-git add *
-git commit -a -m 'Boilerplate for new Google open source project'
+### Isolate Issue Tracking
+To allow isolates to request help from volunteers, we implemented a ticketing system, allowing isolates to send in requests that they would like fulfilled.
+
+The ticketing system's UI is displayed below
+![screenshot of the request ticketing UI](screenshots/request_ticket_ui.png)
+
+## Getting Started
+### Prerequisites
+In order to build and/or run this project, you will need:
+1. [Git](https://git-scm.com/)
+1. [Apache Maven](https://maven.apache.org/)
+
+### Building Locally
+The first thing you will need to do is `git clone` this repo using one of the following commands:
+HTTPS:
+```bash
+  git clone https://github.com/googleinterns/step226-2020.git
+```
+ssh:
+```bash
+  git clone git@github.com:googleinterns/step226-2020.git
+```
+GitHub CLI:
+```bash
+  gh repo clone googleinterns/step226-2020
 ```
 
-## Source Code Headers
+Now that you have the project available locally you can either:
+ - Run the tests for this project.
+ - Run the project locally on a development server.
+ - Deploy the project to Google's App Engine.
 
-Every file containing source code must include copyright and license
-information. This includes any JS/CSS files that you might be serving out to
-browsers. (This is to help well-intentioned people avoid accidental copying that
-doesn't comply with the license.)
+#### Running Tests
+To run the tests for this project, run the following command from the terminal:
+```bash
+  mvn test
+````
+The first time you run this command, it might take a few minutes to fetch all of the project dependencies - this is normal.
 
-Apache header:
+#### Running the project locally on a development server
+To run this project locally on a development server, run the following command from the terminal:
+```bash
+  mvn package appengine:run
+```
+Once the development server has started, the project will be available at [localhost:8080](localhost:8080).
 
-    Copyright 2020 Google LLC
+Note: The development server will not hot-reload files. If you wish to make and test changes, you must reload the development server.
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
+#### Deploying the Project to App Engine
+To deploy this project to App Engine, you will need to enable to [App Engine](cloud.google.com/appengine) service from the [google cloud console](console.cloud.google.com).
 
-        https://www.apache.org/licenses/LICENSE-2.0
+Once you have done so, copy the [project id](cloud.google.com/resource-manager/docs/creating-managing-projects#identifying_projects) of your google cloud console project.
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+Navigate into this project's root directory, and edit the `pom.xml` file. You will need to change the following entry in the `<plugins>` section:
+```xml
+<plugin>
+  <groupId>com.google.cloud.tools</groupId>
+  <artifactId>appengine-maven-plugin</artifactId>
+  <version>2.2.0</version>
+  <configuration>
+    <deploy.projectId>YOUR_PROJECT_ID</deploy.projectId>
+    <deploy.version>1</deploy.version>
+  </configuration>
+</plugin>
+```
+Under `<configuration>`, change the `<deploy.projectId>` tag to contain **your google cloud project's id**.
+
+Once this has been configured, run the following command:
+```bash
+  mvn package appengine:deploy
+```
+
+The project will be deployed, and will be visible under the App Engine dashboard.
