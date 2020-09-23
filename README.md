@@ -1,6 +1,6 @@
 # VInet (Volunteer Isolate Network)
 
-VINet is a Web App, designed to connect those isolating as a result of CoViD-19 with volunteers. The aim of the app is to allow isolate's to request help from volunteers, for tasks the isolate cannot complete due to the restrictions on movement during the CoViD-19 pandemic. These tasks could include going to the store for some groceries, collecting a package from the couriers and so on.
+VINet is a Web App, designed to connect those isolating as a result of CoViD-19 with volunteers. The aim of the app is to allow isolates to request help from volunteers, for tasks the isolate cannot complete due to the restrictions on movement during the CoViD-19 pandemic. These tasks could include going to the shops for some groceries, collecting a package from the couriers and so on.
 
 ## Core Features
 
@@ -15,7 +15,7 @@ The core features of the VInet Web App include:
 
 User Authentication for the VInet Web App is done via the App Engine UserService API.
 
-This allows users to log in with their Google accounts, providing a seamless experience for users.
+This allows people to log in with their Google accounts, providing a seamless experience for users.
 
 All ingress / egress points have user authentication, ensuring that user data is safe and secure on the app's backend.
 
@@ -25,7 +25,7 @@ To allow isolates to request help from volunteers, we implemented a ticketing sy
 
 The ticketing system's UI is displayed below ![screenshot of the request ticketing UI](screenshots/request_ticket_ui.png)
 
-As can be seen from the above example, an isolate's request contains a variable number of tickets, and these tickets allow an isolate to describe what sort of help they need, such as help with shopping for groceries.
+As can be seen from the above example, an isolate's request contains a variable number of tickets, and these tickets allow an isolate to describe what sort of help they need, such as help with grocery shopping.
 
 ### Volunteer Availability Tracking
 
