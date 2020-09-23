@@ -65,10 +65,10 @@ public class Match {
     Entity user =
             datastoreService
                     .prepare(
-                            new Query("UserInfo") // TODO use constant instead
+                            new Query("UserInfo")
                                     .setFilter(
                                             new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId)))
-                    .asSingleEntity(); //TODO check in case null or duplicate
+                    .asSingleEntity();
 
     firstName = (String) user.getProperty("firstname");
     lastName = (String) user.getProperty("lastname");
@@ -76,11 +76,11 @@ public class Match {
     // Get ticket
     PreparedQuery query =
             datastoreService.prepare(
-                    new Query("Ticket") // TODO use constant instead
+                    new Query("Ticket")
                             .setFilter(
                                     new Query.FilterPredicate("isolateId", Query.FilterOperator.EQUAL, isolateId)));
 
-    Entity ticket = query.asSingleEntity(); // TODO check in case missing or duplicate
+    Entity ticket = query.asSingleEntity();
 
     subjects = new Gson().fromJson((String) ticket.getProperty("subjects"), String[].class);
     details = new Gson().fromJson((String) ticket.getProperty("details"), String[].class);
