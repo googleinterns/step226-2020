@@ -82,11 +82,7 @@ function fillISOStartTime(inputElement) {
     inputElement.parentNode.children["ISO-start-time"].value = new Date(inputElement.value).toISOString();
 
     // Also update end time, as it is dependant on the start time's date value.
-<<<<<<< HEAD
-    fillISOEndTime(inputElement.parentNode.children["ISO-end-time"]);
-=======
     fillISOEndTime(inputElement.parentNode.children["end-time"]);
->>>>>>> a351bd07ee4346ee4c7357151d044b38ba180c92
 }
 
 /**
@@ -94,12 +90,8 @@ function fillISOStartTime(inputElement) {
  * @param {HTMLInputElement} inputElement The end time element.
  */
 function fillISOEndTime(inputElement) {
-<<<<<<< HEAD
-    const children = inputElement.parentNode.children;
-=======
     const div = inputElement.parentNode;
     const children = div.children;
->>>>>>> a351bd07ee4346ee4c7357151d044b38ba180c92
     const endValue = inputElement.value;
     const ISOStartTime = children["ISO-start-time"]
 
@@ -115,11 +107,8 @@ function fillISOEndTime(inputElement) {
     date.setHours(Number(first));
     date.setMinutes(Number(second));
     children["ISO-end-time"].value = date.toISOString();
-<<<<<<< HEAD
-=======
 
     validateTimeSlot(div);
->>>>>>> a351bd07ee4346ee4c7357151d044b38ba180c92
 }
 
 /**
