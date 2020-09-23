@@ -39,6 +39,10 @@ To match isolates with volunteers, VInet uses the [Hopcroft-Karp bipartite match
 
 Matching is run as a cron job each evening at 8pm. This was determined as the ideal time to run the matching algorithm, as it would allow for the matching algorithm to run to completion overnight, and for users to be notified of the matchings produced on the following morning.
 
+Once the algorithm has run, the matches found are accessible to both volunteers and isolates in a table as below.
+
+![screenshot of matches UI](screenshots/matches.png)
+
 ## Getting Started
 
 ### Prerequisites
