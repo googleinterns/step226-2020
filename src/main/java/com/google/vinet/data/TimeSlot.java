@@ -31,8 +31,9 @@ public abstract class TimeSlot implements Comparable<TimeSlot> {
   private TimeSlot pairedSlot = null;
   private double distance = 0;
 
-  protected TimeSlot(Instant start, Instant end, RegisteredUser registeredUser) {
+  public TimeSlot(Instant start, Instant end, RegisteredUser registeredUser) {
     if (start == null || end == null) throw new NullPointerException();
+    System.out.println("Start: " + start.toString() + " end: " + end.toString());
     if (start.isAfter(end)) throw new IllegalArgumentException();
     this.start = start;
     this.end = end;
