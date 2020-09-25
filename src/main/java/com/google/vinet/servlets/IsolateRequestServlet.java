@@ -53,7 +53,7 @@ public class IsolateRequestServlet  extends HttpServlet {
       return;
     }
 
-    final boolean registered = registrationServlet.isUserRegistered(this.userService);
+    final boolean registered = registrationServlet.isUserRegistered();
 
     if (!registered) {
       response.sendError(

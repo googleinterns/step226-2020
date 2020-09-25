@@ -136,6 +136,7 @@ public class RequestServletTest {
 
     when(request.getParameter("timezoneId")).thenReturn("Europe/Paris");
     when(request.getParameter("date")).thenReturn("2020-09-12");
+    when(request.getParameter("duration")).thenReturn("30");
     when(request.getParameter("startTime")).thenReturn("12:00:00");
     when(request.getParameter("endTime")).thenReturn("13:00:00");
 

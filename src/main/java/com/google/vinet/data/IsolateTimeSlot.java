@@ -30,7 +30,7 @@ import java.util.stream.*;
  */
 public class IsolateTimeSlot extends TimeSlot implements Datastoreable {
   /** The Datastore Entity name for an IsolateTimeSlot. */
-  protected static final String ISOLATE_TIME_SLOT_TABLE_NAME = "IsolateTimeSlot";
+  public static final String ISOLATE_TIME_SLOT_TABLE_NAME = "IsolateTimeSlot";
   /** The ticket associated with this TimeSlot. */
   protected final Key ticket;
   /** The date this IsolateTimeSlot is scheduled on. */
@@ -178,7 +178,7 @@ public class IsolateTimeSlot extends TimeSlot implements Datastoreable {
     /* TODO: Check that all instance variables are non-null before posting to Datastore. */
     final Entity entity = new Entity(ISOLATE_TIME_SLOT_TABLE_NAME);
     entity.setProperty("ticketKey", KeyFactory.keyToString(ticket));
-    entity.setProperty("isolateId", this.getIsolate().userId);
+    entity.setProperty("isolateId", this.getIsolate().getUserId());
     entity.setProperty("date", date.toString());
     entity.setProperty("startTime", start.toString());
     entity.setProperty("endTime", end.toString());

@@ -19,11 +19,16 @@ package com.google.vinet.data;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class VolunteerTimeSlot extends TimeSlot implements Datastoreable {
-  private DatastoreService datastoreService;
+  private static DatastoreService datastoreService;
   public static final String VOLUNTEER_TIMESLOT_TABLE_NAME = "volunteer_timeslots";
 
   public VolunteerTimeSlot(Instant start, Instant end, Volunteer volunteer) {
@@ -47,9 +52,34 @@ public class VolunteerTimeSlot extends TimeSlot implements Datastoreable {
 
     final Entity entity = new Entity(VOLUNTEER_TIMESLOT_TABLE_NAME);
     entity.setProperty("userId", registeredUser.getUserId());
-    entity.setProperty("start", getStart());
-    entity.setProperty("end", getEnd());
+    entity.setProperty("date", getStart().toString().split("T")[0]);
+    entity.setProperty("start", getStart().toString());
+    entity.setProperty("end", getEnd().toString());
 
     datastoreService.put(entity);
+  }
+
+  public static List<VolunteerTimeSlot> getTimeslotsByUserId(String userId) {
+    return StreamSupport.stream(queryTimeSlots(userId).asIterable().spliterator(), true)
+            .map(VolunteerTimeSlot::new)
+            .collect(Collectors.toList());
+  }
+
+  private static PreparedQuery queryTimeSlots(String userId) {
+    Query query =
+            new Query(VOLUNTEER_TIMESLOT_TABLE_NAME)
+                    .setFilter(new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId));
+
+    if (datastoreService == null) datastoreService = DatastoreServiceFactory.getDatastoreService();
+
+    return datastoreService.prepare(query);
+  }
+
+  public static void deleteAllTimeSlotsByUserId(String userId) {
+    if (datastoreService == null) datastoreService = DatastoreServiceFactory.getDatastoreService();
+    datastoreService.delete(
+            StreamSupport.stream(queryTimeSlots(userId).asIterable().spliterator(), true)
+                    .map(Entity::getKey)
+                    .collect(Collectors.toList()));
   }
 }
